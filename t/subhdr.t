@@ -4,7 +4,7 @@
 # Needs a better suite of tests.
 use strict;
 use Test;
-BEGIN { plan tests => 11 };
+BEGIN { plan tests => 10 };
 
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
