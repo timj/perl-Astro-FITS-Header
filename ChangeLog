@@ -1,6 +1,7 @@
-2003-03-11  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.5)
+2003-03-11  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.5.1)
 
-        * Minor documentation tweaks, released as version 2.5
+        * Minor documentation tweaks, badged version 2.5
+        * t/hierarch.t: Added test harness for ESO HIERARCH header keywords
 
 2003-03-10  Tim Jenness  <timj@jach.hawaii.edu>
 
