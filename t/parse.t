@@ -83,14 +83,14 @@ CRVAL3  =  1.27557086671004E-6 / Axis 3 reference value
 CRPIX3  =                126.0 / Axis 3 pixel value                             
 CTYPE3  = 'a3      '           / LAMBDA                                         
 OBJECT  = 'galaxy  '           / Title of the dataset                           
-DATE    = '2000-12-13T22:44:53'/ file creation date (YYYY-MM-DDThh:mm:ss UTC)   
-ORIGIN  = 'NOAO-IRAF FITS Image Kernel July 1999'/ FITS file originator         
+DATE    = '2000-12-13T22:44:53' / file creation date (YYYY-MM-DDThh:mm:ss UTC)  
+ORIGIN  = 'NOAO-IRAF FITS Image Kernel July 1999' / FITS file originator        
 BSCALE  =                  1.0 / True_value = BSCALE * FITS_value + BZERO       
 BZERO   =                  0.0 / True_value = BSCALE * FITS_value + BZERO       
 HDUCLAS1= 'NDF     '           / Starlink NDF (hierarchical n-dim format)       
 HDUCLAS2= 'DATA    '           / Array component subclass                       
-IRAF-TLM= '23:07:26 (27/02/2000)'/ Time of last modification                    
-TELESCOP= 'UKIRT, Mauna Kea, HI'/ Telescope name                                
+IRAF-TLM= '23:07:26 (27/02/2000)' / Time of last modification                   
+TELESCOP= 'UKIRT, Mauna Kea, HI' / Telescope name                               
 INSTRUME= 'CGS4    '           / Instrument                                     
 OBSERVER= 'SMIRF   '           / Observer name(s)                               
 OBSREF  = '?       '           / Observer reference                             

@@ -616,20 +616,9 @@ sub _stringify {
 
     }
 
-
-
-
     # Add the comment
     if (defined $comment && length($comment) > 0) {
-    
-      # while this isn't in the FITS standard most FITS files seem
-      # to agree that this is what should happen so we need to deal
-      # with it or we might end up truncating comment strings
-      if ( length($value) <= 20 ) {
-         $card .= $value . ' / ' . $comment;
-      } else {
-         $card .= $value . '/ ' . $comment;
-      }      
+      $card .= $value . ' / ' . $comment;
     } else {
       $card .= $value;
     }
