@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 2 };
+BEGIN { plan tests => 256 };
 
 # load modules
 use Astro::FITS::Header;
@@ -31,6 +31,40 @@ tie %keywords, "Astro::FITS::Header", $header;
 my $value = $keywords{"TELESCOP"};
 ok( "$value", "UKIRT, Mauna Kea, HI");
 
+# store
+$keywords{"TELESCOP"} = "JCMT, Mauna Kea, HI";
+my @values = $header->value("TELESCOP");
+ok( "$values[0]", "JCMT, Mauna Kea, HI");
+
+# store 
+$keywords{"LIFE"} = 42;
+my @end = $header->index('END');
+my @test = $header->index('LIFE');
+ok($end[0],123);
+ok($test[0],122);
+
+# delete
+delete $keywords{"LIFE"};
+my @item = $header->itembyname("LIFE");
+unless (defined($item[0])) { ok(1) } else { ok(0) };
+
+# exists
+ok(exists $keywords{"SIMPLE"});
+ok(!exists $keywords{"ARGH"});
+ok(!exists $keywords{"LIFE"});
+
+# firstkey, nextkey
+my $line = 0;
+foreach my $key (keys %keywords) {
+   ok($header->keyword($line),$key);
+   my @values = $header->value($key);
+   ok($values[0],$keywords{$key});
+   $line += 1;
+}
+
+#clear
+undef %keywords;
+ok($header->keyword(0),undef);
 
 exit;
 

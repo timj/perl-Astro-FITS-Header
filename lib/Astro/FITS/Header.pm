@@ -85,7 +85,8 @@ sub new {
 
   # bless the header block into the class
   my $block = bless { HEADER => [],
-                      LOOKUP  => {} }, $class;
+                      LOOKUP  => {},
+		      LASTKEY => undef }, $class;
 
   # If we have arguments configure the object
   $block->configure( @_ ) if @_;
@@ -114,9 +115,31 @@ sub item {
    my ( $self, $index ) = @_;
    
    return undef unless defined $index;
+   return undef unless exists ${$self->{HEADER}}[$index];
    
    # grab and return the Header::Item at $index
    return ${$self->{HEADER}}[$index];
+ 
+}
+
+# K E Y W O R D ------------------------------------------------------------
+
+=item B<keyword>
+
+Returns keyword referenced by index.
+
+   $keyword = $header->keyword($index);
+
+=cut
+
+sub keyword {
+   my ( $self, $index ) = @_;
+   
+   return undef unless defined $index;
+   return undef unless exists ${$self->{HEADER}}[$index];
+   
+   # grab and return the keyword at $index
+   return ${$self->{HEADER}}[$index]->keyword();
  
 }
 
@@ -522,11 +545,22 @@ The C<FITS::Header> object can also be tied to a hash
    $header = new Astro::FITS::Header( Cards => \@array );
    tie %hash, "Astro::FITS::Header", $header   
 
-   $value = $hash{$keyword}
+   $value = $hash{$keyword};
+   $hash{$keyword} = $value;
+
+   print "keyword $keyword is present" if exists $hash{$keyword};
+
+   foreach my $key (keys %hash) {
+      print "$key = $hash{$key}\n";
+   }
 
 It should be noted that if querying a value using the tied interface and the
 keyword appears multiple times in the FITS HDU, then only the first occurance
-will be returned.
+will be returned. Similiarly for storing a value, only the first occurance will
+be modified.
+
+Calls to keys() or each() will, by default, return the keywords in the order 
+in which they appear in the header.
 
 =cut
 
@@ -545,38 +579,57 @@ sub FETCH {
 
 # store key and value pair
 sub STORE {
+  my ($self, $keyword, $value) = @_;
+  
+  my @items = $self->itembyname($keyword);
+  if ( exists $items[0] && defined $items[0] ) {
+     $items[0]->value($value);
+  } else {
+     my $item = new Astro::FITS::Header::Item( Keyword => $keyword,
+                                               Value => $value );
+     $self->insert(-1,$item);
+  }
 
 }
 
 # reports whether a key is present in the hash
 sub EXISTS {
-
+  my ($self, $keyword) = @_;
+  return undef unless exists ${$self->{LOOKUP}}{$keyword};  
 }
 
 # deletes a key and value pair
 sub DELETE {
-
+  my ($self, $keyword) = @_;
+  return $self->removebyname($keyword);
 }
 
 # empties the hash
 sub CLEAR {
-
+  my $self = shift; 
+  $self->{HEADER} = [ ];
+  $self->{LOOKUP} = { };
+  $self->{LASTKEY} = undef;
 }
 
 # implements keys() and each()
 sub FIRSTKEY {
-
+  my $self = shift;
+  $self->{LASTKEY} = 0;
+  return undef unless defined @{$self->{HEADER}};
+  return ${$self->{HEADER}}[0]->keyword();
 }
 
 # implements keys() and each()
 sub NEXTKEY {
-
+  my ($self, $keyword) = @_; 
+  return undef if $self->{LASTKEY}+1 == scalar(@{$self->{HEADER}}) ;
+  $self->{LASTKEY} += 1;  
+  return ${$self->{HEADER}}[$self->{LASTKEY}]->keyword();
 }
 
 # garbage collection
-sub DESTROY {
-
-}
+# sub DESTROY { }
 
 # T I M E   A T   T H E   B A R  --------------------------------------------
 

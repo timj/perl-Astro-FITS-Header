@@ -1,17 +1,22 @@
+2001-03-27  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Header.pm: Added tied hash to header class
+	
+	* t/tied.t: Added test harness for new tied interface
+
 2001-03-24  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Skeleton structre for CFITSIO module added
  	
         * t/parse.t: Rewrote test harness for Header
 	
-	* Header.pm: Fixed bugs
+	* Header.pm: Fixed bugs in array maps being returned by some functions
 	
 	* t/ndf.t: Rewote test harness using some harder tests
 	    	
 2001-03-17  Tim Jenness  <timj@jach.hawaii.edu>
 
-	* Header.pm (configure): Now uses map and _rebuild_lookup
-	(_rebuild_lookup): Use a..b
+	* Header.pm: configure Now uses map and _rebuild_lookup
 
 2001-03-16  Tim Jenness  <timj@jach.hawaii.edu>
 

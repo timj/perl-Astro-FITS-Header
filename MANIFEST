@@ -10,5 +10,6 @@ NDF/Makefile.PL
 CFITSIO/CFITSIO.pm
 CFITSIO/Makefile.PL
 Item/Makefile.PL
+Item/MANIFEST
 Item/Item.pm
 Item/t/parse.t
