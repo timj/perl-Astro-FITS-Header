@@ -26,7 +26,7 @@ It stores information about a FITS header block in an object. Takes an hash as a
 
 use strict;
 use Carp;
-use NDF qw/ :ndf :dat :err /;
+use NDF qw/ :ndf :dat :err :hds /;
 
 use base qw/ Astro::FITS::Header /;
 
@@ -85,22 +85,34 @@ sub configure {
     my $file = $args{File};
     $file =~ s/\.sdf$//;
 
-    # Open it
-    ndf_find(&NDF::DAT__ROOT(), $file, $indf, $status);
+    # First we need to find whether we have an HDS container
+    # or a straight NDF. Rather than simply trying an ndf_find
+    # on both (which causes leaks in the NDF system) we explicitly
+    # open it using HDS
+    hds_open( $file, 'READ', my $hdsloc, $status);
 
-    # If status is bad, try assuming it is a HDS container
-    # with UKIRT style .HEADER component
-    if ($status != $good) {
-      # dont want to contaminate existing status
-      my $lstat = $good;
-      $file .= ".HEADER";
-      ndf_find(&NDF::DAT__ROOT(), $file, $indf, $lstat);
+    # Find its type
+    dat_type( $hdsloc, my $type, $status);
 
-      # flush bad status if we succedded
-      err_annul($status) if $lstat == $good;
+    my $ndffile;
+    if ($status == $good) {
 
+      # If we have an NDF we can simply reopen it
+      if ($type =~ /NDF/i) {
+	$ndffile = $file;
+      } else {
+	# For now simply assume we can find a .HEADER
+	# in future we could tweak this to default to first NDF
+	# it finds if no .HEADER
+	$ndffile = $file . ".HEADER";
+      }
+
+      # Close the HDS file
+      dat_annul( $hdsloc, $status);
+
+      # Open the NDF
+      ndf_find(&NDF::DAT__ROOT(), $ndffile, $indf, $status);
     }
-
 
   } else {
 

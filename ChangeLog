@@ -1,3 +1,8 @@
+2002-11-14  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* NDF/NDF.pm (configure): Workaround a bug in NDF when reading
+	.HEADER NDFs.
+
 2002-06-24  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Minor documentation tweaks to reflect Tim's changes,
