@@ -437,8 +437,6 @@ Configures the object, takes an array of FITS header cards as input.
 
   $header->configure( @array );
 
-=back
-
 Does nothing if the array is not supplied.
 
 =cut
@@ -477,7 +475,6 @@ sub configure {
 
 # P R I V A T  E   M E T H O D S ------------------------------------------
 
-=back
 
 =begin __PRIVATE_METHODS__
 
