@@ -84,6 +84,10 @@ Tim Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC)
 This version of the module includes patches supplied by Diab Jerius
 <dj@head-cfa.harvard.edu> of the Harvard-Smithsonian Center for Astrophysics. 
 
+This version of the module includes patches supplied by Jim Lewis
+<jrl@ast.cam.ac.uk>, of the Cambridge Astronomy Survey Unit at the Institute
+of Astronomy, to allow access to Multi-Extension FITS files.
+ 
 The tied interface was updated for version 2.x by Craig DeForest
 <deforest@boulder.swri.edu> of the Department of Space Studies, Southwest
 Research Institute and Tim Jenness <timj@jach.hawaii.edu> of the Joint

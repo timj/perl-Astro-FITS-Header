@@ -1,4 +1,9 @@
-          
+ 2003-10--21  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.0)
+ 
+        * Applied patches supplied by Jim Lewis <jrl@ast.cam.ac.uk> which
+          add support for MEF files. Modified documentation and shipped
+          as version 2.8.0
+         
 2003-07-02  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.7.1)
 
         * Applied patches, updated documentation and shipped as 2.7.1

@@ -21,6 +21,7 @@ package Astro::FITS::Header::CFITSIO;
 
 #  Authors:
 #    Alasdair Allan (aa@astro.ex.ac.uk)
+#    Jim Lewis (jrl@ast.cam.ac.uk)
 
 #  Revision:
 #     $Id$
@@ -151,6 +152,25 @@ sub configure {
         # Report bad exit status
         croak("Error $status reading FITS array"); 
      }
+
+     # Look at the name of the file as it was passed in. If there is a FITS
+     # extension specified, then this is a single fits image that you want
+     # read.  If there isn't one specified, then we should read each of the
+     # extensions that exist in the file, if in fact there are any.
+
+     my $ext;
+     fits_parse_extnum($args{File},$ext,$status);
+     my @subfrms = ();
+     if ($ext == -99) {
+         my $nhdus;
+         $ifits->get_num_hdus($nhdus,$status);
+         foreach my $ihdu (1 .. $nhdus-1) {
+             my $subfr = sprintf("%s[%d]",$args{File},$ihdu);
+             my $sself = $self->new(File=>$subfr);
+             push @subfrms,$sself;
+         }
+     }
+     $self->subhdrs(@subfrms);
   }
  
   # clean up
@@ -252,6 +272,7 @@ L<Astro::FITS::Header>, L<Astro::FITS::Header::Item>, L<Astro::FITS::Header::NDF
 =head1 AUTHORS
 
 Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
+Jim Lewis E<lt>jrl@ast.cam.ac.ukE<gt>
 
 =head1 COPYRIGHT
 

@@ -21,6 +21,7 @@ package Astro::FITS::Header;
 #    Alasdair Allan (aa@astro.ex.ac.uk)
 #    Tim Jenness (t.jenness@jach.hawaii.edu)
 #    Craig DeForest (deforest@boulder.swri.edu)
+#    Jim Lewis (jrl@ast.cam.ac.uk)
 
 #  Revision:
 #     $Id$
@@ -96,6 +97,7 @@ sub new {
                       LOOKUP  => {},
 		      LASTKEY => undef,
 		      TieRetRef => 0,
+                      SUBHDRS => [],
 		    }, $class;
 
   # Configure the object, even with no arguments since configure
@@ -136,6 +138,28 @@ sub tiereturnsref {
     $self->{TieRetRef} = shift;
   }
   return $self->{TieRetRef};
+}
+
+=item B<subhdrs>
+
+Set or return the subheaders for a Header object
+
+    $header->subhdrs(@hdrs);
+    @hdrs = $header->subhdrs;
+
+=cut
+
+sub subhdrs {
+    my $self = shift;
+
+    if (@_) {
+        @{$self->{SUBHDRS}} = @_;
+    }
+    if (wantarray()) {
+        return @{$self->{SUBHDRS}};
+    } else {
+        return $self->{SUBHDRS};
+    }
 }
 
 =item B<item>
@@ -1189,7 +1213,8 @@ it under the same terms as Perl itself.
 
 Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
 Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>,
-Craig DeForest E<lt>deforest@boulder.swri.eduE<gt>
+Craig DeForest E<lt>deforest@boulder.swri.eduE<gt>,
+Jim Lewis E<lt>jrl@ast.cam.ac.ukE<gt>
 
 =cut
 
