@@ -33,10 +33,11 @@ be created from its components keyword, value and comment.
 
 use strict;
 use overload (
-	      '""'       =>   'card'
+	      '""'       =>   'overload_kluge'
 	      );
 
 use vars qw/ $VERSION /;
+use Carp;
 
 $VERSION = '0.01';
 
@@ -203,17 +204,25 @@ the object.
 
 =cut
 
+# This is required because overloaded methods are called with
+# extra arguments and card() can not tell the difference between
+# an undef value and a stringify request
+sub overload_kluge {
+  my $self = shift;
+  return $self->card;
+}
+
 sub card {
   my $self = shift;
   if (@_) {
     my $card = shift;
     if (defined $card) {
       my $clen = length($card);
-      return undef if $clen > 80;
-      # If we want to force 80 characters (from long or short) we can
-      # use substr($card,0,80)
+      # force to 80 characters
       if ($clen < 80) {
 	$card = $card . (" "x(80-$clen));
+      } elsif ($clen > 80) {
+	$card = substr($card, 0, 80);
       }
     }
     # can assign undef to clear
