@@ -62,8 +62,8 @@ my $qcstr = $quote_card->card;
 my $qtstr1 = "STRSTR  = 'She said ''Foo!'' (\"really?\")'";
 my $qtstr2 = "/ It was 'foobar'.";
 
-ok(substr($qcstr,0,length($qtstr1)) eq $qtstr1);
-ok(substr($qcstr,index($qcstr,'/',length($qtstr1)),length($qtstr2)) eq $qtstr2);
+ok(substr($qcstr,0,length($qtstr1)), $qtstr1);
+ok(substr($qcstr,index($qcstr,'/',length($qtstr1)),length($qtstr2)), $qtstr2);
 
 # insert	
 $header->insert(1, $int_card);
