@@ -7,3 +7,14 @@
 
 - Support subheaders (ie those in Multi-extension fits files that are
   not part of the main header, or the headers in UKIRT data (.I1, .I2)
+
+- Tied interface should be modified so that key_COMMENT will retrieve
+  the comment associated with key "key" rather than the value (this will
+  not clash with real headers because the 8 character limit will be
+  exceeded)
+
+- Support MEF fits headers in a single object. Can use a special card
+  type that will indicate a header change [possible with the name
+  of the next subfile]. Could use "1_" prefix to reference the
+  items from sub headers.
+
