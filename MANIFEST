@@ -3,4 +3,3 @@ MANIFEST
 Makefile.PL
 t/
 t/parse.t
-t/fits.header
