@@ -4,17 +4,12 @@
 use strict;
 
 # load test modules
-use lib ".";  
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
 
-# load general modules
-use Data::Dumper;
-use Carp;
-
 # load test
 use Test;
-BEGIN { plan tests => 22 };
+BEGIN { plan tests => 23 };
 
 # T E S T   H A R N E S S --------------------------------------------------
 
@@ -24,77 +19,108 @@ ok(1);
 # read header file
 my @raw = <DATA>;
 chomp @raw;
-		  
-# LOGICAL
-my $item_logical1 = new Astro::FITS::Header::Item( Card => $raw[0] );
-my $item_logical2 = new Astro::FITS::Header::Item(
-                                  Keyword => 'LOGICAL',
-		                  Value   => 'T',
-			          Comment => 'Testing the LOGICAL type',
-			          Type    => 'LOGICAL' );
-ok( "$item_logical1", "$item_logical2");
-ok( "$item_logical1", $raw[0]);
-ok( "$item_logical2", $raw[0]);
 
-# INTEGER
-my $item_integer1 = new Astro::FITS::Header::Item( Card => $raw[1] );
-my $item_integer2 = new Astro::FITS::Header::Item(
-                                  Keyword => 'INTEGER',
-		                  Value   => -32,
-			          Comment => 'Testing the INT type',
-			          Type    => 'INT' );
-ok( "$item_integer1", "$item_integer2");
-ok( "$item_integer1", $raw[1]);
-ok( "$item_integer2", $raw[1]);
+# Store the answers in an array, the index must match the index into @raw
+# Might be better to store in a hash indexed by the card itself
+# but would require us to not use <DATA>
+my @ANSWER = (
+	      {
+	       Keyword => 'LOGICAL',
+	       Value   => 'T',
+	       Comment => 'Testing the LOGICAL type',
+	       Type    => 'LOGICAL',
+	      },
+	      {
+	       Keyword => 'INTEGER',
+	       Value   => -32,
+	       Comment => 'Testing the INT type',
+	       Type    => 'INT',
+	      },
+	      {
+	       Keyword => 'FLOAT',
+	       Value   => 12.5,
+	       Comment => 'Testing the FLOAT type',
+	       Type    => 'FLOAT',
+	      },
+	      {
+	       Keyword => 'UNDEF',
+	       Value   => undef,
+	       Comment => 'Testing the undef type',
+	       Type    => 'UNDEF',
+	      },
+	      {
+	       Keyword => 'STRING',
+	       Value   => 'string',
+	       Comment => 'Testing the STRING type',
+	       Type    => 'STRING',
+	      },
+	      {
+	       Keyword => 'LNGSTR',
+	       Value   => 'a very long string that is long',
+	       Comment => 'Long string',
+	       Type    => 'STRING',
+	      },
+	      {
+	       Keyword => 'QUOTE',
+	       Value   => "a ' single quote",
+	       Comment => 'Single quote',
+	       Type    => 'STRING',
+	      },
+	      {
+	       Keyword => 'ZERO',
+	       Value   => "",
+	       Comment => 'Zero length quote',
+	       Type    => 'STRING',
+	      },
+	      {
+	       Keyword => 'COMMENT',
+	       Comment => 'Testing the COMMENT type',
+	       Type    => 'COMMENT',
+	      },
+	      {
+	       Keyword => 'HISTORY',
+	       Comment => 'Testing the HISTORY type',
+	       Type    => 'COMMENT',
+	      },
+	      {
+	       Keyword => 'STRANGE',
+	       Comment => 'Testing the non-standard COMMENT',
+	       Type    => 'COMMENT',
+	      },
+	      {
+	       Keyword => 'END'
+	      },
+	     );
 
-# FLOAT
-my $item_float1 = new Astro::FITS::Header::Item( Card => $raw[2] );
-my $item_float2 = new Astro::FITS::Header::Item(
-                                  Keyword => 'FLOAT',
-		                  Value   => 12.5,
-			          Comment => 'Testing the FLOAT type',
-			          Type    => 'FLOAT' );
-ok( "$item_float1", "$item_float2");
-ok( "$item_float1", $raw[2]);
-ok( "$item_float2", $raw[2]);
 
-# STRING
-my $item_string1 = new Astro::FITS::Header::Item( Card => $raw[3] );
-my $item_string2 = new Astro::FITS::Header::Item(
-                                  Keyword => 'STRING',
-		                  Value   => 'string',
-			          Comment => 'Testing the STRING type',
-			          Type    => 'STRING' );
-ok( "$item_string1", "$item_string2");
-ok( "$item_string1", $raw[3]);
-ok( "$item_string2", $raw[3]);
 
-# COMMENT
-my $item_comment1 = new Astro::FITS::Header::Item( Card => $raw[4] );
-my $item_comment2 = new Astro::FITS::Header::Item(
-                                  Keyword => 'COMMENT',
-			          Comment => 'Testing the COMMENT type',
-			          Type    => 'COMMENT' );
-ok( "$item_comment1", "$item_comment2");
-ok( "$item_comment1", $raw[4]);
-ok( "$item_comment2", $raw[4]);
+# Loop through the array of FITS header items
+# Checking that we can reconstruct a FITS header card
+foreach my $n (0..$#raw) {
 
-# HISTORY
-my $item_history1 = new Astro::FITS::Header::Item( Card => $raw[5] );
-my $item_history2 = new Astro::FITS::Header::Item(
-                                  Keyword => 'HISTORY',
-			          Comment => 'Testing the HISTORY type',
-			          Type    => 'COMMENT' );
-ok( "$item_history1", "$item_history2");
-ok( "$item_history1", $raw[5]);
-ok( "$item_history2", $raw[5]);
+  my $card = $raw[$n];
 
-# END line
-my $item_end1 = new Astro::FITS::Header::Item( Card => $raw[6] );
-my $item_end2 = new Astro::FITS::Header::Item( Keyword => 'END');
-ok( "$item_end1", "$item_end2");
-ok( "$item_end1", $raw[6]);
-ok( "$item_end2", $raw[6]);
+  # For information
+  # print "# $card\n";
+
+  # Create a new Item object using this card
+  my $item = new Astro::FITS::Header::Item( Card => $card );
+
+  # Make sure the constructed card is used rather than the cached version
+  $item->keyword( $item->keyword );
+
+  # Compare the actual card with the reconstructed version
+  # This tests the parsing of header cards
+  ok( "$item", $card );
+
+  # Now create a new item from the bits
+  $item = new Astro::FITS::Header::Item( %{ $ANSWER[$n] });
+
+  # Compare the brand new card with the old version
+  # This tests the construction of a card from the raw "bits"
+  ok( "$item", $card);
+}
+
 
 #keyword
 #value
@@ -110,7 +136,12 @@ __DATA__
 LOGICAL =                    T / Testing the LOGICAL type                       
 INTEGER =                  -32 / Testing the INT type                           
 FLOAT   =                 12.5 / Testing the FLOAT type                         
+UNDEF   =                      / Testing the undef type                         
 STRING  = 'string  '           / Testing the STRING type                        
+LNGSTR  = 'a very long string that is long' / Long string                       
+QUOTE   = 'a '' single quote'  / Single quote                                   
+ZERO    = ''                   / Zero length quote                              
 COMMENT   Testing the COMMENT type                                              
 HISTORY   Testing the HISTORY type                                              
+STRANGE   Testing the non-standard COMMENT                                      
 END                                                                             
