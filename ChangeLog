@@ -1,3 +1,11 @@
+2001-03-16  Tim Jenness  <timj@jach.hawaii.edu>
+
+        * NDF/NDF.pm: Add
+
+	* t/ndf.t: Add test
+
+	* Header.pm: Use map. Add dump(). Use hash for configure()
+
 2001-03-15  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Item/t/parse.t: Add caching test 

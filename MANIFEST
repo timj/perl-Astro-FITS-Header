@@ -3,3 +3,9 @@ MANIFEST
 Makefile.PL
 t/
 t/parse.t
+t/ndf.t
+NDF/NDF.pm
+NDF/Makefile.PL
+Item/Makefile.PL
+Item/Item.pm
+Item/t/parse.t
