@@ -208,9 +208,16 @@ sub configure {
 
   # Shutdown
   ndf_end($status);
+
+  # Handle errors
   if ($status != $good) {
-    err_flush($status);
-    croak "Error during header read from NDF\n";
+    my ( $param, $parlen, $opstr, $oplen, @errs );
+    do {
+      err_load( $param, $parlen, $opstr, $oplen, $status );
+      push @errs, $opstr;
+    } until ( $oplen == 1 );
+    err_annul($status);
+    croak "Error during header read from NDF:\n" . join "\n", @errs;
   }
   err_end($status);
 
@@ -309,9 +316,16 @@ sub writehdr {
 
   # Shutdown
   ndf_end($status);
+
+  # Handle errors
   if ($status != $good) {
-    err_flush($status);
-    croak "Error during header write from NDF\n";
+    my ( $param, $parlen, $opstr, $oplen, @errs );
+    do {
+      err_load( $param, $parlen, $opstr, $oplen, $status );
+      push @errs, $opstr;
+    } until ( $oplen == 1 );
+    err_annul($status);
+    croak "Error during header write to NDF:\n" . join "\n", @errs;
   }
   err_end($status);
 
@@ -337,11 +351,12 @@ L<Astro::FITS::Header::CFITSIO>
 =head1 AUTHORS
 
 Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>,
-Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>
+Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
+Brad Cavanagh E<lt>b.cavanagh@jach.hawaii.eduE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2004 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
 =cut
