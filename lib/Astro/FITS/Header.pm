@@ -105,7 +105,8 @@ sub new {
 
 =item B<item>
 
-Returns a FITS::Header:Item object referenced by index.
+Returns a FITS::Header:Item object referenced by index, C<undef> if it
+does not exist.
 
    $item = $header->item($index);
 
@@ -126,7 +127,7 @@ sub item {
 
 =item B<keyword>
 
-Returns keyword referenced by index.
+Returns keyword referenced by index, C<undef> if it does not exist.
 
    $keyword = $header->keyword($index);
 
@@ -147,32 +148,45 @@ sub keyword {
 
 =item B<itembyname>
 
-Returns an array of Header::Items for the requested keyword
+Returns an array of Header::Items for the requested keyword if called
+in list context, or an empty array if it does not exist.
 
    @items = $header->itembyname($keyword);
+
+If called in scalar context it returns the first item in the array, or
+C<undef> if the keyword does not exist.
+
+   $item = $header->itembyname($keyword);
+
+
 
 =cut
 
 sub itembyname {
    my ( $self, $keyword ) = @_;
             
-   # grab the index array from lookup table
-   my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
+   # resolve the items from the index array from lookup table
+   my @items =
+     map { ${$self->{HEADER}}[$_] } @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
-   return map { ${$self->{HEADER}}[$_] } @index;
-
+   return wantarray ?  @items : @items ? $items[0] : undef;
 }
 
 # I N D E X   --------------------------------------------------------------
 
 =item B<index>
 
-Returns an array of indices for the requested keyword
+Returns an array of indices for the requested keyword if called in list
+context, or an empty array if it does not exist.
 
    @index = $header->index($keyword);
+
+If called in scalar context it returns the first item in the array, or
+C<undef> if the keyword does not exist.
+
+   $index = $header->index($keyword);
 
 =cut
 
@@ -186,7 +200,7 @@ sub index {
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
    # return the values array
-   return @index;
+   return wantarray ? @index : @index ? $index[0] : undef;
 
 }
 
@@ -194,23 +208,27 @@ sub index {
 
 =item B<value>
 
-Returns an array of values for the requested keyword
+Returns an array of values for the requested keyword if called
+in list context, or an empty array if it does not exist.
 
    @value = $header->value($keyword);
+
+If called in scalar context it returns the first item in the array, or
+C<undef> if the keyword does not exist.
 
 =cut
 
 sub value {
    my ( $self, $keyword ) = @_;
    
-   # grab the index array from lookup table
-   my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
+   # resolve the values from the index array from lookup table
+   my @values =
+     map { ${$self->{HEADER}}[$_]->value() } @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
    # loop over the indices and grab the values
-   return map { ${$self->{HEADER}}[$_]->value() }  @index;
+   return wantarray ? @values : @values ? $values[0] : undef;
    
 }
 
@@ -218,23 +236,29 @@ sub value {
 
 =item B<comment>
 
-Returns an array of comments for the requested keyword
+Returns an array of comments for the requested keyword if called
+in list context, or an empty array if it does not exist.
 
    @comment = $header->comment($keyword);
+
+If called in scalar context it returns the first item in the array, or
+C<undef> if the keyword does not exist.
+
+   $comment = $header->comment($keyword);
 
 =cut
 
 sub comment {
    my ( $self, $keyword ) = @_;
       
-   # grab the index array from lookup table
-   my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
+   # resolve the comments from the index array from lookup table
+   my @comments =
+     map { ${$self->{HEADER}}[$_]->comment() } @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
    # loop over the indices and grab the comments
-   return map { ${$self->{HEADER}}[$_]->comment() }  @index;
+   return wantarray ?  @comments : @comments ? $comments[0] : undef;
 }
 
 # I N S E R T -------------------------------------------------------------
@@ -590,20 +614,19 @@ sub TIEHASH {
 # fetch key and value pair
 sub FETCH {
   my ($self, $key) = @_;
-  my @values = $self->value($key);
-  return $values[0];
+  scalar $self->value($key);
 }
 
 # store key and value pair
 sub STORE {
   my ($self, $keyword, $value) = @_;
   
-  my @items = $self->itembyname($keyword);
-  if ( exists $items[0] && defined $items[0] ) {
-     $items[0]->value($value);
+  my $item = $self->itembyname($keyword);
+  if (  defined $item ) {
+     $item->value($value);
   } else {
-     my $item = new Astro::FITS::Header::Item( Keyword => $keyword,
-                                               Value => $value );
+     $item = new Astro::FITS::Header::Item( Keyword => $keyword,
+                                            Value => $value );
      $self->insert(-1,$item);
   }
 

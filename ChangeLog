@@ -1,3 +1,10 @@
+2001-10-16  Diab Jerius  <dj@head-cfa.harvard.edu>
+
+	* Header.pm: itembyname(), index(), value(), and comment() now
+	return a single element when called in scalar context.
+
+	* t/parse.t: test new behavior of above routines in scalar environment
+	
 2001-06-26  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Header.pm: Fixed bug in removebyname() method
