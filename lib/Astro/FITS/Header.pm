@@ -766,8 +766,8 @@ sub FETCH {
   $out .= "\n" if((defined $item) && (defined $item->type) && ($item->type =~ m/^(COMMENT)$/s));
 
   # If we have a header we need to tie it to another hash
-  if (defined $item && $item->type eq 'HEADER' 
-      && UNIVERSAL::isa($out,"Astro::FITS::Header")) {
+  if ((UNIVERSAL::isa($out, "Astro::FITS::Header")) ||
+      (defined $item && defined $item->type && $item->type eq 'HEADER')) {
 
     my %header;
     tie %header, ref($out), $out;

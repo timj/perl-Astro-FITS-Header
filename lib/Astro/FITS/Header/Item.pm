@@ -580,7 +580,7 @@ sub _stringify {
   my $type = $self->type;
 
   # Special case for HEADER type
-  if ($type eq 'HEADER') {
+  if (defined $type && $type eq 'HEADER') {
     $type = "COMMENT";
     $comment = "Contains a subsidiary header";
   }
