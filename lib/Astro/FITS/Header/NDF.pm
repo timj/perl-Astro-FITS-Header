@@ -18,13 +18,20 @@ Astro::FITS::Header::NDF - Manipulate FITS headers from NDF files
 
 =head1 DESCRIPTION
 
-This module makes use of the Starlink L<NDF|NDF> module to read and write to
-an NDF FITS extension or to a C<.HEADER> block in an HDS container file.
+This module makes use of the Starlink L<NDF|NDF> module to read and
+write to an NDF FITS extension or to a C<.HEADER> block in an HDS
+container file.  If the file is found to be an HDS container
+containing multiple NDFs at the top level, either the .HEADER NDF or
+the first NDF containing a FITS header is deemed to be the primary
+header, and all other headers a subsidiary headers indexed by the name
+of the NDF in the container.
 
 It stores information about a FITS header block in an object. Takes an
 hash as an argument, with either an array reference pointing to an
 array of FITS header cards, array of C<Astro::FITS::Header::Item>
 objects, or a filename, or (alternatively) an NDF identifier.
+
+Currently, subheader support is readonly.
 
 =cut
 
@@ -55,7 +62,10 @@ exist, C<ndfID> key takes priority.
 
 If the file is actually an HDS container, an attempt will be made
 to read a ".HEADER" NDF inside that container (this is the standard
-layout of UKIRT (and some JCMT) data files.
+layout of UKIRT (and some JCMT) data files). If an extension is specified
+explicitly (that is not ".sdf") that path is treated as an explicit path
+to an NDF. If an explicit path is specified no attempt is made to locate
+other NDFs in the HDS container.
 
 =cut
 
@@ -91,36 +101,42 @@ sub configure {
     my $file = $args{File};
     $file =~ s/\.sdf$//;
 
-    # First we need to find whether we have an HDS container
-    # or a straight NDF. Rather than simply trying an ndf_find
-    # on both (which causes leaks in the NDF system) we explicitly
-    # open it using HDS
-    hds_open( $file, 'READ', my $hdsloc, $status);
+    # First we need to find whether we have an HDS container or a
+    # straight NDF. Rather than simply trying an ndf_find on both
+    # (which causes leaks in the NDF system circa 2001) we explicitly
+    # open it using HDS unless it has a "." in it.
+    if ($file =~ /\./) {
+      # an NDF
+      ndf_find(&NDF::DAT__ROOT(), $file, $indf, $status);
+    } else {
+      # Try HDS
+      hds_open( $file, 'READ', my $hdsloc, $status);
 
-    # Find its type
-    dat_type( $hdsloc, my $type, $status);
+      # Find its type
+      dat_type( $hdsloc, my $type, $status);
 
-    my $ndffile;
-    if ($status == $good) {
+      if ($status == $good) {
 
-      # If we have an NDF we can simply reopen it
-      # Additionally if we have no description of the component
-      # at all we assume NDF. This overcomes a bug in the acquisition
-      # for SCUBA where a blank type field is used.
-      if ($type =~ /NDF/i || $type !~ /\w/) {
-	$ndffile = $file;
-      } else {
-	# For now simply assume we can find a .HEADER
-	# in future we could tweak this to default to first NDF
-	# it finds if no .HEADER
-	$ndffile = $file . ".HEADER";
+	# If we have an NDF we can simply reopen it
+	# Additionally if we have no description of the component
+	# at all we assume NDF. This overcomes a bug in the acquisition
+	# for SCUBA where a blank type field is used.
+	my $ndffile;
+	if ($type =~ /NDF/i || $type !~ /\w/) {
+	  $ndffile = $file;
+	} else {
+	  # For now simply assume we can find a .HEADER
+	  # in future we could tweak this to default to first NDF
+	  # it finds if no .HEADER
+	  $ndffile = $file . ".HEADER";
+	}
+
+	# Close the HDS file
+	dat_annul( $hdsloc, $status);
+
+	# Open the NDF
+	ndf_find(&NDF::DAT__ROOT(), $ndffile, $indf, $status);
       }
-
-      # Close the HDS file
-      dat_annul( $hdsloc, $status);
-
-      # Open the NDF
-      ndf_find(&NDF::DAT__ROOT(), $ndffile, $indf, $status);
     }
 
   } else {
