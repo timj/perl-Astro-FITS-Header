@@ -5,8 +5,7 @@
 use strict;
 
 #load test
-use Test;
-BEGIN { plan tests => 283 };
+use Test::More tests => 293;
 
 # load modules
 use Astro::FITS::Header;
@@ -30,18 +29,18 @@ tie %keywords, "Astro::FITS::Header", $header;
 
 # fetch
 my $value = $keywords{"TELESCOP"};
-ok( "$value", "UKIRT, Mauna Kea, HI");
+is( "$value", "UKIRT, Mauna Kea, HI");
 
 # store
 $keywords{"TELESCOP"} = "JCMT, Mauna Kea, HI";
 my @values = $header->value("TELESCOP");
-ok( "$values[0]", "JCMT, Mauna Kea, HI");
+is( "$values[0]", "JCMT, Mauna Kea, HI");
 
 # Get the comment, set a new one and retrieve it
-ok($keywords{"TELESCOP_COMMENT"}, "Telescope name");
+is($keywords{"TELESCOP_COMMENT"}, "Telescope name");
 my $new = "Not a telescope";
 $keywords{TELESCOP_COMMENT} = $new;
-ok($keywords{TELESCOP_COMMENT}, $new);
+is($keywords{TELESCOP_COMMENT}, $new);
 
 
 # store 
@@ -49,8 +48,29 @@ $keywords{"LIFE"} = 42;
 my @end = $header->index('END');
 my @test = $header->index('LIFE');
 
-ok($end[0],123);
-ok($test[0],122);
+is($end[0],125);
+is($test[0],124);
+
+
+##########
+# "Missing" header values
+#
+
+ok( exists( $keywords{"MSBID"} ) );
+
+$value = $keywords{"MSBID"};
+is( $value, undef );
+
+$value = $keywords{"MSBID_COMMENT"};
+is( "$value", "Unique identifier" );
+
+ok( !exists( $keywords{"CSOTAU"} ) );
+
+$value = $keywords{"CSOTAU"};
+is( $value, undef );
+
+$value = $keywords{"CSOTAU_COMMENT"};
+is( "$value", "                       / Tau at 225 GHz from CSO\n" );
 
 ##########
 # Multiline comments
@@ -62,21 +82,21 @@ $keywords{"COMMENT"} = $s;
 
 # It doesn't make any values
 @values = $header->value("COMMENT");
-ok( $values[0], undef);
-ok( $values[1], undef);
-ok( $values[2], undef);
+is( $values[0], undef);
+is( $values[1], undef);
+is( $values[2], undef);
 
 
 # The comments come out correctly in the comment method
 my @comments = $header->comment("COMMENT");
 my @s = split("\n",$s);
 chomp @s;
-ok( $comments[0], $s[0] );
-ok( $comments[1], $s[1] );
-ok( $comments[2], $s[2] );
+is( $comments[0], $s[0] );
+is( $comments[1], $s[1] );
+is( $comments[2], $s[2] );
 
 # The comments come out correctly in the tied method
-ok( $s."\n", $keywords{"COMMENT"} );
+is( $s."\n", $keywords{"COMMENT"} );
 
 ##########
 # Multiline values
@@ -85,23 +105,23 @@ my $sr = [0,1,2];
 
 # Assigning with array ref yields correct string
 $keywords{"TESTVAL"} = $sr;
-ok( $keywords{"TESTVAL"}, $s );
+is( $keywords{"TESTVAL"}, $s );
 
 # ... and also gives the correct values
 my(@vals) = $header->value("TESTVAL");
-ok($vals[0], 0);
-ok($vals[1], 1);
-ok($vals[2], 2);
+is($vals[0], 0);
+is($vals[1], 1);
+is($vals[2], 2);
 
 
 # ... and also acts correctly in arithmetic expressions
 { no warnings;
-  ok( $keywords{"TESTVAL"} + 1, 1 );
+  is( $keywords{"TESTVAL"} + 1, 1 );
 }
 
 # ... and also truncates OK
 $keywords{"TESTVAL"}++;
-ok($keywords{"TESTVAL"}, 1);
+is($keywords{"TESTVAL"}, 1);
 
 ##############################
 
@@ -121,14 +141,14 @@ my $key;
 foreach $key (keys %keywords) {
     my @values = $header->value($key);
 
-    ok($header->keyword($line),$key);
+    is($header->keyword($line),$key);
 
     if($key ne 'COMMENT') {  # Skip [multiline] comments...
 	# END card is a special case -- should return ' '
 	if($key eq 'END') {
-	    ok(' ',$keywords{$key});
+	    is(' ',$keywords{$key});
 	} else {
-	    ok($values[0],$keywords{$key});
+	    is($values[0],$keywords{$key});
 	}
     }
 
@@ -149,40 +169,40 @@ ok(not ref $str );
 $hdr->tiereturnsref(1);
 my $strref = $keywords{COMMENT};
 
-ok(ref($strref), "ARRAY");
+is(ref($strref), "ARRAY");
 
 my @strings = @$strref;
 
-ok(scalar(@strings), 3); # There are 4 comments
-ok(join('',@strings), $str);
+is(scalar(@strings), 3); # There are 4 comments
+is(join('',@strings), $str);
 $hdr->tiereturnsref(0);
 
 # Test that we can copy in a new hash
 # This test will fail in v2.4 of Astro::FITS::Header
 my $href = \%keywords;
 %{ $href } = ( TELESCOP => 'GEMINI', instrume => 'MICHELLE' );
-ok($href->{TELESCOP}, 'GEMINI');
-ok($href->{INSTRUME}, 'MICHELLE');
+is($href->{TELESCOP}, 'GEMINI');
+is($href->{INSTRUME}, 'MICHELLE');
 
 
 # Test that SIMPLE and END get put at the beginning and end, respectively
  
-ok($href->{SIMPLE},undef);
-ok($href->{END},undef);
+is($href->{SIMPLE},undef);
+is($href->{END},undef);
  
 $keywords{SIMPLE} = 0;
 $keywords{END} = "Drop this string on the floor";
 my @keys = keys %keywords;
-ok($keys[0],'SIMPLE');
-ok($keys[3],'END');
-ok($keywords{SIMPLE},0);
-ok($keywords{END},' ');
+is($keys[0],'SIMPLE');
+is($keys[3],'END');
+is($keywords{SIMPLE},0);
+is($keywords{END},' ');
 
 
 #clear
 undef %keywords;
 
-ok($header->keyword(0),undef);
+is($header->keyword(0),undef);
 
 
 # Test the override
@@ -190,20 +210,20 @@ my %keywords2;
 my $header2 = new Astro::FITS::Header( Cards => \@raw );
 tie %keywords2, "Astro::FITS::Header", $header2, tiereturnsref => 1;
 my $value2 = $keywords2{COMMENT};
-ok(ref $value2, "ARRAY");
+is(ref $value2, "ARRAY");
 
 # Test comment parsing in keyword setting
 $href->{NUM} = "3 / test";
-ok($href->{NUM},3);
-ok($href->{NUM_COMMENT},'test');
+is($href->{NUM},3);
+is($href->{NUM_COMMENT},'test');
 
 $href->{SLASHSTR} = "foo\\/bar / value is 'foo/bar'";
-ok($href->{SLASHSTR},'foo/bar');
-ok($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'');
+is($href->{SLASHSTR},'foo/bar');
+is($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'');
 
 # principal of least surprise.... you should get back what you put in!
 #$href->{REVERSE} = "foo / bar";
-#ok($href->{REVERSE}, "foo / bar");
+#is($href->{REVERSE}, "foo / bar");
 
 exit;
 
@@ -330,4 +350,6 @@ AMEND   = 1.320149999999999935 / Airmass at end of obs
 RUTSTART= 8.000171999999999173 / Start time of obs (hrs)                        
 RUTEND  = 8.101883000000000834 / End time of obs (hrs)                          
 NBADPIX =                   32                                                  
+MSBID   =                      / Unique identifier                              
+CSOTAU                         / Tau at 225 GHz from CSO                        
 END                                                                             
