@@ -6,7 +6,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 279 };
+BEGIN { plan tests => 283 };
 
 # load modules
 use Astro::FITS::Header;
@@ -191,6 +191,15 @@ my $header2 = new Astro::FITS::Header( Cards => \@raw );
 tie %keywords2, "Astro::FITS::Header", $header2, tiereturnsref => 1;
 my $value2 = $keywords2{COMMENT};
 ok(ref $value2, "ARRAY");
+
+# Test comment parsing in keyword setting
+$href->{NUM} = "3 / test";
+ok($href->{NUM},3);
+ok($href->{NUM_COMMENT},'test');
+
+$href->{SLASHSTR} = "foo\\/bar / value is 'foo/bar'";
+ok($href->{SLASHSTR},'foo/bar');
+ok($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'');
 
 
 exit;

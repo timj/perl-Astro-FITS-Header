@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 152 };
+BEGIN { plan tests => 160 };
 
 # load modules
 use Astro::FITS::Header;
@@ -136,6 +136,16 @@ $header->insert(5, $string_card);
 # removebyname
 my $removebyname = $header->removebyname('STUFF');
 ok("$string_card","$removebyname");
+
+# check regular expressions
+@index = $header->index( qr/CLOCK\d/ );
+@actual = (53..59);
+ok( scalar @index, scalar @actual );
+while( @index )
+{
+  ok( shift @index, shift @actual );
+}
+
 
 exit;
 

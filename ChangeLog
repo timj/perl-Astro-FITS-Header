@@ -1,3 +1,29 @@
+2003-07-02  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.7)
+
+        * Applied patches, updated documentation and shipped as 2.7
+
+2003-06-27  Craig DeForest  <djerius@cfa.harvard.edu>
+
+        * Header.pm: Added slash-based comment parsing to the tied interface
+
+        * t/tied.t: Added test cases.
+        
+2003-06-23  Diab Jerius  <djerius@cfa.harvard.edu>
+
+	* Item/Item.pm (configure): automatically sets type to COMMENT
+	  when keyword is COMMENT, HISTORY, or is blank. (_stringify): comment
+          keyword values/comments are in columns 9-80, unlike other cards which
+          are in columns 11-80.
+
+2003-05-27  Diab Jerius  <djerius@cfa.harvard.edu>
+
+	* t/parse.t: added test for index() regexep functionality.
+
+	* Header.pm: index() now handles regexps as well as exact matches.
+          itembyname(), value(), comment(), replacebyname(), and removebyname()
+          now call index() instead of doing the search themselves, so they
+          inherit the new behavior.
+	
 2003-04-28  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.2)
 
         * Applied patch by Diab, shipped as 2.6.2
@@ -56,13 +82,13 @@
 	* Header.pm: Add tiereturnshash, and configure it from TIEHASH
 	
 	* Header.pm (FETCH): Respect the new tiereturnshash method. If
-	true, will return multi-valued items as a reference to an array
-	rather than as a joined string (tied interface does not respect
-	calling context).
+	  true, will return multi-valued items as a reference to an array
+	  rather than as a joined string (tied interface does not respect
+	  calling context).
 
 	* Header.pm (FETCH/STORE): Tied interface can now retrieve or set
-	the comment string associated with an item by adding '_COMMENT' to
-	the keyword.
+	  the comment string associated with an item by adding '_COMMENT' to
+	  the keyword.
 
 2002-01-19  Malcolm J. Currie <mjc@star.rl.ac.uk>
 
@@ -71,28 +97,28 @@
 2002-12-05  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (FETCH): Tied interface now returns a hash ref when a
-	subheader is encountered. (STORE): And accepts a hash via STORE
+	  subheader is encountered. (STORE): And accepts a hash via STORE
 
 2002-12-04  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* NDF/NDF.pm (configure): Allow for someone to supply an explicit
-	HDS path to an NDF
+	  HDS path to an NDF
 
 	* Item/Item.pm: Sub-headers can now be stored with
-	Astro::FITS::Header objects, using type HEADER
+	  Astro::FITS::Header objects, using type HEADER
 
 	* Header.pm (STORE): Allow an Astro::FITS::Header object to be
-	stored through the tied interface.
+	  stored through the tied interface.
 
 2002-12-03  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (insert{): Fix problem with tied hash when
-	doing %$tieref = %new
+	  doing %$tieref = %new
 
 2002-12-02  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* NDF/NDF.pm (configure): Fix problem with SCUBA raw data. The
-	files are NDFs but are not declared as such in the type field
+	  files are NDFs but are not declared as such in the type field
 
 2002-11-27  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.4)
 

@@ -311,6 +311,9 @@ sub configure {
       my $method = lc($key);
       $self->$method( $hash{$key}) if exists $hash{$key};
     }
+    # COMMENT, HISTORY, and blank cards are special
+    $self->type('COMMENT') if $self->keyword =~ /^(COMMENT|HISTORY|)$/;
+
     # End cards are special, need only do a Keyword => 'END' to configure
     $self->type('END') if $self->keyword() eq 'END';
   }
@@ -615,8 +618,8 @@ sub _stringify {
 
   } elsif (defined $type && $type eq 'COMMENT') {
 
-    # Comments are from character 11 - 80
-    $card = sprintf("%-10s%-70s", $card, $comment);
+    # Comments are from character 9 - 80
+    $card = sprintf("%-8s%-72s", $card, $comment);
 
   } elsif (!defined $type && !defined $value && !defined $comment) {
 

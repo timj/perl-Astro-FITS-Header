@@ -89,6 +89,9 @@ The tied interface was updated for version 2.x by Craig DeForest
 Research Institute and Tim Jenness <timj@jach.hawaii.edu> of the Joint
 Astronomy Center (JAC) in Hawaii.
 
+Modifications to parse ESO HIERARCH keywords, read-only, were added by
+Malcolm Currie <mjc@star.rl.ac.uk> of the Rutherford Appleton Laboratory.
+
 For full details of who did what, and when, see the ChangeLog.
 
 Maintainer

@@ -183,7 +183,8 @@ sub keyword {
 
 Returns an array of Header::Items for the requested keyword if called
 in list context, or the first matching Header::Item if called in scalar
-context. Returns C<undef> if the keyword does not exist.
+context. Returns C<undef> if the keyword does not exist.  The keyword
+may be a regular expression created with the C<qr> operator.
 
    @items = $header->itembyname($keyword);
    $item = $header->itembyname($keyword);
@@ -194,25 +195,20 @@ context. Returns C<undef> if the keyword does not exist.
 
 sub itembyname {
    my ( $self, $keyword ) = @_;
-            
-   # resolve the items from the index array from lookup table
-   # grab the index array from the lookup table
-   my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
-         if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	      defined ${$self->{LOOKUP}}{$keyword} );
-   my @items = map {${$self->{HEADER}}[$_]} @index;
-   
+
+   my @items = @{$self->{HEADER}}[$self->index($keyword)];
+
    return wantarray ?  @items : @items ? $items[0] : undef;
-   
+
 }
 
 # I N D E X   --------------------------------------------------------------
 
 =item B<index>
 
-Returns an array of indices for the requested keyword if called in list
-context, or an empty array if it does not exist.
+Returns an array of indices for the requested keyword if called in
+list context, or an empty array if it does not exist.  The keyword may
+be a regular expression created with the C<qr> operator.
 
    @index = $header->index($keyword);
 
@@ -228,9 +224,20 @@ sub index {
    
    # grab the index array from lookup table
    my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
-         if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	      defined ${$self->{LOOKUP}}{$keyword} );
+
+   if ( 'Regexp' eq ref $keyword )
+   {
+     push @index, @{$self->{LOOKUP}{$_}}
+       foreach grep { /$keyword/ && 
+			defined $self->{LOOKUP}{$_} } keys %{$self->{LOOKUP}};
+     @index = sort @index;
+   }
+   else
+   {
+     @index = @{${$self->{LOOKUP}}{$keyword}}
+       if ( exists ${$self->{LOOKUP}}{$keyword} && 
+	    defined ${$self->{LOOKUP}}{$keyword} );
+   }
    
    # return the values array
    return wantarray ? @index : @index ? $index[0] : undef;
@@ -241,8 +248,9 @@ sub index {
 
 =item B<value>
 
-Returns an array of values for the requested keyword if called
-in list context, or an empty array if it does not exist.
+Returns an array of values for the requested keyword if called in list
+context, or an empty array if it does not exist.  The keyword may be
+a regular expression created with the C<qr> operator.
 
    @value = $header->value($keyword);
 
@@ -253,16 +261,13 @@ C<undef> if the keyword does not exist.
 
 sub value {
    my ( $self, $keyword ) = @_;
-   
+
    # resolve the values from the index array from lookup table
-   my @values =
-     map { ${$self->{HEADER}}[$_]->value() } @{${$self->{LOOKUP}}{$keyword}}
-         if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	      defined ${$self->{LOOKUP}}{$keyword} );
+   my @values = map { ${$self->{HEADER}}[$_]->value() } $self->index($keyword);
 
    # loop over the indices and grab the values
    return wantarray ? @values : @values ? $values[0] : undef;
-   
+
 }
 
 # C O M M E N T -------------------------------------------------------------
@@ -270,7 +275,8 @@ sub value {
 =item B<comment>
 
 Returns an array of comments for the requested keyword if called
-in list context, or an empty array if it does not exist.
+in list context, or an empty array if it does not exist.  The keyword
+may be a regular expression created with the C<qr> operator.
 
    @comment = $header->comment($keyword);
 
@@ -286,9 +292,7 @@ sub comment {
       
    # resolve the comments from the index array from lookup table
    my @comments =
-     map { ${$self->{HEADER}}[$_]->comment() } @{${$self->{LOOKUP}}{$keyword}}
-         if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	      defined ${$self->{LOOKUP}}{$keyword} );
+     map { ${$self->{HEADER}}[$_]->comment() } $self->index($keyword);
    
    # loop over the indices and grab the comments
    return wantarray ?  @comments : @comments ? $comments[0] : undef;
@@ -388,7 +392,8 @@ Replace FITS header cards with keyword $keyword with card $item
 
    $card = $header->replacebyname($keyword, $item);  
 
-returns the replaced card.
+returns the replaced card. The keyword may be a regular expression
+created with the C<qr> operator.
 
 =cut
 
@@ -396,10 +401,7 @@ sub replacebyname{
    my ($self, $keyword, $item) = @_;
    
    # grab the index array from lookup table
-   my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
-         if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	      defined ${$self->{LOOKUP}}{$keyword} );
+   my @index = $self->index($keyword);
 
    # loop over the keywords
    my @cards = map { splice @{$self->{HEADER}}, $_, 1, $item;} @index;
@@ -420,7 +422,8 @@ Removes a FITS header card object by name
 
   @card = $header->removebyname($keyword);
 
-returns the removed cards.
+returns the removed cards.  The keyword may be a regular expression
+created with the C<qr> operator.
 
 =cut
 
@@ -428,10 +431,7 @@ sub removebyname{
    my ($self, $keyword) = @_;
    
    # grab the index array from lookup table
-   my @index;
-   @index = @{${$self->{LOOKUP}}{$keyword}}
-         if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	      defined ${$self->{LOOKUP}}{$keyword} );
+   my @index = $self->index($keyword);
 
    # loop over the keywords
    my @cards = map { splice @{$self->{HEADER}}, $_, 1; } @index;
@@ -691,6 +691,17 @@ can be modified in the same way:
 
   $hdr{CRPIX1_COMMENT} = "An axis";
 
+You can also modify the comment by slash-delimiting it when setting the 
+associated keyword:
+
+  $hdr{CRPIX1} = "34 / Set this field manually";
+
+If you want an actual slash character in your string field you must escape
+it with a backslash.  (If you're in double quotes you have to use a double
+backslash):
+
+  $hdr{SLASHSTR} = 'foo\/bar / field contains "foo/bar"';
+
 Keywords are CaSE-inNSEnSiTIvE, unlike normal hash keywords.  All
 keywords are translated to upper case internally, per the FITS standard.
 
@@ -947,6 +958,24 @@ sub FETCH {
 sub STORE {
   my ($self, $keyword, $value) = @_;
   my @values;
+
+  # Recognize slash-delimited comments in value keywords.  This is done 
+  # cheesily via recursion -- would be more efficient, but less readable, 
+  # to propagate the comment through the code...
+
+  if( $keyword !~ m/(COMMENT)|(HISTORY)/ and 
+      $value =~ s:\s*(?<!\\)/\s*(.*)::         # Identify any '/' not preceded by '\'
+      ) { 
+    my $comment = $1;
+
+    # Recurse to store the comment.  This is a direct (non-method) call to 
+    # keep this method monolithic.  --CED 27-Jun-2003
+    STORE($self,$keyword."_COMMENT",$comment);
+
+  }
+
+  $value =~ s:\\\\:\\:g;
+  $value =~ s:\\\/:\/:g;
 
   # skip the shenanigans for the normal case
   # or if we have an Astro::FITS::Header
