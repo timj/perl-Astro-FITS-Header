@@ -4,7 +4,7 @@
 # Needs a better suite of tests.
 use strict;
 use Test;
-BEGIN { plan tests => 1 };
+BEGIN { plan tests => 8 };
 
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
@@ -55,5 +55,42 @@ tie %header, ref($hdr), $hdr;
 $header{EXTEND2} = $subhdr;
 
 # test that we have the correct type
-ok( UNIVERSAL::isa($header{EXTEND}, "Astro::FITS::Header"));
+# This should be a hash
+ok( ref($header{EXTEND}), "HASH");
+
+# And this should be an Astro::FITS::Header
+ok( UNIVERSAL::isa($hdr->value("EXTEND"), "Astro::FITS::Header"));
+
+# Now store a hash
+$header{NEWHASH} = { A => 2, B => 3};
+ok( $header{NEWHASH}->{A}, 2);
+ok( $header{NEWHASH}->{B}, 3);
+
+# Now store a tied hash
+my %sub;
+tie %sub, ref($subhdr), $subhdr;
+$header{NEWTIE} = \%sub;
+my $newtie = $header{NEWTIE};
+my $tieobj = tied %$newtie;
+
+# We need to disable the stringify operator so that we can compare
+# objects directly
+eval 'no overload \'""\';';
+
+printf "# The tied object is: %s\n",$tieobj;
+printf "# The original object is:: %s\n",$subhdr;
+
+# Compare string representation
+# and make sure we have the same object
+ok( $tieobj, $subhdr);
+
+# test values
+ok($header{NEWTIE}->{VALUE}, $another_card->value);
+
+# Test autovivification
+# Note that $hdr{BLAH}->{YYY} = 5 does not work
+$header{BLAH}->{XXX};
+ok(ref($header{BLAH}), 'HASH');
+$header{BLAH}->{XXX} = 5;
+ok($header{BLAH}->{XXX}, 5);
 

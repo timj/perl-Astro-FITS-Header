@@ -1,4 +1,13 @@
+2002-12-05  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Header.pm (FETCH): Tied interface now returns a hash ref when a
+	subheader is encountered.
+	(STORE): And accepts a hash via STORE
+
 2002-12-04  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* NDF/NDF.pm (configure): Allow for someone to supply an explicit
+	HDS path to an NDF
 
 	* Item/Item.pm: Sub-headers can now be stored with
 	Astro::FITS::Header objects, using type HEADER

@@ -60,7 +60,8 @@ use Astro::FITS::Header::Item;
 '$Revision$ ' =~ /.*:\s(.*)\s\$/ && ($VERSION = $1);
 
 # Operator overloads
-use overload '""' => "stringify";
+use overload '""' => "stringify",
+  fallback => 1;
 
 # C O N S T R U C T O R ----------------------------------------------------
 
@@ -724,6 +725,10 @@ force string evaluation, feed in a trivial hash array:
 Calls to keys() or each() will, by default, return the keywords in the order 
 n which they appear in the header.
 
+When the key refers to a subheader entry, a hash reference is returned.
+If a hash reference is stored in a value it is converted to a
+C<Astro::FITS::Header> object.
+
 =cut
 
 # List of known comment-type fields
@@ -759,8 +764,17 @@ sub FETCH {
       $out =~ s/\\\n//gs if (defined($out));
   }
   $out .= "\n" if((defined $item) && (defined $item->type) && ($item->type =~ m/^(COMMENT)$/s));
+
+  # If we have a header we need to tie it to another hash
+  if (defined $item && $item->type eq 'HEADER' 
+      && UNIVERSAL::isa($out,"Astro::FITS::Header")) {
+
+    my %header;
+    tie %header, ref($out), $out;
+    $out = \%header;
+  }
+
   return $out;
-  
 }
 
 # store key and value pair
@@ -784,6 +798,24 @@ sub STORE {
   # or if we have an Astro::FITS::Header
   if (UNIVERSAL::isa($value, "Astro::FITS::Header")) {
     @values = ($value);
+  } elsif (ref $value eq 'HASH') {
+    # Convert a hash to a Astro::FITS::Header
+    # If this is a tied hash already just get the object
+    my $tied = tied %$value;
+    if (defined $tied && UNIVERSAL::isa($tied, "Astro::FITS::Header")) {
+      # Just take the object
+      @values = ($tied);
+    } else {
+      # Convert it to a hash
+      my @items = map { new Astro::FITS::Header::Item( Keyword => $_,
+                                                       Value => $value->{$_}
+                                                     ) } keys (%{$value});
+
+      # Create the Header object.
+      @values = (new Astro::FITS::Header( Cards => \@items ));
+
+    }
+
   } elsif((ref $value) || (length $value > 70) || $value =~ m/\n/s ) {
     my @val;
     # @val gets intermediate breakdowns, @values gets line-by-line breakdowns.
