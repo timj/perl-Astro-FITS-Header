@@ -1,3 +1,7 @@
+2003-11-12  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.1)
+
+        * Documentation updated and released.
+        
 2003-10-22  Brad Cavanagh  <b.cavanagh@jach.hawaii.edu>
 
 	* t/subhdr.t: Must test with stringify enabled, so compare
@@ -6,7 +10,7 @@
 	* Header.pm (STORE): Do not want to stringify prematurely if we
 	are accepting a blessed data structure.
 
- 2003-10--21  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.0)
+2003-10-21  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.0)
  
         * Applied patches supplied by Jim Lewis <jrl@ast.cam.ac.uk> which
           add support for MEF files. Modified documentation and shipped
