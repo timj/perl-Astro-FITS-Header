@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 150 };
+BEGIN { plan tests => 1 };
 
 # load modules
 use Astro::FITS::Header;
@@ -23,103 +23,10 @@ chomp(@raw);
 # build header array
 my $header = new Astro::FITS::Header( Cards => \@raw );
 
-# test the header
-for my $i (0 .. $#raw) {
-  my $card = $header->item($i);
-  ok( "$card", $raw[$i]);  
-}
+# tie
+my %keywords;
+tie %keywords, "Astro::FITS::Header", $header;   
 
-# build a test card
-my $int_card = new Astro::FITS::Header::Item(
-                               Keyword => 'LIFE',
-		               Value   => 42,
-			       Comment => 'Life the Universe and everything',
-			       Type    => 'INT' );
-				  
-# build another
-my $string_card = new Astro::FITS::Header::Item(
-                               Keyword => 'STUFF',
-		               Value   => 'Blah Blah Blah',
-			       Comment => 'So long and thanks for all the fish',
-			       Type    => 'STRING' );
-
-# and another
-my $another_card = new Astro::FITS::Header::Item(
-                               Keyword => 'VALUE',
-		               Value   => 34.5678,
-			       Comment => 'A floating point number',
-			       Type    => 'FLOAT' );
-# insert	
-$header->insert(1, $int_card);
-
-# value
-my @test_value = $header->value('LIFE');
-ok($test_value[0], 42);
-
-# itembyname
-my @itembyname = $header->itembyname('LIFE');
-ok("$int_card","$itembyname[0]");
-
-# item
-my @item = $header->item(1);
-ok("$int_card","$itembyname[0]");
-
-# splice
-my @cards = $header->splice( 0, 6, $string_card);	
-my @comp = ( $raw[0], $int_card, $raw[1], $raw[2], $raw[3], $raw[4] );
-for my $i (0 .. $#cards) {
-  ok( "$cards[$i]", "$comp[$i]");   
-}
-
-# item
-my $test_item = $header->item(1);
-ok( "$test_item", $raw[6] );
-
-# itembyname
-my @comments = $header->itembyname('COMMENT');
-ok( scalar(@comments), 4);
-for my $j (0 .. $#comments) {
-  ok( "$comments[$j]", "$raw[$j+7]");   
-}
-
-# index
-my @index = $header->index('COMMENT');
-my @actual = (2,3,4,5);
-for my $k (0 .. $#index ) {
-  ok( $index[$k], $actual[$k] );
-}
-
-# insert	
-$header->insert(5, $string_card);
-
-# comment
-my @comment = $header->comment('STUFF');
-ok( "$comment[0]", "So long and thanks for all the fish");
-
-# replacebyname
-my $replacebyname = $header->replacebyname('STUFF', $int_card);
-ok("$string_card","$replacebyname"); 
-
-# replace
-my $replace = $header->replace(5, $another_card);
-ok("$int_card","$replace");
-
-# value
-my @floating = $header->value('VALUE');
-ok($floating[0],34.5678);
-
-# remove
-my $remove = $header->remove(5);
-ok("$another_card","$remove");
-@floating = $header->value('VALUE');
-ok($floating[0],undef);
-
-# insert	
-$header->insert(5, $string_card);
-
-# removebyname
-my $removebyname = $header->removebyname('STUFF');
-ok("$string_card","$removebyname");
 
 exit;
 

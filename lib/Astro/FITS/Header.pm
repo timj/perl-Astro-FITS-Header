@@ -240,7 +240,7 @@ sub insert{
 }
 
 
-# R E P L A C E  B Y  N A M E ---------------------------------------------
+# R E P L A C E -------------------------------------------------------------
 
 =item B<replace>
 
@@ -403,6 +403,21 @@ sub splice {
       return wantarray ? @cards : $cards[scalar(@cards)-1];
    }
 }
+
+# C A R D S --------------------------------------------------------------
+
+=item B<cards>
+
+Return the object contents as an array of FITS cards.
+
+  @array = $header->cards;
+
+=cut
+
+sub cards {
+  my $self = shift;
+  return map { "$_"  } @{$self->{HEADER}};
+}
    
 # C O N F I G U R E -------------------------------------------------------
 
@@ -445,19 +460,6 @@ sub configure {
     $self->_rebuild_lookup;
 
   }
-}
-
-=item B<cards>
-
-Return the object contents as an array of FITS cards.
-
-  @array = $header->cards;
-
-=cut
-
-sub cards {
-  my $self = shift;
-  return map { "$_"  } @{$self->{HEADER}};
 }
 
 # P R I V A T  E   M E T H O D S ------------------------------------------
@@ -508,64 +510,73 @@ sub _rebuild_lookup {
 }
 
 # T I E D   I N T E R F A C E -----------------------------------------------
-#
-#=back
-#
-#=head1 TIED INTERFACE
-#
-#The C<FITS::Header> object can also be tied to a hash
-#
-#   use Astro::FITS::Header;
-#
-#   $header = new Astro::FITS::Header( Cards => \@array );
-#   tie %hash, "Astro::FITS::Header", $header   
-#
-#=cut
-#
+
+=back
+
+=head1 TIED INTERFACE
+
+The C<FITS::Header> object can also be tied to a hash
+
+   use Astro::FITS::Header;
+
+   $header = new Astro::FITS::Header( Cards => \@array );
+   tie %hash, "Astro::FITS::Header", $header   
+
+   $value = $hash{$keyword}
+
+It should be noted that if querying a value using the tied interface and the
+keyword appears multiple times in the FITS HDU, then only the first occurance
+will be returned.
+
+=cut
+
 # constructor
-#sub TIEHASH {
-#
-#}
-#
+sub TIEHASH {
+  my ( $class, $obj, %options ) = @_;
+  return bless $obj, $class;  
+}
+
 # fetch key and value pair
-#sub FETCH {
-#
-#}
-#
+sub FETCH {
+  my ($self, $key) = @_;
+  my @values = $self->value($key);
+  return $values[0];
+}
+
 # store key and value pair
-#sub STORE {
-#
-#}
-#
+sub STORE {
+
+}
+
 # reports whether a key is present in the hash
-#sub EXISTS {
-#
-#}
-#
+sub EXISTS {
+
+}
+
 # deletes a key and value pair
-#sub DELETE {
-#
-#}
-#
+sub DELETE {
+
+}
+
 # empties the hash
-#sub CLEAR {
-#
-#}
-#
+sub CLEAR {
+
+}
+
 # implements keys() and each()
-#sub FIRSTKEY {
-#
-#}
-#
+sub FIRSTKEY {
+
+}
+
 # implements keys() and each()
-#sub NEXTKEY {
-#
-#}
-#
+sub NEXTKEY {
+
+}
+
 # garbage collection
-#sub DESTROY {
-#
-#}
+sub DESTROY {
+
+}
 
 # T I M E   A T   T H E   B A R  --------------------------------------------
 
@@ -590,4 +601,4 @@ Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>
 
 # L A S T  O R D E R S ------------------------------------------------------
 
-1;
+1;                                                                  

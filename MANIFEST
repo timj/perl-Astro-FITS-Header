@@ -4,8 +4,11 @@ Makefile.PL
 t/
 t/parse.t
 t/ndf.t
+t/cfitsio.t
 NDF/NDF.pm
 NDF/Makefile.PL
+CFITSIO/CFITSIO.pm
+CFITSIO/Makefile.PL
 Item/Makefile.PL
 Item/Item.pm
 Item/t/parse.t

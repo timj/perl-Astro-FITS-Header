@@ -1,3 +1,13 @@
+2001-03-24  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Skeleton structre for CFITSIO module added
+ 	
+        * t/parse.t: Rewrote test harness for Header
+	
+	* Header.pm: Fixed bugs
+	
+	* t/ndf.t: Rewote test harness using some harder tests
+	    	
 2001-03-17  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (configure): Now uses map and _rebuild_lookup
@@ -24,9 +34,13 @@
 2001-03-15  Alasdair Allan <aa@astro.ex.ac.uk>
 
        * t/parse.t: Rewrote test harness
+
        * Item/Item.pm: Added some work arounds for common non-standard entries
 
 2001-03-12  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* t/parse.t: Update test to fix array comparison.
 
+2001-03-10  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Original version

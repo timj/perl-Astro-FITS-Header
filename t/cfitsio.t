@@ -1,70 +1,20 @@
 #!perl
-# Testing NDF read/write of fits headers
+# Testing CFITSIO read/write of fits headers
 
 use strict;
 
 use Test;
-BEGIN { plan tests => 193 };
+BEGIN { plan tests => 1 };
 
-eval "use Astro::FITS::Header::NDF; use NDF;";
+eval("use Astro::FITS::Header::CFITSIO; use NOT_IMPLEMENTED;");
 if ($@) {
-  for (1..193) {
-    skip("Skip NDF module not available", 1);
+  for (1..1) {
+    skip("Skip CFITSIO module not yet implemented", 1);
   }
   exit;
 }
 
 ok(1);
-
-
-my $file = "temp$$";
-END { unlink $file . ".sdf" if defined $file; };
-
-# Create an NDF file
-my $status = &NDF::SAI__OK;
-my $good = $status;
-ndf_begin();
-ndf_open(&NDF::DAT__ROOT(), $file, 'WRITE', 'UNKNOWN',
-	     my $ndfid, my $place, $status);
-
-# if the file was not there we have to create it from the place holder
-# KLUGE : need to get NDF__NOID from the NDF module at some point
-if ($ndfid == 0) {
-  my @lbnd = (1);
-  my @ubnd = (1);
-  ndf_new('_INTEGER', 1, @lbnd, @ubnd, $place, $ndfid, $status );
-
-  # Map the data array
-  ndf_map($ndfid, 'DATA', '_INTEGER', 'WRITE', my $pntr, my $el, $status);
-  my @data = (5);
-  &array2mem(\@data, "i*", $pntr) if ($status == $good);
-  ndf_unmap($ndfid,'DATA', $status);
-}
-
-ndf_annul($ndfid, $status);
-ndf_end($status);
-
-# Read the stuff from the end
-my @cards = <DATA>;
-chomp(@cards);
-
-# Create a new object with those cards
-my $hdr = new Astro::FITS::Header::NDF( Cards => \@cards );
-
-# Store them on disk
-$hdr->writehdr( File => $file );
-
-ok( -e $file .".sdf" );
-
-# Read them back in
-my $hdr2 = new Astro::FITS::Header::NDF( File => $file );
-
-# Now compare with the original
-my @newcards = $hdr2->cards;
-
-for my $i (0..$#cards) {
-  ok($newcards[$i], $cards[$i]);
-}
 
 exit;
 

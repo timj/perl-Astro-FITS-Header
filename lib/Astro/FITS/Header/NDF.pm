@@ -8,15 +8,19 @@ Astro::FITS::Header::NDF - Manipulate FITS headers from NDF files
 
   use Astro::FITS::Header::NDF;
 
-  $h = new Astro::FITS::Header::NDF( Cards => \@cards );
-  $h = new Astro::FITS::Header::NDF( ndfID => $indf );
-  $h = new Astro::FITS::Header::NDF( File => $file );
+  $hdr = new Astro::FITS::Header::NDF( Cards => \@cards );
+  $hdr = new Astro::FITS::Header::NDF( ndfID => $indf );
+  $hdr = new Astro::FITS::Header::NDF( File => $file );
 
-  $h->writehdr( $indf );
+  $hdr->writehdr( $indf );
+  $hdr->writehdr( File => $file );
 
 =head1 DESCRIPTION
 
-Stores information about a FITS header block in an object. Takes an
+This module makes use of the Starlink L<NDF|NDF> module to read and write to
+and NDF FITS extension.
+
+It stores information about a FITS header block in an object. Takes an hash as an arguement, with either an array reference pointing to an array of FITS header cards, or a filename, or (alternatively) and NDF identifier.
 
 =cut
 
@@ -38,10 +42,11 @@ $VERSION = '0.01';
 
 Reads a FITS header from an NDF.
 
+  $hdr->configure( Cards => \@cards );
   $hdr->configure( ndfID => $indf );
   $hdr->configure( File => $filename );
 
-Accepts an NDF identifier or a filename.  If both ndfID and File keys
+Accepts an NDF identifier or a filename. If both ndfID and File keys
 exist, ndfID key takes priority.
 
 =cut
@@ -172,8 +177,7 @@ Write a fits header to an NDF.
 Accepts an NDF identifier or a filename.  If both ndfID and File keys
 exist, ndfID key takes priority.
 
-Returns undef on error, true if the header was written
-successfully.
+Returns undef on error, true if the header was written successfully.
 
 =cut
 
@@ -265,14 +269,14 @@ L<Astro::FITS::Header::CFITSIO>
 
 =head1 AUTHORS
 
-
+Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>,
+Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>
 
 =head1 COPYRIGHT
 
 Copyright (C) 2001 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
-
-
 =cut
 
+1;
