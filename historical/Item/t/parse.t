@@ -9,7 +9,7 @@ use Astro::FITS::Header::Item;
 
 # load test
 use Test;
-BEGIN { plan tests => 25 };
+BEGIN { plan tests => 26 };
 
 # T E S T   H A R N E S S --------------------------------------------------
 
