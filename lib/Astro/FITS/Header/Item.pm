@@ -184,11 +184,17 @@ A special type, "HEADER", is used to specify that this item refers
 to a subsidiary header (eg a header in an MEFITS file or a header
 in an NDF in an HDS container).
 
+The type is case-insensitive, but will always be returned up-cased.
+
 =cut
 
 sub type {
   my $self = shift;
-  if (@_) { $self->{Type} = shift;  }
+  if (@_) { 
+    my $type = shift;
+    $type = uc($type) if defined $type;
+    $self->{Type} = $type;
+  }
   return $self->{Type};
 }
 
@@ -700,6 +706,8 @@ sub _stringify {
       # Pad goes reverse way to a number
       $value = $value.(' 'x(20-length($value)));
 
+    } else {
+      carp("Type '$type' is not a recognized type. Header creation may be incorrect");
     }
 
     # Add the comment

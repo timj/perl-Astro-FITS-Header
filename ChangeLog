@@ -1,5 +1,8 @@
 2004-10-21  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* Item/Item.pm (type): Make sure that type is upper cased. Also
+	make sure that we warn about unrecognized types on stringification.
+
 	* t/parse.t: Make sure that the cache is cleared before we test
 	card creation
 
