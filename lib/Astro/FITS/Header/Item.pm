@@ -201,7 +201,7 @@ object.  It is created if there is no cached version.
   $card = $item->card();
 
 If a new card is supplied it will only be accepted if it is 80
-characters long or less. The string is padded with spaces if it is too
+characters long or fewer.  The string is padded with spaces if it is too
 short. No attempt (yet) )is made to shorten the string if it is too
 long since that may require a check to see if the value is a string
 that must be shortened with a closing single quote.  Returns C<undef>
@@ -340,10 +340,18 @@ Returns an empty list on error.
 =cut
 
 # Fits standard specifies
-# Characters 1:8  KEYWORD (trailing spaces)  COMMENT is special
-#            9:10 "= "  for a valid value (unless COMMENT keyword)
+# Characters 1:8  KEYWORD (trailing spaces)  Comment cards: COMMENT,
+#                 HISTORY, blank and HIERARCH are special
+#            9:10 "= "  for a valid value (unless comment keyword)
 #            11:80 The Value   "/" used to indicate a comment
 
+# HIERARCH keywords
+#      This is a comment but used to store values in an extended,
+#      hierarchical name space.  The keyword is the string before
+#      the equals sign and ignoring trailing spaces.  The value
+#      follows the first equals sign.  The comment is delimited by a
+#      solidus following a string or a single vlaue.  
+#      
 # The value can contain:
 #  STRINGS:
 #      '  starting at position 12
@@ -361,14 +369,23 @@ sub parse_card {
   return () unless @_;
 
   my $card = shift;
+  my $equals_col = 8;
 
   # Value is only present if an = is found in position 9
   my ($value, $comment) = ('', '');
-  my $keyword = uc(substr($card, 0, 8));
+  my $keyword = uc(substr($card, 0, $equals_col));
+
+  # HIERARCH special case.  It's a comment, but want to treat it as
+  # a multi-word keyword followed by a value and/or comment.
+  if ( $keyword eq 'HIERARCH' || $card =~ /^\s+HIERARCH/ ) {
+    $equals_col = index( $card, "=" );
+    $keyword = uc(substr($card, 0, $equals_col ));
+  }
   $keyword =~ s/\s+$//;
+  $keyword =~ s/\s/./g;
 
   # update object
-  $self->keyword( $keyword);
+  $self->keyword( $keyword );
 
   # END cards are special
   if ($keyword eq 'END') {
@@ -383,7 +400,7 @@ sub parse_card {
 
   # Check for comment or HISTORY
   if ($keyword eq 'COMMENT' || $keyword eq 'HISTORY' ||
-      substr($card,8,2) ne "= ") {
+      (substr($card,8,2) ne "= " && $keyword !~ /^HIERARCH/)) {
 
     # Store the type
     $self->type( "COMMENT" );
@@ -402,7 +419,7 @@ sub parse_card {
   }
 
   # We must have a value after '= '
-  my $rest = substr($card,10);
+  my $rest = substr($card, $equals_col+1);
 
   # Remove leading spaces
   $rest =~ s/^\s+//;
