@@ -4,14 +4,17 @@
 # Needs a better suite of tests.
 use strict;
 use Test;
-BEGIN { plan tests => 10 };
+BEGIN { plan tests => 12 };
 
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
 
-# Need to disable string overloading for tests
+# Force numify to return the actual object reference.
+# This allows us to verify that a header stored through
+# a tie does not get reblessed or stringified.
 package Astro::FITS::Header;
-no overload '""';
+use overload '0+' => 'fudge', fallback => 1;
+sub fudge { return $_[0] }
 package main;
 
 # build a test card
@@ -41,7 +44,7 @@ my $hdr = new Astro::FITS::Header( Cards => [ $int_card, $string_card ]);
 
 # and another header
 my $subhdr = new Astro::FITS::Header( Cards => [ $another_card ]);
-
+print "Subhdr: $subhdr\n";
 
 # now create an item pointing to that subhdr
 my $subitem = new Astro::FITS::Header::Item(
@@ -58,6 +61,7 @@ tie %header, ref($hdr), $hdr;
 
 # Add another item
 $header{EXTEND2} = $subhdr;
+ok($header{EXTEND2}{VALUE},34.5678 );
 
 # test that we have the correct type
 # This should be a hash
@@ -78,16 +82,20 @@ $header{NEWTIE} = \%sub;
 my $newtie = $header{NEWTIE};
 my $tieobj = tied %$newtie;
 
-# Make sure we have a short stringification
-ok( length($tieobj) < 40);
-ok( "$tieobj" =~ /Astro::FITS::Header/);
+# Check class
+ok( UNIVERSAL::isa($tieobj, "Astro::FITS::Header"));
 
-printf "# The tied object is: %s\n",$tieobj;
-printf "# The original object is:: %s\n",$subhdr;
+# Make sure we have a long numification
+my $tienum = 0 + $tieobj;
+my $hdrnum = 0 + $subhdr;
+ok( $tienum > 0);
+ok( $hdrnum > 0);
 
-# Compare string representation
-# and make sure we have the same object
-ok( $tieobj, $subhdr);
+# Compare memory addresses
+ok( $tienum, $hdrnum );
+
+printf "# The tied object is: %s\n",0+$tienum;
+printf "# The original object is:: %s\n",$hdrnum;
 
 # test values
 ok($header{NEWTIE}->{VALUE}, $another_card->value);
