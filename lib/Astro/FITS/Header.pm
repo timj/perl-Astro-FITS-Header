@@ -669,7 +669,7 @@ appended automatically on FETCH, so that
   $hash{HISTORY} .= "Added multi-line string support";
 
 adds a new HISTORY comment card, while
-  
+
   $hash{TELESCOP} .= " dome B";
 
 only modifies an existing TELESCOP card.

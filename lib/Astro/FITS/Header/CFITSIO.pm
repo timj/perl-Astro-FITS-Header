@@ -40,7 +40,7 @@ Astro::FITS::Header::CFITSIO - Manipulates FITS headers from a FITS file
 =head1 SYNOPSIS
 
   use Astro::FITS::Header::CFITSIO;
-  
+
   $header = new Astro::FITS::Header::CFITSIO( Cards => \@array );
   $header = new Astro::FITS::Header::CFITSIO( File => $file );
   $header = new Astro::FITS::Header::CFITSIO( fitsID => $ifits );
