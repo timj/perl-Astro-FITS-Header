@@ -1,3 +1,8 @@
+2001-03-15  Alasdair Allan <aa@astro.ex.ac.uk>
+
+       * t/parse.t: Rewrote test harness
+       * Item/Item.pm: Added some work arounds for common non-standard entries
+
 2001-03-12  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* t/parse.t: Update test to fix array comparison.

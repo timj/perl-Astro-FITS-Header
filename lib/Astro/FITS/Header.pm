@@ -42,9 +42,7 @@ Astro::FITS::Header - A FITS header
 =head1 DESCRIPTION
 
 Stores information about a FITS header block in an object. Takes an array
-of FITS header cards as input and stores them in a blessed hash containing
-an anonymous array of FITS::Header::Items and a keyword lookup table
-implemented as an anonymous hash.
+of FITS header cards as input.
 
 =cut
 
@@ -75,7 +73,7 @@ Create a new instance from an array of FITS header cards.
 
   $item = new Astro::FITS::Header( @header );
 
-returns an object reference to a Header object.
+returns a reference to a Header object.
 
 =cut
 
@@ -84,9 +82,8 @@ sub new {
   my $class = ref($proto) || $proto;
 
   # bless the header block into the class
-  my ( @header, %lookup );
-  my $block = bless { HEADER => \@header,
-                      LOOKUP  => \%lookup }, $class;
+  my $block = bless { HEADER => [],
+                      LOOKUP  => {} }, $class;
                           
   # If we have arguments configure the object
   $block->configure( @_ ) if @_;
@@ -135,7 +132,8 @@ sub itembyname {
    my ( $self, $keyword ) = @_;
    
    # grab the index array from lookup table
-   my @index = @{${$self->{LOOKUP}}{$keyword}}
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
@@ -164,7 +162,8 @@ sub index {
    my ( $self, $keyword ) = @_;
    
    # grab the index array from lookup table
-   my @index = @{${$self->{LOOKUP}}{$keyword}}
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
@@ -186,7 +185,8 @@ sub value {
    my ( $self, $keyword ) = @_;
    
    # grab the index array from lookup table
-   my @index = @{${$self->{LOOKUP}}{$keyword}}
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
@@ -205,7 +205,7 @@ sub value {
 
 =item B<comment>
 
-Returns an array of values for the requested keyword
+Returns an array of comments for the requested keyword
 
    @comment = $header->comment($keyword);
 
@@ -215,7 +215,8 @@ sub comment {
    my ( $self, $keyword ) = @_;
       
    # grab the index array from lookup table
-   my @index = @{${$self->{LOOKUP}}{$keyword}}
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
@@ -250,29 +251,8 @@ sub insert{
    # splice the new FITS header card into the array
    splice @{$self->{HEADER}}, $index, 0, $item;
    
-   # rebuild the lookup table
-
-   # empty the hash 
-   my %empty_hash;
-   $self->{LOOKUP} = \%empty_hash;
-
-   # loop over the existing header array
-   for ( my $i = 0; $i<scalar(@{$self->{HEADER}}); $i++) {
-
-      # grab the keyword from each header item;
-       
-      my $keyword = ${$self->{HEADER}}[$i]->keyword();
-            
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$keyword} &&
-               defined ${$self->{LOOKUP}}{$keyword} ) {
-         # new keyword
-         ${$self->{LOOKUP}}{$keyword} = [ $i ];
-      } else {     
-         # keyword exists, push the current index into the array
-         push( @{${$self->{LOOKUP}}{$keyword}}, $i );
-      }   
-   }
+   # rebuild the lookup table from the modified header
+   $self->_rebuild_lookup();   
    
 }
 
@@ -283,7 +263,7 @@ sub insert{
 
 Replace FITS header card at index $index with card $item
 
-   $header->replace($index, $item);
+   $card = $header->replace($index, $item);
 
 returns the replaced card.
 
@@ -295,28 +275,8 @@ sub replace{
    # remove the specified item and replace with $item
    my @cards = splice @{$self->{HEADER}}, $index, 1, $item;
    
-   # rebuild the lookup table
-
-   # empty the hash 
-   my %empty_hash;
-   $self->{LOOKUP} = \%empty_hash;
-
-   # loop over the existing header array
-   for ( my $j = 0; $j<scalar(@{$self->{HEADER}}); $j++) {
-
-      # grab the keyword from each header item;
-      my $key = ${$self->{HEADER}}[$j]->keyword();
-            
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$key} &&
-               defined ${$self->{LOOKUP}}{$key} ) {
-         # new keyword
-         ${$self->{LOOKUP}}{$key} = [ $j ];
-      } else {     
-         # keyword exists, push the current index into the array
-         push( @{${$self->{LOOKUP}}{$key}}, $j );
-      }   
-   }
+   # rebuild the lookup table from the modified header
+   $self->_rebuild_lookup();
    
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
@@ -341,29 +301,8 @@ sub remove{
    # remove the  FITS header card from the array
    my @cards = splice @{$self->{HEADER}}, $index, 1;
    
-   # rebuild the lookup table
-
-   # empty the hash 
-   my %empty_hash;
-   $self->{LOOKUP} = \%empty_hash;
-
-   # loop over the existing header array
-   for ( my $i = 0; $i<scalar(@{$self->{HEADER}}); $i++) {
-
-      # grab the keyword from each header item;
-       
-      my $keyword = ${$self->{HEADER}}[$i]->keyword();
-            
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$keyword} &&
-               defined ${$self->{LOOKUP}}{$keyword} ) {
-         # new keyword
-         ${$self->{LOOKUP}}{$keyword} = [ $i ];
-      } else {     
-         # keyword exists, push the current index into the array
-         push( @{${$self->{LOOKUP}}{$keyword}}, $i );
-      }   
-   }
+   # rebuild the lookup table from the modified header
+   $self->_rebuild_lookup();
    
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
@@ -386,7 +325,8 @@ sub replacebyname{
    my ($self, $keyword, $item) = @_;
    
    # grab the index array from lookup table
-   my @index = @{${$self->{LOOKUP}}{$keyword}}
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
@@ -396,28 +336,8 @@ sub replacebyname{
       @cards = splice @{$self->{HEADER}}, $index[$i], 1, $item;
    }   
    
-   # rebuild the lookup table
-
-   # empty the hash 
-   my %empty_hash;
-   $self->{LOOKUP} = \%empty_hash;
-
-   # loop over the existing header array
-   for ( my $j = 0; $j<scalar(@{$self->{HEADER}}); $j++) {
-
-      # grab the keyword from each header item;
-      my $key = ${$self->{HEADER}}[$j]->keyword();
-            
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$key} &&
-               defined ${$self->{LOOKUP}}{$key} ) {
-         # new keyword
-         ${$self->{LOOKUP}}{$key} = [ $j ];
-      } else {     
-         # keyword exists, push the current index into the array
-         push( @{${$self->{LOOKUP}}{$key}}, $j );
-      }   
-   }
+   # rebuild the lookup table from the modified header
+   $self->_rebuild_lookup();
    
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
@@ -440,7 +360,8 @@ sub removebyname{
    my ($self, $keyword) = @_;
    
    # grab the index array from lookup table
-   my @index = @{${$self->{LOOKUP}}{$keyword}}
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
@@ -450,28 +371,8 @@ sub removebyname{
       @cards = splice @{$self->{HEADER}}, $index[$i], 1;
    }   
    
-   # rebuild the lookup table
-
-   # empty the hash 
-   my %empty_hash;
-   $self->{LOOKUP} = \%empty_hash;
-
-   # loop over the existing header array
-   for ( my $j = 0; $j<scalar(@{$self->{HEADER}}); $j++) {
-
-      # grab the keyword from each header item;
-      my $key = ${$self->{HEADER}}[$j]->keyword();
-            
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$key} &&
-               defined ${$self->{LOOKUP}}{$key} ) {
-         # new keyword
-         ${$self->{LOOKUP}}{$key} = [ $j ];
-      } else {     
-         # keyword exists, push the current index into the array
-         push( @{${$self->{LOOKUP}}{$key}}, $j );
-      }   
-   }
+   # rebuild the lookup table from the modified header
+   $self->_rebuild_lookup();
    
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
@@ -574,7 +475,56 @@ sub configure {
   
 }
 
+# P R I V A T  E   M E T H O D S ------------------------------------------
+
+=back
+
+=begin __PRIVATE_METHODS__
+
+=head2 Private methods
+
+These methods are for internal use only.
+
+=over 4
+
+=item B<_rebuild_lookup>
+
+Private function used to rebuild the lookup table after modifying the
+header block, its easier to do it this way than go through and add one
+to the indices of all header cards following the modifed card.
+
+=cut
+
+sub _rebuild_lookup {
+   my $self = shift;
+   
+   # rebuild the lookup table
+
+   # empty the hash 
+   $self->{LOOKUP} = { };
+
+   # loop over the existing header array
+   for ( my $j = 0; $j<scalar(@{$self->{HEADER}}); $j++) {
+
+      # grab the keyword from each header item;
+      my $key = ${$self->{HEADER}}[$j]->keyword();
+            
+      # need to account to repeated keywords (e.g. COMMENT)
+      unless ( exists ${$self->{LOOKUP}}{$key} &&
+               defined ${$self->{LOOKUP}}{$key} ) {
+         # new keyword
+         ${$self->{LOOKUP}}{$key} = [ $j ];
+      } else {     
+         # keyword exists, push the current index into the array
+         push( @{${$self->{LOOKUP}}{$key}}, $j );
+      }   
+   }
+
+}
+
 # T I M E   A T   T H E   B A R  --------------------------------------------
+
+=end __PRIVATE_METHODS__
 
 =back
 

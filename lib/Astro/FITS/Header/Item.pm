@@ -286,6 +286,8 @@ sub configure {
       my $method = lc($key);
       $self->$method( $hash{$key}) if exists $hash{$key};
     }
+    # End cards are special, need only do a Keyword => 'END' to configure
+    $self->type('END') if $self->keyword() eq 'END';
   }
 }
 
@@ -336,6 +338,7 @@ sub parse_card {
   if ($keyword eq 'END') {
     $self->comment(undef);
     $self->value(undef);
+    $self->type( "END" );
     $self->card( $card ); # store it after storing indiv components
     return("END", undef,undef);
   }
@@ -421,6 +424,7 @@ sub parse_card {
 	# Comment
 	$comment = substr($rest,$pos+1); # Extract post string
 	$comment =~ s/^\s+\///;  # Delete everything before the first slash
+	$comment =~ s/\///;  # In case there was no space before the slash
 
       } else {
 	# Never found the end so include all of it
@@ -535,13 +539,14 @@ sub _stringify {
   # Sort out the keyword. This always uses up the first 8 characters
   my $card = sprintf("%-8s", $keyword);
 
-  # Comments first
-  if ($type eq 'COMMENT') {
+  # End card and Comments first
+  if ($type eq 'END' ) {
+    $card = sprintf("%-10s%-70s", $card);
+   
+  } elsif ($type eq 'COMMENT') {
 
     # Comments are from character 11 - 80
     $card = sprintf("%-10s%-70s", $card, $comment);
-
-    print $card, "length = ", length($card),"\n";
 
   } else {
     # A real keyword/value so add the "= "
@@ -596,6 +601,10 @@ sub _stringify {
 
 	# chop to 65 characters
 	$value = substr($value,0, 65);
+        
+	# if the string has less than 8 characters pad it to put the
+	# closing quote at CHAR 20
+	$value = $value.(' 'x(8-length($value))) if length($value) < 8;
 	$value = "'$value'";
 
       } else {
@@ -612,7 +621,15 @@ sub _stringify {
 
     # Add the comment
     if (defined $comment && length($comment) > 0) {
-      $card .= $value . ' / ' . $comment;
+    
+      # while this isn't in the FITS standard most FITS files seem
+      # to agree that this is what should happen so we need to deal
+      # with it or we might end up truncating comment strings
+      if ( length($value) <= 20 ) {
+         $card .= $value . ' / ' . $comment;
+      } else {
+         $card .= $value . '/ ' . $comment;
+      }      
     } else {
       $card .= $value;
     }
@@ -642,7 +659,8 @@ it under the same terms as Perl itself.
 
 =head1 AUTHORS
 
-Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>
+Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>,
+Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>
 
 =cut
 
