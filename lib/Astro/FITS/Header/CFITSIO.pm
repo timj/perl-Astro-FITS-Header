@@ -194,18 +194,31 @@ sub writehdr {
     my ($numkeys, $morekeys);
     $ifits->get_hdrspace( $numkeys, $morekeys, $status);      
 
-    # write the cards, including END card
+    # delete keys
+    my @deleted_keys;
+    for my $i ( 1 .. $numkeys ) {
+       # grab the keyword
+       $ifits->read_keyn( $i, my $keyword, my $value, my $comment, $status);
+       # mark it for cleanup
+       push(@deleted_keys, $keyword); 
+    }
+    
+    # This is a kludge, for some reason you can't reliably delete
+    # cards by index using CFITSIO (reserved keywords?), but you 
+    # can by name, so we delete the entire header by name. Icky!
+    for  my $j ( 0 .. $#deleted_keys ) { 
+       # delete it if it doesn't exist
+       $ifits->delete_key($deleted_keys[$j], $status) ;
+    }
+
+    # write the new cards, not including END card
+    my @end_cards = $self->index('END'); 
     for my $j (0 .. $#cards ) {
-       $ifits->write_record($cards[$j], $status );
-       print "$j $status\n";
+       # write the card unless its the END card, 
+       # which we've kept from the old header
+       $ifits->write_record($cards[$j], $status ) unless $end_cards[0] == $j;
     } 
-    
-    # delete the old FITS keys
-    for my $i (1 .. $numkeys ) {
-       $ifits->delete_record( $i, $status );
-       print "$i $status\n";
-    }    
-    
+
   }
  
   # clean up
@@ -226,7 +239,7 @@ sub writehdr {
 =head1 NOTES
 
 This module requires Pete Ratzlaff's L<CFITSIO|CFITSIO> module, 
-and  William Pence's C<cfitsio> subroutine library.
+and  William Pence's C<cfitsio> subroutine library (v2.1 or greater).
 
 =head1 SEE ALSO
 

@@ -1,9 +1,11 @@
 Header.pm
 MANIFEST
 Makefile.PL
+ChangeLog
 t/parse.t
 t/ndf.t
 t/cfitsio.t
+t/cfitsio.fit
 t/tied.t
 NDF/NDF.pm
 NDF/Makefile.PL

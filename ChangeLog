@@ -1,3 +1,13 @@
+2001-03-29  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * CFITSIO/CFITSIO.pm: Implemented writehdr
+	
+	* t/cfitsio.t: Added test harness for new class
+
+2001-03-28  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * CFITSIO/CFITSIO.pm: Implemented configure
+	
 2001-03-27  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Header.pm: Added tied hash to header class
@@ -6,7 +16,7 @@
 
 2001-03-24  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Skeleton structre for CFITSIO module added
+        * CFITSIO/CFITSIO.pm: Skeleton structre for CFITSIO module added
  	
         * t/parse.t: Rewrote test harness for Header
 	
@@ -38,9 +48,9 @@
 
 2001-03-15  Alasdair Allan <aa@astro.ex.ac.uk>
 
-       * t/parse.t: Rewrote test harness
+        * t/parse.t: Rewrote test harness
 
-       * Item/Item.pm: Added some work arounds for common non-standard entries
+        * Item/Item.pm: Added some work arounds for common non-standard entries
 
 2001-03-12  Tim Jenness  <timj@jach.hawaii.edu>
 
