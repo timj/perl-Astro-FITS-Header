@@ -2,6 +2,7 @@
 # Testing GSD read of fits headers
 
 use strict;
+use File::Spec;
 
 use Test;
 BEGIN { plan tests => 3 };
@@ -17,7 +18,11 @@ if ($@) {
 ok(1);
 
 # Read-only
+# Try to work out whether the file is in the t directory or the parent
 my $gsdfile = "test.gsd";
+
+$gsdfile = File::Spec->catfile("t","test.gsd")
+  unless -e $gsdfile;
 
 my $hdr = new Astro::FITS::Header::GSD( File => $gsdfile );
 ok( $hdr );
