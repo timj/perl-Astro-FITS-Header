@@ -21,7 +21,5 @@ t/parse.t
 t/tied.t
 t/test.gsd
 t/gsd.t
+t/subhdr.t
 TODO
-
-
-

@@ -1,3 +1,11 @@
+2002-12-04  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Item/Item.pm: Sub-headers can now be stored with
+	Astro::FITS::Header objects, using type HEADER
+
+	* Header.pm (STORE): Allow an Astro::FITS::Header object to be
+	stored through the tied interface.
+
 2002-12-03  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (insert{): Fix problem with tied hash when

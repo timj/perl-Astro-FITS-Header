@@ -778,13 +778,16 @@ sub FETCH {
 
 sub STORE {
   my ($self, $keyword, $value) = @_;
-    my @values;
+  my @values;
 
   # skip the shenanigans for the normal case
-  if( (ref $value) || (length $value > 70) || $value =~ m/\n/s ) {
+  # or if we have an Astro::FITS::Header
+  if (UNIVERSAL::isa($value, "Astro::FITS::Header")) {
+    @values = ($value);
+  } elsif((ref $value) || (length $value > 70) || $value =~ m/\n/s ) {
     my @val;
     # @val gets intermediate breakdowns, @values gets line-by-line breakdowns.
-    
+
     # Change multiline strings into array refs
     if (ref $value eq 'ARRAY') {
       @val = @$value;
@@ -799,7 +802,7 @@ sub STORE {
     } else {
       @val = $value;
     }
-    
+
     # Cut up really long items into multiline strings
     my($val);
     foreach $val(@val) {
@@ -811,12 +814,12 @@ sub STORE {
     }
   }   ## End of complicated case
   else {
-    @values = $value;
+    @values = ($value);
   }
-    
+
   $keyword = uc($keyword);
   my @items = $self->itembyname($keyword);
-  
+
   ## Remove extra items if necessary
   if(scalar(@items) > scalar(@values)) {
     my(@indices) = $self->index($keyword);
@@ -825,7 +828,7 @@ sub STORE {
       $self->remove( $indices[-$i] );
     }
   }
-  
+
   ## Allocate items if necessary
   while(scalar(@items) < scalar(@values)) {
 
@@ -838,7 +841,7 @@ sub STORE {
     $self->insert(-1,$item);
     push(@items,$item);
   }
-  
+
   ## Set values or comments
   my($i); 
   for $i(0..$#values) {
@@ -852,7 +855,7 @@ sub STORE {
       $items[$i]->type("STRING") if($#values > 0);
     }
   }
-}  
+}
 
 
 # reports whether a key is present in the hash

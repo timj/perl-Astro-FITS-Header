@@ -124,13 +124,25 @@ the FITS card.
 
 When a new value is supplied any C<card> in the cache is invalidated.
 
+If the value is an C<Astro::FITS::Header> object, the type is automatically
+set to "HEADER".
+
 =cut
 
 sub value {
   my $self = shift;
-  if (@_) { 
-    $self->{Value} = shift;
+  if (@_) {
+    my $value = shift;
+    $self->{Value} = $value;
     $self->{Card} = undef;
+
+    if (UNIVERSAL::isa($value,"Astro::FITS::Header" )) {
+      $self->type( "HEADER" );
+    } elsif ($self->type eq 'HEADER') {
+      # HEADER is only valid if we really are a HEADER
+      $self->type(undef);
+    }
+
   }
   return $self->{Value};
 }
@@ -166,7 +178,11 @@ the FITS card.
   $item->type( "INT" );
 
 Allowed types are "LOGICAL", "INT", "FLOAT", "STRING", "COMMENT"
-and "UNDEF"
+and "UNDEF".
+
+A special type, "HEADER", is used to specify that this item refers
+to a subsidiary header (eg a header in an MEFITS file or a header
+in an NDF in an HDS container).
 
 =cut
 
@@ -547,6 +563,11 @@ The object state is not updated by this routine.
 
 This routine is only called if the card cache has been cleared.
 
+If this item points to a sub-header the stringification returns
+a comment indicating that we have a sub header. In the future
+this behaviour may change (either to return nothing, or
+to return the stringified header itself).
+
 =cut
 
 sub _stringify {
@@ -557,6 +578,12 @@ sub _stringify {
   my $value = $self->value;
   my $comment = $self->comment;
   my $type = $self->type;
+
+  # Special case for HEADER type
+  if ($type eq 'HEADER') {
+    $type = "COMMENT";
+    $comment = "Contains a subsidiary header";
+  }
 
   # Sort out the keyword. This always uses up the first 8 characters
   my $card = sprintf("%-8s", $keyword);
@@ -632,7 +659,7 @@ sub _stringify {
 
 	# chop to 65 characters
 	$value = substr($value,0, 65);
-        
+
 	# if the string has less than 8 characters pad it to put the
 	# closing quote at CHAR 20
 	if (length($value) < 8 ) {
