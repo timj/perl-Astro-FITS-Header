@@ -39,8 +39,7 @@ use overload (
 use vars qw/ $VERSION /;
 use Carp;
 
-$VERSION = '0.01';
-
+'$Revision$ ' =~ /.*:\s(.*)\s\$/ && ($VERSION = $1);
 
 =head1 METHODS
 
@@ -671,3 +670,5 @@ Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>
 
 =cut
 
+#     $Id$
+1;
