@@ -19,6 +19,7 @@ package Astro::FITS::Header;
 
 #  Authors:
 #    Alasdair Allan (aa@astro.ex.ac.uk)
+#    Tim Jenness (t.jenness@jach.hawaii.edu)
 
 #  Revision:
 #     $Id$
@@ -426,30 +427,18 @@ sub configure {
 
   if (defined $args{Cards}) {
 
-    my @array = @{$args{Cards}};
+    # First translate each incoming card into a Item object
+    # Any existing cards are removed
+    @{$self->{HEADER}} = map {
+      new Astro::FITS::Header::Item( Card => $_ );
+    } @{ $args{Cards} };
 
-    # loop over the passed array
-    for ( my $i = 0; $i<scalar(@array); $i++) {
+    # Now build the lookup table. There would be a slight efficiency
+    # gain to include this in a loop over the cards but prefer
+    # to reuse the method for this rather than repeating code
+    $self->_rebuild_lookup;
 
-      # build array of Header::Items
-      my $item = new Astro::FITS::Header::Item( Card => $array[$i] );
-      push (@{$self->{HEADER}}, $item);
-
-      # build the lookup table 
-      my $keyword = $item->keyword();
-     
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$keyword} &&
-	defined ${$self->{LOOKUP}}{$keyword} ) {
-        # new keyword
-        ${$self->{LOOKUP}}{$keyword} = [ $i ];
-      } else {     
-        # keyword exists, push the current index into the array
-        push( @{${$self->{LOOKUP}}{$keyword}}, $i );
-      }
-    }
   }
-  
 }
 
 =item B<cards>
@@ -497,7 +486,7 @@ sub _rebuild_lookup {
    $self->{LOOKUP} = { };
 
    # loop over the existing header array
-   for ( my $j = 0; $j<scalar(@{$self->{HEADER}}); $j++) {
+   for my $j (0 .. $#{$self->{HEADER}}) {
 
       # grab the keyword from each header item;
       my $key = ${$self->{HEADER}}[$j]->keyword();
