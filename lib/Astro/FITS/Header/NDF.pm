@@ -9,6 +9,7 @@ Astro::FITS::Header::NDF - Manipulate FITS headers from NDF files
   use Astro::FITS::Header::NDF;
 
   $hdr = new Astro::FITS::Header::NDF( Cards => \@cards );
+  $hdr = new Astro::FITS::Header::NDF( Items => \@items );
   $hdr = new Astro::FITS::Header::NDF( ndfID => $indf );
   $hdr = new Astro::FITS::Header::NDF( File => $file );
 
@@ -18,9 +19,12 @@ Astro::FITS::Header::NDF - Manipulate FITS headers from NDF files
 =head1 DESCRIPTION
 
 This module makes use of the Starlink L<NDF|NDF> module to read and write to
-and NDF FITS extension or to a C<.HEADER> block in an HDS container file.
+an NDF FITS extension or to a C<.HEADER> block in an HDS container file.
 
-It stores information about a FITS header block in an object. Takes an hash as an arguement, with either an array reference pointing to an array of FITS header cards, or a filename, or (alternatively) and NDF identifier.
+It stores information about a FITS header block in an object. Takes an
+hash as an argument, with either an array reference pointing to an
+array of FITS header cards, array of C<Astro::FITS::Header::Item>
+objects, or a filename, or (alternatively) an NDF identifier.
 
 =cut
 
@@ -46,11 +50,12 @@ Reads a FITS header from an NDF.
   $hdr->configure( ndfID => $indf );
   $hdr->configure( File => $filename );
 
-Accepts an NDF identifier or a filename. If both ndfID and File keys
-exist, ndfID key takes priority.
+Accepts an NDF identifier or a filename. If both C<ndfID> and C<File> keys
+exist, C<ndfID> key takes priority.
 
-If the file open does not work, a second attempt is made with
-".HEADER" appended in case this was a UKIRT-style HDS container.
+If the file is actually an HDS container, an attempt will be made
+to read a ".HEADER" NDF inside that container (this is the standard
+layout of UKIRT (and some JCMT) data files.
 
 =cut
 
@@ -199,15 +204,15 @@ sub configure {
 
 =item B<writehdr>
 
-Write a fits header to an NDF.
+Write a FITS header to an NDF.
 
   $hdr->writehdr( ndfID => $indf );
   $hdr->writehdr( File => $file );
 
-Accepts an NDF identifier or a filename.  If both ndfID and File keys
-exist, ndfID key takes priority.
+Accepts an NDF identifier or a filename.  If both C<ndfID> and C<File> keys
+exist, C<ndfID> key takes priority.
 
-Returns undef on error, true if the header was written successfully.
+Returns C<undef> on error, true if the header was written successfully.
 
 =cut
 

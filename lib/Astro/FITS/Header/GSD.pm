@@ -44,11 +44,12 @@ $VERSION = '0.01';
 Reads a header from a GSD file.
 
   $hdr->configure( Cards => \@cards );
+  $hdr->configure( Items => \@items );
   $hdr->configure( gsdobj => $gsd );
   $hdr->configure( File => $filename );
 
-Accepts a GSD object or a filename. If both gsdobj and File keys
-exist, gsdobj key takes priority.
+Accepts a GSD object or a filename. If both C<gsdobj> and C<File> keys
+exist, C<gsdobj> key takes priority.
 
 =cut
 
@@ -137,7 +138,11 @@ for this sub-class.";
 
 =head1 NOTES
 
-This module requires the Starlink L<NDF|NDF> module.
+This module requires the Starlink L<GSD|GSD> module.
+
+GSD supports keys that are longer than the 8 characters allowed as
+part of the FITS standard. GSD keys are truncated to 8 characters
+by this module.
 
 =head1 SEE ALSO
 
