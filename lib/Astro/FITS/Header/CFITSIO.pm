@@ -102,8 +102,9 @@ sub configure {
   my $status = 0;
   my $ifits;
 
-  return $self->SUPER::configure(%args) if exists $args{Cards};
-  
+  return $self->SUPER::configure(%args) 
+    if exists $args{Cards} or exists $args{Items};
+
   # read the args hash
   if (exists $args{fitsID}) {
      $ifits = $args{fitsID};
@@ -251,7 +252,7 @@ Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify

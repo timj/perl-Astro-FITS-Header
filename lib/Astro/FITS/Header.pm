@@ -470,9 +470,9 @@ sub cards {
   my $self = shift;
   return map { "$_" } @{$self->{HEADER}};
 }
-   
-# A L L I T E M S ---------------------------------------------------------   
- 
+
+# A L L I T E M S ---------------------------------------------------------
+
 =item B<allitems>
 
 Returns the header as an array of FITS::Header:Item objects.
@@ -484,8 +484,8 @@ Returns the header as an array of FITS::Header:Item objects.
 sub allitems {
    my $self = shift;
    return map { $_ } @{$self->{HEADER}};
-} 
-   
+}
+
 # C O N F I G U R E -------------------------------------------------------
 
 =back
@@ -496,9 +496,11 @@ sub allitems {
 
 =item B<configure>
 
-Configures the object, takes an array of FITS header cards as input.
+Configures the object, takes an array of FITS header cards 
+or an array of Astro::FITS::Header::Item objects as input.
 
   $header->configure( Cards => \@array );
+  $header->configure( Items => \@array );
 
 Does nothing if the array is not supplied.
 
@@ -513,7 +515,7 @@ sub configure {
   # grab the argument list
   my %args = @_;
 
-  if (defined $args{Cards}) {
+  if (exists $args{Cards} && defined $args{Cards}) {
 
     # First translate each incoming card into a Item object
     # Any existing cards are removed
@@ -526,6 +528,10 @@ sub configure {
     # to reuse the method for this rather than repeating code
     $self->_rebuild_lookup;
 
+  } elsif (exists $args{Items} && defined $args{Items}){
+    # We have an array of Astro::FITS::Header::Items
+    @{$self->{HEADER}} = @{ $args{Items} };
+    $self->_rebuild_lookup;
   }
 }
 

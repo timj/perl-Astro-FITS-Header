@@ -62,7 +62,8 @@ sub configure {
   my ($indf, $started);
   my $task = ref($self);
 
-  return $self->SUPER::configure(%args) if exists $args{Cards};
+  return $self->SUPER::configure(%args) 
+    if exists $args{Cards} or exists $args{Items};
 
   # Store the definition of good locally
   my $status = &NDF::SAI__OK;
