@@ -19,7 +19,7 @@ ok(1);
 
 
 my $file = "temp$$";
-#END { unlink $file . ".sdf" };
+END { unlink $file . ".sdf" };
 
 # Create an NDF file
 my $status = &NDF::SAI__OK;
