@@ -285,13 +285,19 @@ sub writehdr {
       # dont want to contaminate existing status
       my $lstat = $good;
       my $hdsfile = $file . ".HEADER";
+      my $useheader;
       err_mark();
       ndf_open(&NDF::DAT__ROOT(), $hdsfile, 'UPDATE', 'UNKNOWN',
 	       $ndfid, $place, $lstat);
+      if ($lstat != $good) {
+	err_annul( $lstat );
+      } else {
+	$useheader = 1;
+      }
       err_rlse();
 
-      # flush bad status if we succeeded
-      err_annul($status) if $lstat == $good;
+      # flush bad global status if we succeeded
+      err_annul($status) if $useheader;
 
     }
 
