@@ -611,7 +611,9 @@ sub _stringify {
         
 	# if the string has less than 8 characters pad it to put the
 	# closing quote at CHAR 20
-	$value = $value.(' 'x(8-length($value))) if length($value) < 8;
+	if (length($value) < 8 ) {
+	   $value = $value.(' 'x(8-length($value))) unless length($value) == 0;
+	}  
 	$value = "'$value'";
 
       } else {
