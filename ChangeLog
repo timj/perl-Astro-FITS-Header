@@ -1,3 +1,11 @@
+2001-06-26  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Header.pm: Fixed bug in removebyname() method
+
+2001-06-18  Alasdair Allan <aa@astro.ex.ac.uk>
+        
+        * Header.pm: Added allitems() method	
+
 2001-03-30  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Packaged for CPAN distribution, included README and GPL files
