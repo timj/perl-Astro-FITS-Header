@@ -9,7 +9,7 @@ BEGIN { plan tests => 193 };
 #eval "use Astro::FITS::Header::NDF; use NDF;";
 use Astro::FITS::Header::NDF; use NDF;
 if ($@) {
-  for (1..5) {
+  for (1..193) {
     skip("Skip NDF module not available", 1);
   }
   exit;
