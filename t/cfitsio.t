@@ -10,7 +10,7 @@ BEGIN { plan tests => 41 };
 
 eval "use Astro::FITS::Header::CFITSIO; use CFITSIO qw / :longnames /; use CFITSIO qw/ :constants /;";
 if ($@) {
-  for (1..193) {
+  for (1..41) {
     skip("Skip CFITSIO module not available", 1);
   }
   exit;
