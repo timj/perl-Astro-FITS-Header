@@ -1,0 +1,6 @@
+
+- Add ability for units to be extracted from item comments
+
+- Read HISTORY from NDF and merge it into FITS header
+
+- Provide option to extract WCS from FITS header and store it in AST object
