@@ -169,8 +169,8 @@ ok($header->keyword(0),undef);
 my %keywords2;
 my $header2 = new Astro::FITS::Header( Cards => \@raw );
 tie %keywords2, "Astro::FITS::Header", $header2, tiereturnsref => 1;
-my $value = $keywords2{COMMENT};
-ok(ref $value, "ARRAY");
+my $value2 = $keywords2{COMMENT};
+ok(ref $value2, "ARRAY");
 
 
 exit;
