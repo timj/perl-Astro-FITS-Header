@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile( 
                'NAME'           => 'Astro::FITS::Header',
-	       'VERSION_FROM'   => 'Header.pm',
+	       'VERSION'        => '1.10.1',
                'PREREQ_PM'      => {  },
 	       'dist'           => { COMPRESS => "gzip -9f"},
 	       ($] >= 5.005 ?    ## Add these new keywords supported since 5.005

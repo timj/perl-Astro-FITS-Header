@@ -15,17 +15,20 @@ package Astro::FITS::Header;
 #  Description:
 #    This module wraps a FITS header block as a perl object as a hash
 #    containing an array of FITS::Header::Items and a lookup hash for
-#    the keywords.
+#    the keywords.  May be tied to a single hash for convenience.
 
 #  Authors:
 #    Alasdair Allan (aa@astro.ex.ac.uk)
 #    Tim Jenness (t.jenness@jach.hawaii.edu)
+#    Craig DeForest (deforest@boulder.swri.edu)
 
 #  Revision:
 #     $Id$
+     
 
 #  Copyright:
-#     Copyright (C) 2001 Particle Physics and Astronomy Research Council. 
+#     Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council. 
+#     Portions copyright (C) 2002 Southwest Research Institute
 #     All Rights Reserved.
 
 #-
@@ -149,13 +152,10 @@ sub keyword {
 =item B<itembyname>
 
 Returns an array of Header::Items for the requested keyword if called
-in list context, or an empty array if it does not exist.
+in list context, or the first matching Header::Item if called in scalar
+context. Returns C<undef> if the keyword does not exist.
 
    @items = $header->itembyname($keyword);
-
-If called in scalar context it returns the first item in the array, or
-C<undef> if the keyword does not exist.
-
    $item = $header->itembyname($keyword);
 
 
@@ -166,12 +166,15 @@ sub itembyname {
    my ( $self, $keyword ) = @_;
             
    # resolve the items from the index array from lookup table
-   my @items =
-     map { ${$self->{HEADER}}[$_] } @{${$self->{LOOKUP}}{$keyword}}
+   # grab the index array from the lookup table
+   my @index;
+   @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
+   my @items = map {${$self->{HEADER}}[$_]} @index;
    
    return wantarray ?  @items : @items ? $items[0] : undef;
+   
 }
 
 # I N D E X   --------------------------------------------------------------
@@ -392,8 +395,6 @@ sub removebyname{
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
-   print "\@index = @index\n\n";
-   
    # loop over the keywords
    my @cards = map { splice @{$self->{HEADER}}, $_, 1; } @index;
 
@@ -542,8 +543,6 @@ sub freeze {
 
 =back
 
-=begin __PRIVATE_METHODS__
-
 =head2 Private methods
 
 These methods are for internal use only.
@@ -591,7 +590,7 @@ sub _rebuild_lookup {
 
 =head1 TIED INTERFACE
 
-The C<FITS::Header> object can also be tied to a hash
+The C<FITS::Header> object can also be tied to a hash: 
 
    use Astro::FITS::Header;
 
@@ -607,15 +606,96 @@ The C<FITS::Header> object can also be tied to a hash
       print "$key = $hash{$key}\n";
    }
 
-It should be noted that if querying a value using the tied interface and the
-keyword appears multiple times in the FITS HDU, then only the first occurance
-will be returned. Similiarly for storing a value, only the first occurance will
-be modified.
+=head2 Basic hash translation
+
+Header value type is determined on-the-fly by parsing of the input values.
+Anything that parses as a number or a logical is converted to that before
+being put in a card (but see below).
+
+There's no way to access the per-card comment fields using the tied interface.
+
+Keywords are CaSE-inNSEnSiTIvE, unlike normal hash keywords.  All
+keywords are translated to upper case internally, per the FITS standard.
+
+=head2 Comment cards
+
+Comment cards are a special case because they have no normal value and
+their comment field is treated as the hash value.  The keywords
+"COMMENT" and "HISTORY" are magic and refer to comment cards; all other
+keywords create normal valued cards.  If you don't like that behavior,
+don't use the tied interface.
+
+=head2 Multi-card values
+
+Multiline string values are broken up, one card per line in the
+string.  Extra-long string values are handled gracefully: they get
+split among multiple cards, with a backslash at the end of each card
+image.  They're transparently reassembled when you access the data, so
+that there is a strong analogy between multiline string values and multiple
+cards.  
+
+In general, appending to hash entries that look like strings does what
+you think it should.  In particular, comment cards have a newline
+appended automatically on FETCH, so that
+
+  $hash{HISTORY} .= "Added multi-line string support";
+
+adds a new HISTORY comment card, while
+  
+  $hash{TELESCOP} .= " dome B";
+
+only modifies an existing TELESCOP card.
+
+You can make multi-line values by feeding in newline-delimited
+strings, or by assigning from an array ref.  If you ask for a tag that
+has a multiline value it's always expanded to a multiline string, even
+if you fed in an array ref to start with.  That's by design: multiline
+string expansion often acts as though you are getting just the first
+value back out, because perl string-to-number conversion stops at the
+first newline.  So:
+
+  $hash{CDELT1} = [3,4,5];
+  print $hash{CDELT1} + 99,"\n$hash{CDELT1}";
+
+prints "102\n3\n4\n5", and then 
+
+  $hash{CDELT1}++;
+  print $hash{CDELT1};
+
+prints "4".
+
+In short, most of the time you get what you want.  But you can always fall
+back on the non-tied interface by calling methods like so:
+
+  ((tied $hash)->method())
+
+=head2 Type forcing
+
+Because perl uses behind-the-scenes typing, there is an ambiguity
+between strings and numeric and/or logical values: sometimes you want
+to create a STRING card whose value could parse as a number or as a
+logical value, and perl kindly parses it into a number for you.  To
+force string evaluation, feed in a trivial hash array:
+
+  $hash{NUMSTR} = 123;     # generates an INT card containing 123.
+  $hash{NUMSTR} = '123';   # generates an INT card containing 123.
+  $hash{NUMSTR} = ['123']; # generates a STRING card containing '123'.
+  $hash{NUMSTR} = [123];   # generates a STRING card containing '123'.
+
+  $hash{ALPHA} = 'T';      # generates a LOGICAL card containing T. 
+  $hash{ALPHA} = ['T'];    # generates a STRING card containing 'T'.
 
 Calls to keys() or each() will, by default, return the keywords in the order 
-in which they appear in the header.
+n which they appear in the header.
 
 =cut
+
+# List of known comment-type fields
+%Astro::FITS::Header::COMMENT_FIELD = (
+  "COMMENT"=>1,
+  "HISTORY"=>1
+);
+
 
 # constructor
 sub TIEHASH {
@@ -624,25 +704,120 @@ sub TIEHASH {
 }
 
 # fetch key and value pair
+
 sub FETCH {
   my ($self, $key) = @_;
-  scalar $self->value($key);
+  
+  $key = uc($key);
+  my $item = ($self->itembyname($key))[0];
+  
+  my @values = ((defined $item) && (defined $item->type) && ($item->type eq 'COMMENT')) ?
+      $self->comment($key) :
+	  $self->value($key);
+  
+  my $out;
+  if($#values <= 0) {
+      $out = $values[0];
+  } else {
+      $out = join("\n",@values);
+      $out =~ s/\\\n//gs if (defined($out));
+  }
+  $out .= "\n" if((defined $item) && (defined $item->type) && ($item->type =~ m/^(COMMENT)$/s));
+  return $out;
+  
 }
 
 # store key and value pair
+#
+# Multiple-line kludges (CED):
+#
+#    * Array refs get handled gracefully by being put in as multiple cards.
+#
+#    * Multiline strings get broken up and put in as multiple cards.
+#
+#    * Extra-long strings get broken up and put in as multiple cards, with 
+#      an extra backslash at the end so that they transparently get put back
+#      together upon retrieval.
+#
+
 sub STORE {
   my ($self, $keyword, $value) = @_;
-  
-  my $item = $self->itembyname($keyword);
-  if (  defined $item ) {
-     $item->value($value);
-  } else {
-     $item = new Astro::FITS::Header::Item( Keyword => $keyword,
-                                            Value => $value );
-     $self->insert(-1,$item);
-  }
+    my @values;
 
-}
+  # skip the shenanigans for the normal case
+  if( (ref $value) || (length $value > 70) || $value =~ m/\n/s ) {
+    my @val;
+    # @val gets intermediate breakdowns, @values gets line-by-line breakdowns.
+    
+    # Change multiline strings into array refs
+    if (ref $value eq 'ARRAY') {
+      @val = @$value;
+
+    } elsif (ref $value) {
+      die "Can't put non-array ref values into a tied FITS header\n";
+
+    } elsif( $value =~ m/\n/s ) {
+      @val = split("\n",$value);
+      chomp @val;
+
+    } else {
+      @val = $value;
+    }
+    
+    # Cut up really long items into multiline strings
+    my($val);
+    foreach $val(@val) {
+      while((length $val) > 70) {
+	push(@values,substr($val,0,69)."\\");
+	$val = substr($val,69);
+      }
+      push(@values,$val);
+    }
+  }   ## End of complicated case
+  else {
+    @values = $value;
+  }
+    
+  $keyword = uc($keyword);
+  my @items = $self->itembyname($keyword);
+  
+  ## Remove extra items if necessary
+  if(scalar(@items) > scalar(@values)) {
+    my(@indices) = $self->index($keyword);
+    my($i);
+    for $i (1..(scalar(@items) - scalar(@values))) {
+      $self->remove( $indices[-$i] );
+    }
+  }
+  
+  ## Allocate items if necessary
+  while(scalar(@items) < scalar(@values)) {
+
+    my $item = new Astro::FITS::Header::Item(Keyword=>$keyword,Value=>undef);
+    $item->type('COMMENT') if($Astro::FITS::Header::COMMENT_FIELD{$keyword}
+			      || ((defined $items[0]) && 
+				  (defined $items[0]->type) &&
+				  ($items[0]->type eq 'COMMENT')));
+
+    $self->insert(-1,$item);
+    push(@items,$item);
+  }
+  
+  ## Set values or comments
+  my($i); 
+  for $i(0..$#values) {
+    if($Astro::FITS::Header::COMMENT_FIELD{$keyword}) {
+      $items[$i]->type('COMMENT');
+      $items[$i]->comment($values[$i]);
+    } else {
+      $items[$i]->type( (($#values > 0) || ref $value) ? 'STRING' : undef);
+
+      $items[$i]->value($values[$i]);
+      $items[$i]->type("STRING") if($#values > 0);
+    }
+  }
+}  
+
 
 # reports whether a key is present in the hash
 sub EXISTS {
@@ -662,12 +837,14 @@ sub CLEAR {
   $self->{HEADER} = [ ];
   $self->{LOOKUP} = { };
   $self->{LASTKEY} = undef;
+  $self->{SEENKEY} = undef;
 }
 
 # implements keys() and each()
 sub FIRSTKEY {
   my $self = shift;
   $self->{LASTKEY} = 0;
+  $self->{SEENKEY} = {};
   return undef unless defined @{$self->{HEADER}};
   return ${$self->{HEADER}}[0]->keyword();
 }
@@ -676,8 +853,18 @@ sub FIRSTKEY {
 sub NEXTKEY {
   my ($self, $keyword) = @_; 
   return undef if $self->{LASTKEY}+1 == scalar(@{$self->{HEADER}}) ;
-  $self->{LASTKEY} += 1;  
-  return ${$self->{HEADER}}[$self->{LASTKEY}]->keyword();
+
+  # Skip later lines of multi-line cards...
+  my($a);
+  do {
+    $self->{LASTKEY} += 1;  
+    $a = $self->{HEADER}->[$self->{LASTKEY}];
+    return undef unless defined $a;
+  } while ( $self->{SEENKEY}->{$a->keyword});
+  $a = $a->keyword;
+
+  $self->{SEENKEY}->{$a} = 1;
+  return $a;
 }
 
 # garbage collection
@@ -685,13 +872,10 @@ sub NEXTKEY {
 
 # T I M E   A T   T H E   B A R  --------------------------------------------
 
-=back
-
-=end __PRIVATE_METHODS__
-
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council
+and portions Copyright (C) 2002 Southwest Research Institute.
 All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify
@@ -700,7 +884,8 @@ it under the same terms as Perl itself.
 =head1 AUTHORS
 
 Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
-Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>
+Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>,
+Craig DeForest E<lt>deforest@boulder.swri.eduE<gt>
 
 =cut
 

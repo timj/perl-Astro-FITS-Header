@@ -65,8 +65,12 @@ University of Exeter Astrophysics Group (http://www.astro.ex.ac.uk/) as part
 of his work for the Starlink Project (http://www-star.rl.ac.uk/), and Tim
 Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC) in Hawaii.
 
-The latest version of the module includes patches supplied by Diab Jerius
+This version of the module includes patches supplied by Diab Jerius
 <dj@head-cfa.harvard.edu> of the Harvard-Smithsonian Center for Astrophysics. 
+
+The tied interface has been updated for version 2.x by Craig DeForest
+<zowie@euterpe.boulder.swri.edu> of the Department of Space Studies, Southwest
+Research Institute.
 
 Maintainer
 ----------

@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 153 };
+BEGIN { plan tests => 152 };
 
 # load modules
 use Astro::FITS::Header;
@@ -49,6 +49,22 @@ my $another_card = new Astro::FITS::Header::Item(
 		               Value   => 34.5678,
 			       Comment => 'A floating point number',
 			       Type    => 'FLOAT' );
+
+# and one that contains embedded quotes
+my $quote_card = new Astro::FITS::Header::Item(
+				Keyword=>'STRSTR',
+				Value => "She said 'Foo!' (\"really?\")",
+				Comment=> "It was 'foobar'.",
+				Type   => 'STRING');
+
+# Check quoting
+my $qcstr = $quote_card->card;
+my $qtstr1 = "STRSTR  = 'She said ''Foo!'' (\"really?\")'";
+my $qtstr2 = "/ It was 'foobar'.";
+
+ok(substr($qcstr,0,length($qtstr1)) eq $qtstr1);
+ok(substr($qcstr,index($qcstr,'/',length($qtstr1)),length($qtstr2)) eq $qtstr2);
+
 # insert	
 $header->insert(1, $int_card);
 
@@ -56,15 +72,13 @@ $header->insert(1, $int_card);
 my @test_value = $header->value('LIFE');
 ok($test_value[0], 42);
 
-my $test_value = $header->value('LIFE');
-ok($test_value[0], $test_value);
-
 # itembyname
 my @itembyname = $header->itembyname('LIFE');
 ok("$int_card","$itembyname[0]");
 
-my $itembyname = $header->itembyname('LIFE');
-ok("$int_card","$itembyname");
+# item
+my @item = $header->item(1);
+ok("$int_card","$itembyname[0]");
 
 # splice
 my @cards = $header->splice( 0, 6, $string_card);	
@@ -91,18 +105,12 @@ for my $k (0 .. $#index ) {
   ok( $index[$k], $actual[$k] );
 }
 
-my $index = $header->index('COMMENT');
-ok( $index, $actual[0] );
-
 # insert	
 $header->insert(5, $string_card);
 
 # comment
 my @comment = $header->comment('STUFF');
-ok( $comment[0], "So long and thanks for all the fish");
-
-my $comment = $header->comment('STUFF');
-ok( $comment, $comment[0] );
+ok( "$comment[0]", "So long and thanks for all the fish");
 
 # replacebyname
 my $replacebyname = $header->replacebyname('STUFF', $int_card);

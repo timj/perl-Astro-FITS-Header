@@ -1,3 +1,36 @@
+2002-06-10  Alasdair Allan <aa@astro.ex.ac.uk> 
+
+        * Minor documentation changes, integrated patches into the main
+          CVS tree, released as v2.1. The major change from v1.x is a
+          much improved tied interface, see the POD for details.
+
+2002-05-14   Craig DeForest <deforest@boulder.swri.edu>
+
+        * Header.pm: Fix to typecasting of string in tied interface 
+
+        * t/parse.t: Added single-quote case
+
+2002-05-10   Craig DeForest <deforest.@boulder.swri.edu>
+ 
+        * Header.pm: Minor bug fix for FETCH of undefined tag values 
+          (used to return ''; now returns undef)
+
+        * Header.pm: FETCH and STORE convert tags to ALL UPPERCASE
+          per the FITS standard.
+
+        * Header.pm: undefine the type of newly-assigned cards in the 
+          tied-hash code, so that the autotyper can figure it out.
+
+        * Header.pm: Hash-ref passing now forces string interpretation
+         
+2002-05-09   Craig DeForest <deforest@boulder.swri.edu>
+
+        * Header.pm: Added multiline support to the tied interface, using
+          multiline string return -- which should preserve 0th-element 
+          functionality in arithmetic expressions, as expected by legacy code.
+
+        * t/tied.t: added multline tests.
+
 2002-03-29   Alasdair Allan <aa@astro.ex.ac.uk> 
 
         * Header.pm: Added freeze() function
@@ -7,7 +40,7 @@
 2001-10-16   Diab Jerius  <dj@head-cfa.harvard.edu>
 
 	* Header.pm: itembyname(), index(), value(), and comment() now
-	return a single element when called in scalar context.
+	  return a single element when called in scalar context.
 
 	* t/parse.t: test new behavior of above routines in scalar environment
 	

@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 256 };
+BEGIN { plan tests => 258 };
 
 # load modules
 use Astro::FITS::Header;
@@ -40,8 +40,54 @@ ok( "$values[0]", "JCMT, Mauna Kea, HI");
 $keywords{"LIFE"} = 42;
 my @end = $header->index('END');
 my @test = $header->index('LIFE');
+
 ok($end[0],123);
 ok($test[0],122);
+
+##########
+# Multiline comments
+#
+my $s = "Comment line 1\nComment line 2\nComment line 3";
+
+# Store multiline comment
+$keywords{"COMMENT"} = $s;
+
+# It doesn't make any values
+@values = $header->value("COMMENT");
+ok( !( (defined $values[0]) || (defined $values[1]) || (defined $values[2])));
+
+# The comments come out correctly in the comment method
+my @comments = $header->comment("COMMENT");
+my @s = split("\n",$s);
+chomp @s;
+ok( $comments[0] eq $s[0] && $comments[1] eq $s[1] && $comments[2] eq $s[2] );
+
+# The comments come out correctly in the tied method
+ok( $s."\n" eq $keywords{"COMMENT"} );
+
+##########
+# Multiline values
+$s = "0\n1\n2";
+my $sr = [0,1,2];
+
+# Assigning with array ref yields correct string
+$keywords{"TESTVAL"} = $sr;
+ok( $keywords{"TESTVAL"} eq $s );
+
+# ... and also gives the correct values
+my(@vals) = $header->value("TESTVAL");
+ok($vals[0] == 0 && $vals[1] == 1 && $vals[2] == 2);
+
+# ... and also acts correctly in arithmetic expressions
+{ no warnings;
+  ok( $keywords{"TESTVAL"} + 1  == 1 );
+}
+
+# ... and also truncates OK
+$keywords{"TESTVAL"}++;
+ok($keywords{"TESTVAL"} == 1);
+
+##############################
 
 # delete
 delete $keywords{"LIFE"};
@@ -55,15 +101,26 @@ ok(!exists $keywords{"LIFE"});
 
 # firstkey, nextkey
 my $line = 0;
-foreach my $key (keys %keywords) {
-   ok($header->keyword($line),$key);
-   my @values = $header->value($key);
-   ok($values[0],$keywords{$key});
-   $line += 1;
+my $key;
+foreach $key (keys %keywords) {
+    my @values = $header->value($key);
+
+    ok($header->keyword($line),$key);
+
+    if($key ne 'COMMENT') {  # Skip [multiline] comments...
+
+   	ok($values[0],$keywords{$key});
+    }
+
+    do {
+	$line += 1;
+    }	until(($header->keyword($line)||'') ne 'COMMENT' || $key ne 'COMMENT');
+
 }
 
 #clear
 undef %keywords;
+
 ok($header->keyword(0),undef);
 
 exit;
