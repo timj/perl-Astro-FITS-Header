@@ -1,5 +1,7 @@
 2002-06-19  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* NDF/NDF.pm: Add first support for .HEADER HDS containers 
+
 	* Item/Item.pm (_stringify): Support blank lines
 
 	* Header.pm: Add stringification overload 

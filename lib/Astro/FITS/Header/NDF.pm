@@ -32,7 +32,7 @@ use base qw/ Astro::FITS::Header /;
 
 use vars qw/ $VERSION /;
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 =head1 METHODS
 
@@ -48,6 +48,9 @@ Reads a FITS header from an NDF.
 
 Accepts an NDF identifier or a filename. If both ndfID and File keys
 exist, ndfID key takes priority.
+
+If the file open does not work, a second attempt is made with
+".HEADER" appended in case this was a UKIRT-style HDS container.
 
 =cut
 
@@ -84,6 +87,20 @@ sub configure {
 
     # Open it
     ndf_find(&NDF::DAT__ROOT(), $file, $indf, $status);
+
+    # If status is bad, try assuming it is a HDS container
+    # with UKIRT style .HEADER component
+    if ($status != $good) {
+      # dont want to contaminate existing status
+      my $lstat = $good;
+      $file .= ".HEADER";
+      ndf_find(&NDF::DAT__ROOT(), $file, $indf, $lstat);
+
+      # flush bad status if we succedded
+      err_annul($status) if $lstat == $good;
+
+    }
+
 
   } else {
 
@@ -208,12 +225,25 @@ sub writehdr {
     ndf_open(&NDF::DAT__ROOT(), $file, 'UPDATE', 'UNKNOWN',
 	     $ndfid, my $place, $status);
 
+    # If status is bad, try assuming it is a HDS container
+    # with UKIRT style .HEADER component
+    if ($status != $good or $ndfid == 0) {
+      # dont want to contaminate existing status
+      my $lstat = $good;
+      my $hdsfile .= $file . ".HEADER";
+      ndf_open(&NDF::DAT__ROOT(), $hdsfile, 'UPDATE', 'UNKNOWN',
+	       $ndfid, $place, $lstat);
+
+      # flush bad status if we succedded
+      err_annul($status) if $lstat == $good;
+
+    }
 
     # KLUGE : need to get NDF__NOID from the NDF module at some point
     if ($ndfid == 0 && $status == $good) {
       # could create it :-)
       $status = &NDF::SAI__ERROR;
-      err_rep(' ',"File $file does not exist to receive the header", $status);
+      err_rep(' ',"File '$file' does not exist to receive the header", $status);
     }
 
   } else {
