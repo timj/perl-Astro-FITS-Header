@@ -71,7 +71,7 @@ $Id$
 
 Create a new instance from an array of FITS header cards. 
 
-  $item = new Astro::FITS::Header( @header );
+  $item = new Astro::FITS::Header( Cards => \@header );
 
 returns a reference to a Header object.
 
@@ -84,12 +84,12 @@ sub new {
   # bless the header block into the class
   my $block = bless { HEADER => [],
                       LOOKUP  => {} }, $class;
-                          
+
   # If we have arguments configure the object
   $block->configure( @_ ) if @_;
 
   return $block;
-  
+
 }
 
 # I T E M ------------------------------------------------------------------
@@ -136,16 +136,8 @@ sub itembyname {
    @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
-   
-   # loop over the indices and grab the Header::Items
-   my @items;
-   for( my $i=0; $i<scalar(@index); $i++ ) {
-      my $item = ${$self->{HEADER}}[$index[$i]];
-      push( @items, $item ); 
-   }
-   
-   # return the values array
-   return @items;
+
+   return map { ${$self->{HEADER}}[$index[$_]] } @index;
 }
 
 # I N D E X   --------------------------------------------------------------
@@ -169,6 +161,7 @@ sub index {
    
    # return the values array
    return @index;
+
 }
 
 # V A L U E  ---------------------------------------------------------------
@@ -189,16 +182,10 @@ sub value {
    @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
-   
+
    # loop over the indices and grab the values
-   my @values;
-   for( my $i=0; $i<scalar(@index); $i++ ) {
-      my $value = ${$self->{HEADER}}[$index[$i]]->value();
-      push( @values, $value ); 
-   }
-   
-   # return the values array
-   return @values;
+   return map { ${$self->{HEADER}}[$_]->value() }  @index;
+
 }
 
 # C O M M E N T -------------------------------------------------------------
@@ -221,14 +208,7 @@ sub comment {
 	      defined ${$self->{LOOKUP}}{$keyword} );
    
    # loop over the indices and grab the comments
-   my @comments;
-   for( my $i=0; $i<scalar(@index); $i++ ) {
-      my $comment = ${$self->{HEADER}}[$index[$i]]->comment();
-      push( @comments, $comment ); 
-   }
-   
-   # return the values array
-   return @comments;
+   return map { ${$self->{HEADER}}[$_]->comment() }  @index;
 }
 
 # I N S E R T -------------------------------------------------------------
@@ -331,18 +311,15 @@ sub replacebyname{
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
    # loop over the keywords
-   my @cards;
-   for( my $i=0; $i<scalar(@index); $i++ ) {
-      @cards = splice @{$self->{HEADER}}, $index[$i], 1, $item;
-   }   
-   
+   my @cards = map { splice @{$self->{HEADER}}, $index[$_], 1, $item;} @index;
+
    # rebuild the lookup table from the modified header
    $self->_rebuild_lookup();
-   
+
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
-   
-} 
+
+}
 
 # R E M O V E  B Y   N A M E -----------------------------------------------
 
@@ -366,11 +343,8 @@ sub removebyname{
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
    # loop over the keywords
-   my @cards;
-   for( my $i=0; $i<scalar(@index); $i++ ) {
-      @cards = splice @{$self->{HEADER}}, $index[$i], 1;
-   }   
-   
+   my @cards = map { splice @{$self->{HEADER}}, $index[$_], 1; } @index;
+
    # rebuild the lookup table from the modified header
    $self->_rebuild_lookup();
    
@@ -380,7 +354,7 @@ sub removebyname{
 } 
 
 # S P L I C E --------------------------------------------------------------
- 
+
 =item B<splice>
 
 Implements a standard splice operation for FITS headers
@@ -435,7 +409,7 @@ sub splice {
 
 Configures the object, takes an array of FITS header cards as input.
 
-  $header->configure( @array );
+  $header->configure( Cards => \@array );
 
 Does nothing if the array is not supplied.
 
@@ -444,34 +418,56 @@ Does nothing if the array is not supplied.
 sub configure {
   my $self = shift;
 
-  # return unless we have arguements
-  return undef unless defined @_;
+  # return unless we have arguments
+  return undef unless @_;
 
-  # grab the arguement list
-  my @array = @_;  
+  # grab the argument list
+  my %args = @_;
 
-  # loop over the passed array
-  for ( my $i = 0; $i<scalar(@array); $i++) {
+  if (defined $args{Cards}) {
 
-     # build array of Header::Items
-     my $item = new Astro::FITS::Header::Item( Card => $array[$i] );
-     push (@{$self->{HEADER}}, $item);
+    my @array = @{$args{Cards}};
 
-     # build the lookup table 
-     my $keyword = $item->keyword();
+    # loop over the passed array
+    for ( my $i = 0; $i<scalar(@array); $i++) {
+
+      # build array of Header::Items
+      my $item = new Astro::FITS::Header::Item( Card => $array[$i] );
+      push (@{$self->{HEADER}}, $item);
+
+      # build the lookup table 
+      my $keyword = $item->keyword();
      
-     # need to account to repeated keywords (e.g. COMMENT)
-     unless ( exists ${$self->{LOOKUP}}{$keyword} &&
-              defined ${$self->{LOOKUP}}{$keyword} ) {
+      # need to account to repeated keywords (e.g. COMMENT)
+      unless ( exists ${$self->{LOOKUP}}{$keyword} &&
+	defined ${$self->{LOOKUP}}{$keyword} ) {
         # new keyword
-	${$self->{LOOKUP}}{$keyword} = [ $i ];
-     } else {     
-	# keyword exists, push the current index into the array
+        ${$self->{LOOKUP}}{$keyword} = [ $i ];
+      } else {     
+        # keyword exists, push the current index into the array
         push( @{${$self->{LOOKUP}}{$keyword}}, $i );
-     }
+      }
+    }
   }
   
 }
+
+=item B<cards>
+
+Return the object contents as an array of FITS cards.
+
+  @array = $header->cards;
+
+=cut
+
+sub cards {
+  my $self = shift;
+  return map { "$_"  } @{$self->{HEADER}};
+}
+
+=back
+
+=cut
 
 # P R I V A T  E   M E T H O D S ------------------------------------------
 
@@ -521,9 +517,10 @@ sub _rebuild_lookup {
 
 # T I M E   A T   T H E   B A R  --------------------------------------------
 
-=end __PRIVATE_METHODS__
 
 =back
+
+=end __PRIVATE_METHODS__
 
 =head1 COPYRIGHT
 
