@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 376 };
+BEGIN { plan tests => 377 };
 
 # load modules
 use Astro::FITS::Header;
@@ -26,12 +26,16 @@ my $header = new Astro::FITS::Header( Cards => \@raw );
 # test the header
 for my $i (0 .. $#raw) {
   my $card = $header->item($i);
+  
   ok( "$card", $raw[$i]);  
 }
 
 # test HIERARCH keywords
 ok( $header->value("HIERARCH.ESO.OBS.NAME"), 'Photom-std-S705D' );
 
+# Test the card parsing
+my @cards = $header->allitems();
+ok( $cards[52]->keyword(), "HIERARCH.ESO.OBS.TPLNO" );
 
 exit;
 

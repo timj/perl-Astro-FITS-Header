@@ -1,3 +1,7 @@
+2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.1)
+
+        * t/hierarch.t: Added more test cases.
+
 2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6)
 
         * Minor documentation tweaks and released as Version 2.6
