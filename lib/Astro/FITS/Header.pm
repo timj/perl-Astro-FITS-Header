@@ -36,7 +36,7 @@ package Astro::FITS::Header;
 
 =head1 NAME
 
-Astro::FITS::Header - A FITS header
+Astro::FITS::Header - Object Orientated interface to FITS HDUs
 
 =head1 SYNOPSIS
 
