@@ -5,6 +5,7 @@ t/
 t/parse.t
 t/ndf.t
 t/cfitsio.t
+t/tied.t
 NDF/NDF.pm
 NDF/Makefile.PL
 CFITSIO/CFITSIO.pm
