@@ -1,3 +1,4 @@
+#!perl
 # Astro::FITS::Header test harness
 
 # strict
@@ -5,7 +6,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 266 };
+BEGIN { plan tests => 273 };
 
 # load modules
 use Astro::FITS::Header;
@@ -35,6 +36,13 @@ ok( "$value", "UKIRT, Mauna Kea, HI");
 $keywords{"TELESCOP"} = "JCMT, Mauna Kea, HI";
 my @values = $header->value("TELESCOP");
 ok( "$values[0]", "JCMT, Mauna Kea, HI");
+
+# Get the comment, set a new one and retrieve it
+ok($keywords{"TELESCOP_COMMENT"}, "Telescope name");
+my $new = "Not a telescope";
+$keywords{TELESCOP_COMMENT} = $new;
+ok($keywords{TELESCOP_COMMENT}, $new);
+
 
 # store 
 $keywords{"LIFE"} = 42;
@@ -126,6 +134,25 @@ foreach $key (keys %keywords) {
 
 }
 
+# Test array ref return
+my $hdr = tied %keywords;
+
+# First get the string
+my $str = $keywords{COMMENT};
+ok(not ref $str );
+
+# Then the array
+$hdr->tiereturnsref(1);
+my $strref = $keywords{COMMENT};
+
+ok(ref($strref), "ARRAY");
+
+my @strings = @$strref;
+
+ok(scalar(@strings), 3); # There are 4 comments
+ok(join('',@strings), $str);
+$hdr->tiereturnsref(0);
+
 # Test that we can copy in a new hash
 # This test will fail in v2.4 of Astro::FITS::Header
 my $href = \%keywords;
@@ -137,6 +164,14 @@ ok($href->{INSTRUME}, 'MICHELLE');
 undef %keywords;
 
 ok($header->keyword(0),undef);
+
+# Test the override
+my %keywords2;
+my $header2 = new Astro::FITS::Header( Cards => \@raw );
+tie %keywords2, "Astro::FITS::Header", $header2, tiereturnsref => 1;
+my $value = $keywords2{COMMENT};
+ok(ref $value, "ARRAY");
+
 
 exit;
 

@@ -92,7 +92,9 @@ sub new {
   # bless the header block into the class
   my $block = bless { HEADER => [],
                       LOOKUP  => {},
-		      LASTKEY => undef }, $class;
+		      LASTKEY => undef,
+		      TieRetRef => 0,
+		    }, $class;
 
   # If we have arguments configure the object
   $block->configure( @_ ) if @_;
@@ -109,6 +111,30 @@ sub new {
 
 =over 4
 
+=item B<tieRetRef>
+
+Indicates whether the tied object should return multiple values
+as a single string joined by newline characters (false) or 
+it should return a reference to an array containing all the values.
+
+Only affects the tied interface.
+
+  tie %keywords, "Astro::FITS::Header", $header, tiereturnsref => 1;
+  $ref = $keywords{COMMENT};
+
+Defaults to returning a single string in all cases (for backwards
+compatibility)
+
+=cut
+
+sub tiereturnsref {
+  my $self = shift;
+  if (@_) {
+    $self->{TieRetRef} = shift;
+  }
+  return $self->{TieRetRef};
+}
+
 =item B<item>
 
 Returns a FITS::Header:Item object referenced by index, C<undef> if it
@@ -120,13 +146,12 @@ does not exist.
 
 sub item {
    my ( $self, $index ) = @_;
-   
+
    return undef unless defined $index;
    return undef unless exists ${$self->{HEADER}}[$index];
-   
+
    # grab and return the Header::Item at $index
    return ${$self->{HEADER}}[$index];
- 
 }
 
 # K E Y W O R D ------------------------------------------------------------
@@ -141,13 +166,12 @@ Returns keyword referenced by index, C<undef> if it does not exist.
 
 sub keyword {
    my ( $self, $index ) = @_;
-   
+
    return undef unless defined $index;
    return undef unless exists ${$self->{HEADER}}[$index];
-   
+
    # grab and return the keyword at $index
    return ${$self->{HEADER}}[$index]->keyword();
- 
 }
 
 # I T E M   B Y   N A M E  -------------------------------------------------
@@ -649,7 +673,16 @@ Header value type is determined on-the-fly by parsing of the input values.
 Anything that parses as a number or a logical is converted to that before
 being put in a card (but see below).
 
-There's no way to access the per-card comment fields using the tied interface.
+Per-card comment fields can be accessed using the tied interface by specifying
+a key name of "key_COMMENT". This works because in general "_COMMENT" is too
+long to be confused with a normal key name.
+
+  $comment = $hdr{CRPIX1_COMMENT};
+
+will return the comment associated with CRPIX1 header item. The comment
+can be modified in the same way:
+
+  $hdr{CRPIX1_COMMENT} = "An axes";
 
 Keywords are CaSE-inNSEnSiTIvE, unlike normal hash keywords.  All
 keywords are translated to upper case internally, per the FITS standard.
@@ -706,6 +739,20 @@ back on the non-tied interface by calling methods like so:
 
   ((tied $hash)->method())
 
+Note that multi-valued items are always returned as a string separated
+with newlines. If this is not required (and the original values are to
+be treated separately) the tie can be configured using
+C<tiereturnsref>.
+
+  tie %keywords, "Astro::FITS::Header", $header, tiereturnsref => 1;
+
+When tiereturnsref is true, multi-valued items will be returns via a
+reference to an array (ties do not respect calling context). Note that
+if this is configured you will have to test each return value to see
+whether it is returning a real value or a reference to an array if you
+are not sure whether there will be more than one card with a duplicate
+name.
+
 =head2 Type forcing
 
 Because perl uses behind-the-scenes typing, there is an ambiguity
@@ -741,37 +788,103 @@ C<Astro::FITS::Header> object.
 # constructor
 sub TIEHASH {
   my ( $class, $obj, %options ) = @_;
-  return bless $obj, $class;  
+  my $newobj = bless $obj, $class;
+
+  # Process options
+  for my $key (keys %options) {
+    my $method = lc($key);
+    if ($newobj->can($method)) {
+      $newobj->$method( $options{$key});
+    }
+  }
+
+  return $newobj;
 }
 
 # fetch key and value pair
+# MUST return undef if the key is missing else autovivification of 
+# sub header will fail
 
 sub FETCH {
   my ($self, $key) = @_;
-  
+
   $key = uc($key);
-  my $item = ($self->itembyname($key))[0];
-  
-  my @values = ((defined $item) && (defined $item->type) && ($item->type eq 'COMMENT')) ?
-      $self->comment($key) :
-	  $self->value($key);
-  
-  my $out;
-  if($#values <= 0) {
-      $out = $values[0];
-  } else {
-      $out = join("\n",@values);
-      $out =~ s/\\\n//gs if (defined($out));
+
+  # If the key has a _COMMENT suffix we are looking for a comment
+  my $wantvalue = 1;
+  if ($key =~ /_COMMENT$/) {
+    $wantvalue = 0;
+    # Remove suffix
+    $key =~ s/_COMMENT$//;
   }
-  $out .= "\n" if((defined $item) && (defined $item->type) && ($item->type =~ m/^(COMMENT)$/s));
+
+  # if we are of type COMMENT we want to retrieve the comment regardless
+  # We find this by getting the first item that matches
+  my $item = ($self->itembyname($key))[0];
+  $wantvalue = 0 if ((defined $item) && (defined $item->type) && ($item->type eq 'COMMENT'));
+
+  # Retrieve all the values/comments. Note that we go through the entire
+  # header for this in case of multiple matches
+  my @values = ($wantvalue ? $self->value( $key ) : $self->comment($key) );
+
+  # Return value depends on return context. If we have one value it does not
+  # matter, just return it. In list context want all the values, in scalar
+  # context join them all with a \n
+  # Note that in a TIED hash we do not have access to the calling context
+  # we are ALYWAYS in scalar context.
+  my @out;
+
+  # Sometimes we want the array to remain an array
+  if ($self->tiereturnsref) {
+    @out = @values;
+  } else {
+
+    # Join everything together with a newline
+    # BUT we are careful here to prevent stringification of references
+    # at least for the case where we only have one value. We also must
+    # handle the case where we have no value to return (without turning
+    # it into a null string since that ruins autovivification of sub headers)
+    if (scalar(@values) <= 1) {
+      @out = @values;
+    } else {
+
+      # Multi values so join
+      @out = ( join("\n", @values) );
+
+      # This is a hangover from the STORE (where we add a \ continuation character)
+      # to multiline strings
+      for my $out (@out) {
+	$out =~ s/\\\n//gs if (defined($out));
+      }
+    }
+  }
+
+  # If we have COMMENTs it seems we should add a trailing newline
+  # I do not think we should be doing this but it seems like this has now
+  # become part of the standard interface.
+  if ((defined $item) && (defined $item->type) && ($item->type eq 'COMMENT')) {
+    @out = map { $_ . "\n" } @out;
+  }
 
   # If we have a header we need to tie it to another hash
-  if ((UNIVERSAL::isa($out, "Astro::FITS::Header")) ||
-      (defined $item && defined $item->type && $item->type eq 'HEADER')) {
+  my $ishdr = (defined $item && defined $item->type && $item->type eq 'HEADER');
+  for my $hdr (@out) {
+    if ((UNIVERSAL::isa($hdr, "Astro::FITS::Header")) || $ishdr) {
+      my %header;
+      tie %header, ref($hdr), $hdr;
+      # Change in place
+      $hdr = \%header;
+    }
+  }
 
-    my %header;
-    tie %header, ref($out), $out;
-    $out = \%header;
+  # Can only return a scalar
+  # So return the first value if tiereturnsref is false and an array ref
+  # if tiereturnsref is true.
+  my $out;
+  if ($self->tiereturnsref && scalar(@out) > 1) {
+    $out = \@out;
+  } else {
+    $out = $out[0];
   }
 
   return $out;
@@ -849,7 +962,16 @@ sub STORE {
     @values = ($value);
   }
 
+  # Upper case the relevant item name
   $keyword = uc($keyword);
+
+  # Recognise _COMMENT
+  my $havevalue = 1;
+  if ($keyword =~ /_COMMENT$/) {
+    $keyword =~ s/_COMMENT$//;
+    $havevalue = 0;
+  }
+
   my @items = $self->itembyname($keyword);
 
   ## Remove extra items if necessary
@@ -861,7 +983,7 @@ sub STORE {
     }
   }
 
-  ## Allocate items if necessary
+  ## Allocate new items if necessary
   while(scalar(@items) < scalar(@values)) {
 
     my $item = new Astro::FITS::Header::Item(Keyword=>$keyword,Value=>undef);
@@ -880,6 +1002,9 @@ sub STORE {
     if($Astro::FITS::Header::COMMENT_FIELD{$keyword}) {
       $items[$i]->type('COMMENT');
       $items[$i]->comment($values[$i]);
+    } elsif (! $havevalue) {
+      # This is actually just changing the comment
+      $items[$i]->comment($values[$i]);
     } else {
       $items[$i]->type( (($#values > 0) || ref $value) ? 'STRING' : undef);
 
@@ -893,7 +1018,7 @@ sub STORE {
 # reports whether a key is present in the hash
 sub EXISTS {
   my ($self, $keyword) = @_;
-  return undef unless exists ${$self->{LOOKUP}}{$keyword};  
+  return undef unless exists ${$self->{LOOKUP}}{$keyword};
 }
 
 # deletes a key and value pair

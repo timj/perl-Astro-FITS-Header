@@ -1,3 +1,16 @@
+2003-03-10  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Header.pm: Add tiereturnshash, and configure it from TIEHASH
+	
+	* Header.pm (FETCH): Respect the new tiereturnshash method. If
+	true, will return multi-valued items as a reference to an array
+	rather than as a joined string (tied interface does not respect
+	calling context).
+
+	* Header.pm (FETCH/STORE): Tied interface can now retrieve or set
+	the comment string associated with an item by adding '_COMMENT' to
+	the keyword.
+
 2002-12-05  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (FETCH): Tied interface now returns a hash ref when a
