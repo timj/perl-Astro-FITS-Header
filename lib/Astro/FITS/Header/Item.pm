@@ -138,7 +138,7 @@ sub value {
 
     if (UNIVERSAL::isa($value,"Astro::FITS::Header" )) {
       $self->type( "HEADER" );
-    } elsif ($self->type eq 'HEADER') {
+    } elsif (defined $self->type && $self->type eq 'HEADER') {
       # HEADER is only valid if we really are a HEADER
       $self->type(undef);
     }
