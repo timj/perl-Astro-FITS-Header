@@ -636,6 +636,7 @@ sub configure {
 	$self->_rebuild_lookup; 
     }
 }
+
 =item B<freeze>
 
 Method to return a blessed reference to the object so that we can store
@@ -918,23 +919,29 @@ sub FETCH {
 
   # If the key has a _COMMENT suffix we are looking for a comment
   my $wantvalue = 1;
+  my $wantcomment = 0;
   if ($key =~ /_COMMENT$/) {
     $wantvalue = 0;
+    $wantcomment = 1;
     # Remove suffix
     $key =~ s/_COMMENT$//;
   }
 
-  # if we are of type COMMENT we want to retrieve the comment regardless
-  # We find this by getting the first item that matches
-  my $item = ($self->itembyname($key))[0];
-  my $t_ok = (defined $item) && (defined $item->type);
-  $wantvalue = 0 if ($t_ok && ($item->type eq 'COMMENT'));
+  # if we are of type COMMENT we want to retrieve the comment only
+  # if they're asking for $key_COMMENT.
+  my $item;
+  my $t_ok;
+  if( $wantcomment || $key =~ /^COMMENT$/ || $key =~ /^END$/) {
+    $item = ($self->itembyname($key))[0];
+    $t_ok = (defined $item) && (defined $item->type);
+    $wantvalue = 0 if ($t_ok && ($item->type eq 'COMMENT'));
+  }
 
   # The END card is a special case.  We always return " " for the value,
   # and undef for the comment.
   return ($wantvalue ? " " : undef)
-      if( ($t_ok && ($item->type eq 'END')) || 
-	  ((defined $item) && ($key eq 'END')) );
+    if( ($t_ok && ($item->type eq 'END')) ||
+        ((defined $item) && ($key eq 'END')) );
 
   # Retrieve all the values/comments. Note that we go through the entire
   # header for this in case of multiple matches
@@ -1201,7 +1208,17 @@ sub STORE {
 # reports whether a key is present in the hash
 sub EXISTS {
   my ($self, $keyword) = @_;
-  return undef unless exists ${$self->{LOOKUP}}{$keyword};
+
+  if( !exists( ${$self->{LOOKUP}}{$keyword} ) ) {
+    return undef;
+  }
+  if(  exists( ${$self->{LOOKUP}}{$keyword} ) &&
+      ${$self->{HEADER}}[${$self->{LOOKUP}}{$keyword}[0]]->type eq 'COMMENT' ) {
+    return undef;
+  }
+
+  return 1;
+
 }
 
 # deletes a key and value pair
