@@ -1,3 +1,7 @@
+2003-03-11  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.5)
+
+        * Minor documentation tweaks, released as version 2.5
+
 2003-03-10  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm: Add tiereturnshash, and configure it from TIEHASH
@@ -14,8 +18,7 @@
 2002-12-05  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (FETCH): Tied interface now returns a hash ref when a
-	subheader is encountered.
-	(STORE): And accepts a hash via STORE
+	subheader is encountered. (STORE): And accepts a hash via STORE
 
 2002-12-04  Tim Jenness  <timj@jach.hawaii.edu>
 

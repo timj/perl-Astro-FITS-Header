@@ -73,9 +73,12 @@ Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC) in Hawaii.
 This version of the module includes patches supplied by Diab Jerius
 <dj@head-cfa.harvard.edu> of the Harvard-Smithsonian Center for Astrophysics. 
 
-The tied interface has been updated for version 2.x by Craig DeForest
-<zowie@euterpe.boulder.swri.edu> of the Department of Space Studies, Southwest
-Research Institute.
+The tied interface was updated for version 2.x by Craig DeForest
+<zowie@euterpe.boulder.swri.edu> of the Department of Space Studies, 
+Southwest Research Institute. Further changes were made to teh tied 
+interface by Tim Jenness <timj@jach.hawaii.edu>.
+
+For full details of who did what, and when, see the ChangeLog.
 
 Maintainer
 ----------
