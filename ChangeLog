@@ -1,3 +1,7 @@
+2004-02-29  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Item/Item.pm: Fixed bug in comment parsing.
+        
 2004-02-23  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Header.pm: Added get_wcs() method to allow you direct access

@@ -413,9 +413,13 @@ sub parse_card {
     $self->type( "COMMENT" );
 
     # We have comments
-    $comment = substr($card,8);
-    $comment =~ s/\s+$//;  # Trailing spaces
-
+    unless ( length( $card) <= 8 ) {
+       $comment = substr($card,8);
+       $comment =~ s/\s+$//;  # Trailing spaces
+    } else {
+       $comment = "";
+    }
+    
     # Alasdair wanted to store this as a value
     $self->comment( $comment );
 
