@@ -300,6 +300,17 @@ sub configure {
   }
 }
 
+=item B<freeze>
+
+Method to return a blessed reference to the object so that we can store
+ths object on disk using Data::Dumper module.
+
+=cut
+
+sub freeze {
+  my $self = shift;
+  return bless $self, 'Astro::FITS::Header::Item';
+}
 
 =item B<parse_card>
 

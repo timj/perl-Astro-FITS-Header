@@ -1,4 +1,10 @@
-2001-10-16  Diab Jerius  <dj@head-cfa.harvard.edu>
+2002-03-29   Alasdair Allan <aa@astro.ex.ac.uk> 
+
+        * Header.pm: Added freeze() function
+        
+        * Item.pm: Added freeze() function
+        
+2001-10-16   Diab Jerius  <dj@head-cfa.harvard.edu>
 
 	* Header.pm: itembyname(), index(), value(), and comment() now
 	return a single element when called in scalar context.
