@@ -1,7 +1,6 @@
 Header.pm
 MANIFEST
 Makefile.PL
-t/
 t/parse.t
 t/ndf.t
 t/cfitsio.t

@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 1 };
+BEGIN { plan tests => 2 };
 
 # load modules
 use Astro::FITS::Header;
@@ -26,6 +26,10 @@ my $header = new Astro::FITS::Header( Cards => \@raw );
 # tie
 my %keywords;
 tie %keywords, "Astro::FITS::Header", $header;   
+
+# fetch
+my $value = $keywords{"TELESCOP"};
+ok( "$value", "UKIRT, Mauna Kea, HI");
 
 
 exit;
