@@ -7,11 +7,14 @@ BEGIN { plan tests => 6 };
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
 
+use Carp;
+use File::Spec;
+
 # test the test system
 ok(1);
 
 # open the example header file
-my $filename = 'fits.header';
+my $filename = File::Spec->catfile('t','fits.header');
 open ( FH, $filename ) || croak ('Cannot open header file');
 
 # read and then close header file
@@ -34,9 +37,9 @@ ok ($header->insert(1, $test_item) );
 
 # do a splice
 my @cards;
-ok (@cards = $header->splice( 0, 2, $test_item);	
+ok (scalar(@cards = $header->splice( 0, 2, $test_item)),2);	
 
 # comparison cards
 my @comparison = ( 'SIMPLE  =                    T /  file does conform to FITS standard            ', 'BITPIX  =                  -32 /  number of bits per data pixel                 ');
 
-ok(if @cards == @comparison );
+ok( @cards == @comparison );
