@@ -17,7 +17,9 @@ format (NDF) file.
 To work with FITS files, the Astro::FITS::Header module requires Pete 
 Ratzlaff's <pratzlaff@cfa.harvard.edu> CFITSIO.pm library (v 0.95 or greater),
 which in turn requires William Pence's CFITSIO subroutine library (v2.100 or
-greater).
+greater). It should be noted that to build the CFITSIO subroutine library
+on RedHat Linux 7.x you need to use version 2.202 or above, the module will
+work fine with this version of the library.
 
 For more information on CFITSIO, see http://heasarc.gsfc.nasa.gov/fitsio/
 
@@ -40,7 +42,7 @@ The package provides the following classes
 which all include POD format documentation. 
 
 Where can I get it?
--------------------------
+-------------------
 The package is availabe from CPAN <http://www.cpan.org/> and from
 http://www.astro.ex.ac.uk/people/aa/pages/computing/fitsheader.html  
 
@@ -58,10 +60,17 @@ detect this and skip the test harness for the relevant modules with a warning.
 
 Authors
 -------
-This module was jointly written by Alasdair Allan <aa@astro.ex.ac.uk>, of the
+The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of the
 University of Exeter Astrophysics Group (http://www.astro.ex.ac.uk/) as part
 of his work for the Starlink Project (http://www-star.rl.ac.uk/), and Tim
 Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC) in Hawaii.
+
+The latest version of the module includes patches supplied by Diab Jerius
+<dj@head-cfa.harvard.edu> of the Harvard-Smithsonian Center for Astrophysics. 
+
+Maintainer
+----------
+The package is currently maintained by Alasdair Allan <aa@astro.ex.ac.uk>
 
 License
 -------
