@@ -1,5 +1,7 @@
 2002-11-14  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* GSD/GSD.pm: Add GSD reader 
+
 	* NDF/NDF.pm (configure): Workaround a bug in NDF when reading
 	.HEADER NDFs.
 
