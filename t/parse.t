@@ -32,12 +32,13 @@ ok( my $test_card = new Astro::FITS::Header::Item(
 			          Type    => 'int' ) );
 
 # do an insert	
-ok ($header->insert(1, $test_item) );
-
+$header->insert(1, $test_card);
+my @test_value = $header->value('LIFE');
+ok( $test_value[0] = 42 );
 
 # do a splice
 my @cards;
-ok (scalar(@cards = $header->splice( 0, 2, $test_item)),2);	
+ok (scalar(@cards = $header->splice( 0, 2, $test_card)),2);	
 
 # comparison cards
 my @comparison = ( 'SIMPLE  =                    T /  file does conform to FITS standard            ', 'BITPIX  =                  -32 /  number of bits per data pixel                 ');
