@@ -81,7 +81,9 @@ Create a new instance from an array of FITS header cards.
 
   $item = new Astro::FITS::Header( Cards => \@header );
 
-returns a reference to a Header object.
+returns a reference to a Header object.  If you pass in no cards, 
+you get the (required) first SIMPLE card for free.
+
 
 =cut
 
@@ -96,8 +98,9 @@ sub new {
 		      TieRetRef => 0,
 		    }, $class;
 
-  # If we have arguments configure the object
-  $block->configure( @_ ) if @_;
+  # Configure the object, even with no arguments since configure
+  # still puts the minimum SIMPLE card in.
+  $block->configure( @_ );
 
   return $block;
 
@@ -531,6 +534,8 @@ sub allitems {
 
 Configures the object, takes an array of FITS header cards 
 or an array of Astro::FITS::Header::Item objects as input.
+If you feed in nothing at all, it uses a default array containing
+just the SIMPLE card required at the top of all FITS files.
 
   $header->configure( Cards => \@array );
   $header->configure( Items => \@array );
@@ -540,34 +545,36 @@ Does nothing if the array is not supplied.
 =cut
 
 sub configure {
-  my $self = shift;
-
-  # return unless we have arguments
-  return undef unless @_;
-
-  # grab the argument list
-  my %args = @_;
-
-  if (exists $args{Cards} && defined $args{Cards}) {
-
-    # First translate each incoming card into a Item object
-    # Any existing cards are removed
-    @{$self->{HEADER}} = map {
-      new Astro::FITS::Header::Item( Card => $_ );
-    } @{ $args{Cards} };
-
+    my $self = shift;
+    
+    # grab the argument list
+    my %args = @_;
+    
+    if (exists $args{Cards} && defined $args{Cards}) {
+	
+	# First translate each incoming card into a Item object
+	# Any existing cards are removed
+	@{$self->{HEADER}} = map {
+	    new Astro::FITS::Header::Item( Card => $_ );
+	} @{ $args{Cards} };
+	
     # Now build the lookup table. There would be a slight efficiency
-    # gain to include this in a loop over the cards but prefer
-    # to reuse the method for this rather than repeating code
-    $self->_rebuild_lookup;
-
-  } elsif (exists $args{Items} && defined $args{Items}){
-    # We have an array of Astro::FITS::Header::Items
-    @{$self->{HEADER}} = @{ $args{Items} };
-    $self->_rebuild_lookup;
-  }
+	# gain to include this in a loop over the cards but prefer
+	# to reuse the method for this rather than repeating code
+	$self->_rebuild_lookup;
+	
+    } elsif (exists $args{Items} && defined $args{Items}){
+	# We have an array of Astro::FITS::Header::Items
+	@{$self->{HEADER}} = @{ $args{Items} };
+	$self->_rebuild_lookup;
+    } elsif( !defined($self->{HEADER}) ||  !@{$self->{HEADER}} ) {
+	@{$self->{HEADER}} = (
+	      new Astro::FITS::Header::Item( Card=> "SIMPLE  =  T"),
+	      new Astro::FITS::Header::Item( Card=> "END", Type=>"END" )
+			      );
+	$self->_rebuild_lookup; 
+    }
 }
-
 =item B<freeze>
 
 Method to return a blessed reference to the object so that we can store
@@ -682,18 +689,23 @@ long to be confused with a normal key name.
 will return the comment associated with CRPIX1 header item. The comment
 can be modified in the same way:
 
-  $hdr{CRPIX1_COMMENT} = "An axes";
+  $hdr{CRPIX1_COMMENT} = "An axis";
 
 Keywords are CaSE-inNSEnSiTIvE, unlike normal hash keywords.  All
 keywords are translated to upper case internally, per the FITS standard.
+
+Aside from the SIMPLE and END keywords, which are automagically placed at
+the beginning and end of the header respectively, keywords are included
+in the header in the order received.  This gives you a modicum of control
+over card order, but if you actually care what order they're in, you
+probably don't want the tied interface.
 
 =head2 Comment cards
 
 Comment cards are a special case because they have no normal value and
 their comment field is treated as the hash value.  The keywords
-"COMMENT" and "HISTORY" are magic and refer to comment cards; all other
-keywords create normal valued cards.  If you don't like that behavior,
-don't use the tied interface.
+"COMMENT" and "HISTORY" are magic and refer to comment cards; nearly all other
+keywords create normal valued cards.  (see "SIMPLE and END cards", below).
 
 =head2 Multi-card values
 
@@ -739,14 +751,12 @@ back on the non-tied interface by calling methods like so:
 
   ((tied $hash)->method())
 
-Note that multi-valued items are always returned as a string separated
-with newlines. If this is not required (and the original values are to
-be treated separately) the tie can be configured using
-C<tiereturnsref>.
+If you prefer to have multi-valued items automagically become array
+refs, then you can get that behavior using the C<tiereturnsref> method:
 
   tie %keywords, "Astro::FITS::Header", $header, tiereturnsref => 1;
 
-When tiereturnsref is true, multi-valued items will be returns via a
+When tiereturnsref is true, multi-valued items will be returned via a
 reference to an array (ties do not respect calling context). Note that
 if this is configured you will have to test each return value to see
 whether it is returning a real value or a reference to an array if you
@@ -759,15 +769,15 @@ Because perl uses behind-the-scenes typing, there is an ambiguity
 between strings and numeric and/or logical values: sometimes you want
 to create a STRING card whose value could parse as a number or as a
 logical value, and perl kindly parses it into a number for you.  To
-force string evaluation, feed in a trivial hash array:
+force string evaluation, feed in a trivial array ref:
 
   $hash{NUMSTR} = 123;     # generates an INT card containing 123.
-  $hash{NUMSTR} = '123';   # generates an INT card containing 123.
-  $hash{NUMSTR} = ['123']; # generates a STRING card containing '123'.
-  $hash{NUMSTR} = [123];   # generates a STRING card containing '123'.
+  $hash{NUMSTR} = "123";   # generates an INT card containing 123.
+  $hash{NUMSTR} = ["123"]; # generates a STRING card containing "123".
+  $hash{NUMSTR} = [123];   # generates a STRING card containing "123".
 
-  $hash{ALPHA} = 'T';      # generates a LOGICAL card containing T. 
-  $hash{ALPHA} = ['T'];    # generates a STRING card containing 'T'.
+  $hash{ALPHA} = "T";      # generates a LOGICAL card containing T. 
+  $hash{ALPHA} = ["T"];    # generates a STRING card containing "T".
 
 Calls to keys() or each() will, by default, return the keywords in the order 
 n which they appear in the header.
@@ -775,6 +785,30 @@ n which they appear in the header.
 When the key refers to a subheader entry, a hash reference is returned.
 If a hash reference is stored in a value it is converted to a
 C<Astro::FITS::Header> object.
+
+=head2 SIMPLE and END cards
+
+No FITS interface would becomplete without special cases.  
+ 
+When you assign to SIMPLE or END, the tied interface ensures that they
+are first or last, respectively, in the deck -- as the FITS standard
+requires.  Other cards are inserted in between the first and last
+elements, in the order that you define them.  
+
+The SIMPLE card is forced to FITS LOGICAL (boolean) type.  The FITS
+standard forbids you from setting it to F, but you can if you want --
+we're not the FITS police.
+
+The END card is forced to a null type, so any value you assign to it
+will fall on the floor.  If present in the deck, the END keyword
+always contains the value " ", which is both more-or-less invisible
+when printed and also true -- so you can test the return value to see
+if an END card is present.
+
+SIMPLE and END come pre-defined from the constructor.  If for some
+nefarious reason you want to remove them you must explicitly do so
+with "delete" or the appropriate method call from the object
+interface.
 
 =cut
 
@@ -821,7 +855,14 @@ sub FETCH {
   # if we are of type COMMENT we want to retrieve the comment regardless
   # We find this by getting the first item that matches
   my $item = ($self->itembyname($key))[0];
-  $wantvalue = 0 if ((defined $item) && (defined $item->type) && ($item->type eq 'COMMENT'));
+  my $t_ok = (defined $item) && (defined $item->type);
+  $wantvalue = 0 if ($t_ok && ($item->type eq 'COMMENT'));
+
+  # The END card is a special case.  We always return " " for the value,
+  # and undef for the comment.
+  return ($wantvalue ? " " : undef)
+      if( ($t_ok && ($item->type eq 'END')) || 
+	  ((defined $item) && ($key eq 'END')) );
 
   # Retrieve all the values/comments. Note that we go through the entire
   # header for this in case of multiple matches
@@ -831,7 +872,7 @@ sub FETCH {
   # matter, just return it. In list context want all the values, in scalar
   # context join them all with a \n
   # Note that in a TIED hash we do not have access to the calling context
-  # we are ALYWAYS in scalar context.
+  # we are ALWAYS in scalar context.
   my @out;
 
   # Sometimes we want the array to remain an array
@@ -851,23 +892,24 @@ sub FETCH {
       # Multi values so join
       @out = ( join("\n", @values) );
 
-      # This is a hangover from the STORE (where we add a \ continuation character)
-      # to multiline strings
+      # This is a hangover from the STORE (where we add a \ continuation 
+      # character to multiline strings)
       for my $out (@out) {
 	$out =~ s/\\\n//gs if (defined($out));
       }
     }
   }
 
-  # If we have COMMENTs it seems we should add a trailing newline
-  # I do not think we should be doing this but it seems like this has now
-  # become part of the standard interface.
-  if ((defined $item) && (defined $item->type) && ($item->type eq 'COMMENT')) {
+  # COMMENT cards get a newline appended.
+  # (Whether this should happen is controversial, but it supports
+  # the "just append a string to get a new COMMENT card" behavior
+  # described in the documentation).
+  if ($t_ok && ($item->type eq 'COMMENT')) {
     @out = map { $_ . "\n" } @out;
   }
 
   # If we have a header we need to tie it to another hash
-  my $ishdr = (defined $item && defined $item->type && $item->type eq 'HEADER');
+  my $ishdr = ($t_ok && $item->type eq 'HEADER');
   for my $hdr (@out) {
     if ((UNIVERSAL::isa($hdr, "Astro::FITS::Header")) || $ishdr) {
       my %header;
@@ -878,15 +920,16 @@ sub FETCH {
   }
 
   # Can only return a scalar
-  # So return the first value if tiereturnsref is false and an array ref
-  # if tiereturnsref is true.
+  # So return the first value if tiereturnsref is false.
+  # (by this point, all the values should be joined together into the
+  # first element anyway.)
   my $out;
   if ($self->tiereturnsref && scalar(@out) > 1) {
-    $out = \@out;
+      $out = \@out;
   } else {
-    $out = $out[0];
+      $out = $out[0];
   }
-
+  
   return $out;
 }
 
@@ -911,6 +954,7 @@ sub STORE {
   # or if we have an Astro::FITS::Header
   if (UNIVERSAL::isa($value, "Astro::FITS::Header")) {
     @values = ($value);
+
   } elsif (ref $value eq 'HASH') {
     # Convert a hash to a Astro::FITS::Header
     # If this is a tied hash already just get the object
@@ -964,6 +1008,46 @@ sub STORE {
 
   # Upper case the relevant item name
   $keyword = uc($keyword);
+  
+  if($keyword eq 'END') {
+      # Special case for END keyword
+      # (drops value on floor, makes sure there is one END at the end)
+      my @index = $self->index($keyword);
+      if( @index != 1   ||   $index[0] != $#{$self->allitems}) {
+	  my $i;
+	  while(defined($i = shift @index)) {
+	      $self->remove($i);
+	  }
+      }
+      unless( @index ) {
+	  my $endcard = new Astro::FITS::Header::Item(Keyword=>'END',
+						      Type=>'END', 
+						      Value=>1);
+	  $self->insert( scalar ($self->allitems) , $endcard );
+      }
+      return;
+      
+  } 
+  
+  if($keyword eq 'SIMPLE') {
+      # Special case for SIMPLE keyword
+      # (sets value correctly, makes sure there is one SIMPLE at the beginning)
+      my @index = $self->index($keyword);
+      if( @index != 1  ||  $index[0] != 0) {
+	  my $i;
+	  while(defined ($i=shift @index)) {
+	      $self->remove($i);
+	  }
+      }
+      unless( @index ) {
+	  my $simplecard = new Astro::FITS::Header::Item(Keyword=>'SIMPLE',
+							 Value=>$values[0],
+							 Type=>'LOGICAL');
+	  $self->insert(0, $simplecard);
+      }
+      return;
+  }
+  
 
   # Recognise _COMMENT
   my $havevalue = 1;
@@ -987,10 +1071,7 @@ sub STORE {
   while(scalar(@items) < scalar(@values)) {
 
     my $item = new Astro::FITS::Header::Item(Keyword=>$keyword,Value=>undef);
-    $item->type('COMMENT') if($Astro::FITS::Header::COMMENT_FIELD{$keyword}
-			      || ((defined $items[0]) && 
-				  (defined $items[0]->type) &&
-				  ($items[0]->type eq 'COMMENT')));
+    # (No need to set type here; Item does it for us)
 
     $self->insert(-1,$item);
     push(@items,$item);
@@ -1041,7 +1122,7 @@ sub FIRSTKEY {
   my $self = shift;
   $self->{LASTKEY} = 0;
   $self->{SEENKEY} = {};
-  return undef unless defined @{$self->{HEADER}};
+  return undef unless @{$self->{HEADER}};
   return ${$self->{HEADER}}[0]->keyword();
 }
 

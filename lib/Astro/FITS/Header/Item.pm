@@ -393,7 +393,7 @@ sub parse_card {
     $self->value(undef);
     $self->type( "END" );
     $self->card( $card ); # store it after storing indiv components
-    return("END", undef,undef);
+    return("END", undef, undef);
   }
 
   return () if length($card) == 0;
@@ -607,7 +607,7 @@ sub _stringify {
 
   # End card and Comments first
   if (defined $type && $type eq 'END' ) {
-    $card = sprintf("%-10s%-70s", $card);
+    $card = sprintf("%-10s%-70s", $card, "");
 
   } elsif (defined $type && $type eq 'COMMENT') {
 
@@ -646,7 +646,7 @@ sub _stringify {
 
       # Change the value for logical
       if ($type eq 'LOGICAL') {
-	$value = ($value ? 'T' : 'F' );
+	$value = ( ($value && ($value ne 'F')) ? 'T' : 'F' );
       }
 
       # An undefined value should simply propogate as an empty

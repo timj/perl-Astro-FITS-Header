@@ -6,7 +6,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 273 };
+BEGIN { plan tests => 279 };
 
 # load modules
 use Astro::FITS::Header;
@@ -124,8 +124,12 @@ foreach $key (keys %keywords) {
     ok($header->keyword($line),$key);
 
     if($key ne 'COMMENT') {  # Skip [multiline] comments...
-
-   	ok($values[0],$keywords{$key});
+	# END card is a special case -- should return ' '
+	if($key eq 'END') {
+	    ok(' ',$keywords{$key});
+	} else {
+	    ok($values[0],$keywords{$key});
+	}
     }
 
     do {
@@ -160,10 +164,26 @@ my $href = \%keywords;
 ok($href->{TELESCOP}, 'GEMINI');
 ok($href->{INSTRUME}, 'MICHELLE');
 
+
+# Test that SIMPLE and END get put at the beginning and end, respectively
+ 
+ok($href->{SIMPLE},undef);
+ok($href->{END},undef);
+ 
+$keywords{SIMPLE} = 0;
+$keywords{END} = "Drop this string on the floor";
+my @keys = keys %keywords;
+ok($keys[0],'SIMPLE');
+ok($keys[3],'END');
+ok($keywords{SIMPLE},0);
+ok($keywords{END},' ');
+
+
 #clear
 undef %keywords;
 
 ok($header->keyword(0),undef);
+
 
 # Test the override
 my %keywords2;

@@ -1,6 +1,26 @@
+2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6)
+
+        * Minor documentation tweaks and released as Version 2.6
+        
+2003-03-12 Craig DeForest <deforest@boulder.swri.edu> 
+
+        * Header.pm 
+	   - FETCH: END card always returns ' ' if present, undef if not.
+	   - STORE: END & SIMPLE cards are always put in the right place.
+	   - STORE: Cleaned out some extra cruft in the card assignment 
+	            block
+	   - new:   SIMPLE & END cards are assigned automagically
+	   - Documentation: several improvements.
+
+	* Item.pm
+	   - 'F' evaluates false if assigned to a card of type LOGICAL
+	     (already evaluated false if assigned to a card of unknown type).
+	   - END cards no longer emit warnings with 'use strict'.
+	   
 2003-03-11  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.5.1)
 
-        * Minor documentation tweaks, badged version 2.5
+        * Minor documentation tweaks, badged as version 2.5
+        
         * t/hierarch.t: Added test harness for ESO HIERARCH header keywords
 
 2003-03-10  Tim Jenness  <timj@jach.hawaii.edu>

@@ -4,8 +4,18 @@ Astro::FITS::Header module
 What is it?
 -----------
 Astro::FITS::Header and associated sub-classes are tools for reading,
-modifying and then writing out FITS standard header blocks to FITS and
-NDF files.
+modifying and then writing out FITS standard header blocks to FITS, NDF 
+and GSD files. The module now fully supports ESO HIERARCH header keywords.
+
+Full documentation is included in the POD attached to the modules.
+
+Tied Interface
+--------------
+This is a warning for those of you using the tied interface from previous
+version of the module. The interface now acts very differently, theoretically 
+teh changes shouldn't break existing code, but it has diverged sufficiently 
+far from the original that I'm no longer convinced that it will work in all
+cases. Be warned!
 
 Requirements
 ------------
@@ -32,7 +42,7 @@ greater)  and GSD modules These modules are installed as part of the
 PERLMODS package in the Starlink Software Collection.
 
 For more information on the Starlink Software Collection and the Starlink
-Project in general see http://www-star.rl.ac.uk/
+Project in general see http://www.starlink.ac.uk/
 
 Provides
 --------
@@ -65,24 +75,26 @@ modules with a warning.
 
 Authors
 -------
-The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of the
-University of Exeter Astrophysics Group (http://www.astro.ex.ac.uk/) as part
-of his work for the Starlink Project (http://www-star.rl.ac.uk/), and Tim
-Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC) in Hawaii.
+The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of 
+the University of Exeter Astrophysics Group (http://www.astro.ex.ac.uk/) as 
+part of his work for the Starlink Project (http://www.starlink.ac.uk/), and 
+Tim Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC) 
+(http://www.jach.hawaii.edu/) in Hawaii.
 
 This version of the module includes patches supplied by Diab Jerius
 <dj@head-cfa.harvard.edu> of the Harvard-Smithsonian Center for Astrophysics. 
 
 The tied interface was updated for version 2.x by Craig DeForest
-<zowie@euterpe.boulder.swri.edu> of the Department of Space Studies, 
-Southwest Research Institute. Further changes were made to teh tied 
-interface by Tim Jenness <timj@jach.hawaii.edu>.
+<deforest@boulder.swri.edu> of the Department of Space Studies, Southwest
+Research Institute and Tim Jenness <timj@jach.hawaii.edu> of the Joint
+Astronomy Center (JAC) in Hawaii.
 
 For full details of who did what, and when, see the ChangeLog.
 
 Maintainer
 ----------
-The package is currently maintained by Alasdair Allan <aa@astro.ex.ac.uk>
+The package is currently maintained by Alasdair Allan <aa@astro.ex.ac.uk>,
+please direct comments and patches to him in the first instance. 
 
 License
 -------
