@@ -21,7 +21,7 @@ my @raw = <DATA>;
 chomp(@raw);
 
 # build header array
-my $header = new Astro::FITS::Header( @raw );
+my $header = new Astro::FITS::Header( Cards => \@raw );
 
 # test the header
 for my $i (0 .. $#raw) {
