@@ -7,5 +7,3 @@ To Do
   merged HISTORY should be writing to the HISTORY extension of the NDF
   as this is regarded as canonical.
 
-- Provide option to extract WCS from FITS header and store it in AST object
-

@@ -56,6 +56,7 @@ Provides
 The package provides the following classes
 	
    Astro::FITS::Header
+   Astro::FITS::Header::Item
    Astro::FITS::Header::NDF
    Astro::FITS::Header::CFITSIO
    Astro::FITS::Header::GSD
@@ -90,16 +91,16 @@ Tim Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC)
 (http://www.jach.hawaii.edu/) in Hawaii.
 
 This version of the module includes patches supplied by Diab Jerius
-<dj@head-cfa.harvard.edu> of the Harvard-Smithsonian Center for Astrophysics. 
-
-This version of the module includes patches supplied by Jim Lewis
-<jrl@ast.cam.ac.uk>, of the Cambridge Astronomy Survey Unit at the Institute
-of Astronomy, to allow access to Multi-Extension FITS files.
+<dj@head-cfa.harvard.edu>, of the Harvard-Smithsonian Center for Astrophysics,
+and by Jim Lewis <jrl@ast.cam.ac.uk>, of the Cambridge Astronomy Survey Unit 
+at the Institute of Astronomy, to allow access to Multi-Extension FITS files.
  
 The tied interface was updated for version 2.x by Craig DeForest
 <deforest@boulder.swri.edu> of the Department of Space Studies, Southwest
 Research Institute and Tim Jenness <timj@jach.hawaii.edu> of the Joint
-Astronomy Center (JAC) in Hawaii.
+Astronomy Center (JAC) in Hawaii. Patches to fix some bugs in the tied
+interface when dealing with blank cards were supplied by Brad Cavangh
+<bradc@jach.hawaii.edu> of the Joint Astronomy Center (JAC) in Hawaii.
 
 Modifications to parse ESO HIERARCH keywords, read-only, were added by
 Malcolm Currie <mjc@star.rl.ac.uk> of the Rutherford Appleton Laboratory.
