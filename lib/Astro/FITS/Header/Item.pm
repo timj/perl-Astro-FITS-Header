@@ -166,6 +166,7 @@ the FITS card.
   $item->type( "INT" );
 
 Allowed types are "LOGICAL", "INT", "FLOAT", "STRING", "COMMENT"
+and "UNDEF"
 
 =cut
 
@@ -445,6 +446,8 @@ sub parse_card {
       # No value at all
       $value  = undef;
       $comment = substr($rest, $pos+2);
+      $self->type("UNDEF");
+
     } elsif ($pos != -1) {
       # Found value and comment
       $value = substr($rest, 0, $pos-1);
@@ -540,10 +543,10 @@ sub _stringify {
   my $card = sprintf("%-8s", $keyword);
 
   # End card and Comments first
-  if ($type eq 'END' ) {
+  if (defined $type && $type eq 'END' ) {
     $card = sprintf("%-10s%-70s", $card);
-   
-  } elsif ($type eq 'COMMENT') {
+
+  } elsif (defined $type && $type eq 'COMMENT') {
 
     # Comments are from character 11 - 80
     $card = sprintf("%-10s%-70s", $card, $comment);
@@ -555,8 +558,11 @@ sub _stringify {
     # Try to sort out the type if we havent got one
     # We can not find LOGICAL this way since we can't
     # tell the difference between 'F' and F
+    # an undefined value is typeless
     unless (defined $type) {
-      if ($value =~ /^\d+$/) {
+      if (!defined $value) {
+	$type = "UNDEF";
+      } elsif ($value =~ /^\d+$/) {
 	$type = "INT";
       } elsif ($value =~ /^(-?)(\d*)(\.?)(\d*)([EeDd][-\+]?\d+)?$/) {
 	$type = "FLOAT";
@@ -567,7 +573,8 @@ sub _stringify {
 
     # Numbers behave identically whether they are float or int
     # Logical is a number formatted as a "T" or "F"
-    if ($type eq 'INT' or $type eq 'FLOAT' or $type eq 'LOGICAL') {
+    if ($type eq 'INT' or $type eq 'FLOAT' or $type eq 'LOGICAL' or 
+       $type eq 'UNDEF') {
 
       # Change the value for logical
       if ($type eq 'LOGICAL') {
