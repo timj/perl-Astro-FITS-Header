@@ -1,5 +1,7 @@
 2002-06-12  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* t/tied.t: Use two argument form of ok()
+
 	* t/parse.t: Use two argument form of ok()
 
 2002-06-10  Alasdair Allan <aa@astro.ex.ac.uk> 

@@ -54,16 +54,21 @@ $keywords{"COMMENT"} = $s;
 
 # It doesn't make any values
 @values = $header->value("COMMENT");
-ok( !( (defined $values[0]) || (defined $values[1]) || (defined $values[2])));
+ok( $values[0], undef);
+ok( $values[1], undef);
+ok( $values[2], undef);
+
 
 # The comments come out correctly in the comment method
 my @comments = $header->comment("COMMENT");
 my @s = split("\n",$s);
 chomp @s;
-ok( $comments[0] eq $s[0] && $comments[1] eq $s[1] && $comments[2] eq $s[2] );
+ok( $comments[0], $s[0] );
+ok( $comments[1], $s[1] );
+ok( $comments[2], $s[2] );
 
 # The comments come out correctly in the tied method
-ok( $s."\n" eq $keywords{"COMMENT"} );
+ok( $s."\n", $keywords{"COMMENT"} );
 
 ##########
 # Multiline values
@@ -72,20 +77,23 @@ my $sr = [0,1,2];
 
 # Assigning with array ref yields correct string
 $keywords{"TESTVAL"} = $sr;
-ok( $keywords{"TESTVAL"} eq $s );
+ok( $keywords{"TESTVAL"}, $s );
 
 # ... and also gives the correct values
 my(@vals) = $header->value("TESTVAL");
-ok($vals[0] == 0 && $vals[1] == 1 && $vals[2] == 2);
+ok($vals[0], 0);
+ok($vals[1], 1);
+ok($vals[2], 2);
+
 
 # ... and also acts correctly in arithmetic expressions
 { no warnings;
-  ok( $keywords{"TESTVAL"} + 1  == 1 );
+  ok( $keywords{"TESTVAL"} + 1, 1 );
 }
 
 # ... and also truncates OK
 $keywords{"TESTVAL"}++;
-ok($keywords{"TESTVAL"} == 1);
+ok($keywords{"TESTVAL"}, 1);
 
 ##############################
 
