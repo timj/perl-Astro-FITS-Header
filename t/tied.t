@@ -201,6 +201,9 @@ $href->{SLASHSTR} = "foo\\/bar / value is 'foo/bar'";
 ok($href->{SLASHSTR},'foo/bar');
 ok($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'');
 
+# principal of least surprise.... you should get back what you put in!
+#$href->{REVERSE} = "foo / bar";
+#ok($href->{REVERSE}, "foo / bar");
 
 exit;
 
