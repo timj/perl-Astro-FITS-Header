@@ -1,4 +1,4 @@
-package Astro::FITS::Header;
+package Astro::FITS::Header::CFITSIO;
 
 # ---------------------------------------------------------------------------
 
@@ -63,6 +63,10 @@ use strict;
 use vars qw/ $VERSION /;
 
 use Astro::FITS::Header::Item;
+use base qw/ Astro::FITS::Header /;
+
+use CFITSIO qw / :longnames :constants /;
+use Carp;
 
 '$Revision$ ' =~ /.*:\s(.*)\s\$/ && ($VERSION = $1);
 
@@ -94,9 +98,55 @@ sub configure {
   
   my %args = @_;
   
-  return $self->SUPER::configure(%args) if exists $args{Cards};
-  print "CFITSIO: Not yet implemented\n";
+  # itialise the inherited status to OK.  
+  my $status = 0;
+  my $ifits;
 
+  return $self->SUPER::configure(%args) if exists $args{Cards};
+  
+  # read the args hash
+  if (exists $args{fitsID}) {
+     $ifits = $args{fitsID};
+  } elsif (exists $args{File}) {
+     $ifits = CFITSIO::open_file( $args{File}, CFITSIO::READWRITE(), $status );
+  } else {
+     croak("Arguement hash does not contain fitsID, File or Cards");
+  }
+
+  # file sucessfully opened?
+  if( $status == 0 ) {
+  
+     # Get size of FITS header
+     my ($numkeys, $morekeys);
+     $ifits->get_hdrspace( $numkeys, $morekeys, $status);      
+
+     # Set the FITS array to empty
+     my @fits = ();
+     
+     # read the cards, including END card
+     for my $i (0 .. $numkeys) {
+        $ifits->read_record($i+1, my $card, $status);
+        push(@fits, $card);   
+     }
+     
+     if ($status == 0) {
+        # Parse the FITS array
+        $self->SUPER::configure( Cards => \@fits );
+     } else {
+        # Report bad exit status
+        croak("Error $status reading FITS array"); 
+     }
+  }
+ 
+  # clean up
+  if ( $status != 0 ) {
+     croak("Error $status opening FITS file");
+  }
+  
+  # close file
+  $ifits->close_file( $status );
+  return;
+  
 }
 
 # W R I T E H D R -----------------------------------------------------------
@@ -116,8 +166,57 @@ Returns undef on error, true if the header was written successfully.
 =cut
 
 sub writehdr {
+  my $self = shift;
+  my %args = @_;
 
-  print "CFITSIO: Not yet implemented\n";
+  return $self->SUPER::configure(%args) if exists $args{Cards};
+   
+  # itialise the inherited status to OK.  
+  my $status = 0;
+  my $ifits;   
+  
+  # read the args hash
+  if (exists $args{fitsID}) {
+     $ifits = $args{fitsID};
+  } elsif (exists $args{File}) {
+     $ifits = CFITSIO::open_file( $args{File}, CFITSIO::READWRITE(), $status );
+  } else {
+     croak("Argument hash does not contain fitsID, File or Cards");
+  }
+
+  # file sucessfully opened?
+  if( $status == 0 ) {
+  
+    # Get the fits array
+    my @cards = $self->cards; 
+
+    # Get size of FITS header
+    my ($numkeys, $morekeys);
+    $ifits->get_hdrspace( $numkeys, $morekeys, $status);      
+
+    # write the cards, including END card
+    for my $j (0 .. $#cards ) {
+       $ifits->write_record($cards[$j], $status );
+       print "$j $status\n";
+    } 
+    
+    # delete the old FITS keys
+    for my $i (1 .. $numkeys ) {
+       $ifits->delete_record( $i, $status );
+       print "$i $status\n";
+    }    
+    
+  }
+ 
+  # clean up
+  if ( $status != 0 ) {
+     croak("Error $status opening FITS file");
+  }
+    
+  # close file
+  $ifits->close_file( $status );
+  return;
+   
 }
 
 # T I M E   A T   T H E   B A R  --------------------------------------------

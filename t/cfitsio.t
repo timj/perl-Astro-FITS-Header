@@ -4,17 +4,56 @@
 use strict;
 
 use Test;
-BEGIN { plan tests => 1 };
+use File::Spec;
+BEGIN { plan tests => 193 };
 
-eval("use Astro::FITS::Header::CFITSIO; use NOT_IMPLEMENTED;");
+use Astro::FITS::Header::CFITSIO; use CFITSIO qw / :longnames /; use CFITSIO qw/ :constants /;
 if ($@) {
-  for (1..1) {
-    skip("Skip CFITSIO module not yet implemented", 1);
+  for (1..193) {
+    skip("Skip CFITSIO module not available", 1);
   }
   exit;
 }
 
+# ----------------------------------------------------------------------------
+
+#BEGIN{ link File::Spec->catfile("t", "cfitsio.fit"),
+#            File::Spec->catfile("t", "test.fit" ); };
+#
+#END{ unlink File::Spec->catfile("t", "test.fit" ); };
+
+# ----------------------------------------------------------------------------
+
+# Test the test system
 ok(1);
+
+# Read from the __DATA__ block
+my @cards = <DATA>;
+
+# Version test
+if ( fits_get_version(my $version) > 2.1 ) { ok(1); } else { ok(0); };
+
+my $file = File::Spec->catfile("t", "test.fit");
+print "FILE $file\n\n\n";
+
+my $header = new Astro::FITS::Header::CFITSIO( File => $file );
+
+# tie
+my %keywords;
+tie %keywords, "Astro::FITS::Header::CFITSIO", $header;   
+
+$header->configure( Cards => \@cards );
+
+$header->writehdr( File => $file );
+
+# test the header
+#for my $i (0 .. $#cards) {
+#  my @items = $header->item($i);
+#  ok( "$items[0]", $cards[$i]);  
+#}
+
+#use Data::Dumper;
+#print Dumper($header);
 
 exit;
 
