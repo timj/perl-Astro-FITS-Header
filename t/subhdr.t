@@ -94,7 +94,7 @@ ok($header{NEWTIE}->{VALUE}, $another_card->value);
 
 # Test autovivification
 # Note that $hdr{BLAH}->{YYY} = 5 does not work
-$header{BLAH}->{XXX};
+my $void = $header{BLAH}->{XXX};
 ok(ref($header{BLAH}), 'HASH');
 $header{BLAH}->{XXX} = 5;
 ok($header{BLAH}->{XXX}, 5);
