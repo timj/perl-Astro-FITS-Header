@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 131 };
+BEGIN { plan tests => 137 };
 
 # load modules
 use Astro::FITS::Header;
@@ -43,10 +43,18 @@ my $string_card = new Astro::FITS::Header::Item(
 			       Comment => 'So long and thanks for all the fish',
 			       Type    => 'STRING' );
 
+
 # do an insert	
 $header->insert(1, $int_card);
 my @test_value = $header->value('LIFE');
 ok($test_value[0], 42);
+
+use Data::Dumper;
+#print Dumper($header);
+
+# pull it back
+my @items = $header->itembyname('LIFE');
+print "LIFE @items\n";
 
 # do a splice
 my @cards = $header->splice( 0, 6, $string_card);	
@@ -58,6 +66,23 @@ my @comp = ( $raw[0], $int_card, $raw[1], $raw[2], $raw[3], $raw[4] );
 for my $i (0 .. $#cards) {
   ok( "$cards[$i]", "$comp[$i]");   
 }
+
+# pull an item out of the header
+my $test_item = $header->item(1);
+
+# test the result
+ok( "$test_item", $raw[6] );
+
+# pull the comments
+my @comments = $header->itembyname('COMMENT');
+print Dumper(@comments);
+
+# test the result
+ok( scalar(@comments), 4);
+for my $j (0 .. $#comments) {
+  ok( "$comments[$j]", "$raw[$j+7]");   
+}
+
 
 exit;
 

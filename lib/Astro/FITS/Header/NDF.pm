@@ -8,13 +8,15 @@ Astro::FITS::Header::NDF - Manipulate FITS headers from NDF files
 
   use Astro::FITS::Header::NDF;
 
+  $h = new Astro::FITS::Header::NDF( Cards => \@cards );
   $h = new Astro::FITS::Header::NDF( ndfID => $indf );
+  $h = new Astro::FITS::Header::NDF( File => $file );
 
   $h->writehdr( $indf );
 
 =head1 DESCRIPTION
 
-
+Stores information about a FITS header block in an object. Takes an
 
 =cut
 

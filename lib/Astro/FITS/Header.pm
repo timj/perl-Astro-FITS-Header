@@ -38,11 +38,12 @@ Astro::FITS::Header - A FITS header
 
 =head1 SYNOPSIS
 
-  $item = new Astro::FITS::Header( @array );
+  $header = new Astro::FITS::Header( Cards => \@array );
 
 =head1 DESCRIPTION
 
-Stores information about a FITS header block in an object. Takes an array
+Stores information about a FITS header block in an object. Takes an hash
+with an array reference as an arguement. The array should contain a list
 of FITS header cards as input.
 
 =cut
@@ -125,20 +126,21 @@ sub item {
 
 Returns an array of Header::Items for the requested keyword
 
-   @value = $header->itembyname($keyword);
+   @items = $header->itembyname($keyword);
 
 =cut
 
 sub itembyname {
    my ( $self, $keyword ) = @_;
-   
+            
    # grab the index array from lookup table
    my @index;
    @index = @{${$self->{LOOKUP}}{$keyword}}
          if ( exists ${$self->{LOOKUP}}{$keyword} && 
 	      defined ${$self->{LOOKUP}}{$keyword} );
+   
+   return map { ${$self->{HEADER}}[$_] } @index;
 
-   return map { ${$self->{HEADER}}[$index[$_]] } @index;
 }
 
 # I N D E X   --------------------------------------------------------------
@@ -186,7 +188,7 @@ sub value {
 
    # loop over the indices and grab the values
    return map { ${$self->{HEADER}}[$_]->value() }  @index;
-
+   
 }
 
 # C O M M E N T -------------------------------------------------------------
@@ -312,7 +314,7 @@ sub replacebyname{
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
    # loop over the keywords
-   my @cards = map { splice @{$self->{HEADER}}, $index[$_], 1, $item;} @index;
+   my @cards = map { splice @{$self->{HEADER}}, $_, 1, $item;} @index;
 
    # rebuild the lookup table from the modified header
    $self->_rebuild_lookup();
@@ -344,7 +346,7 @@ sub removebyname{
 	      defined ${$self->{LOOKUP}}{$keyword} );
 
    # loop over the keywords
-   my @cards = map { splice @{$self->{HEADER}}, $index[$_], 1; } @index;
+   my @cards = map { splice @{$self->{HEADER}}, $_, 1; } @index;
 
    # rebuild the lookup table from the modified header
    $self->_rebuild_lookup();
@@ -379,21 +381,25 @@ sub splice {
    if ( scalar(@_) == 0 ) {
       # none
       @cards = splice @{$self->{HEADER}};
+      $self->_rebuild_lookup();
       return wantarray ? @cards : $cards[scalar(@cards)-1];
    } elsif ( scalar(@_) == 1 ) {
       # $offset
       my ( $offset ) = @_;
       @cards = splice @{$self->{HEADER}}, $offset;          
+      $self->_rebuild_lookup();
       return wantarray ? @cards : $cards[scalar(@cards)-1];
    } elsif ( scalar(@_) == 2 ) {
       # $offset and $length
       my ( $offset, $length ) = @_;
       @cards = splice @{$self->{HEADER}}, $offset, $length;
+      $self->_rebuild_lookup();
       return wantarray ? @cards : $cards[scalar(@cards)-1];
    } else {
       # $offset, $length and @list 
       my ( $offset, $length, @list ) = @_;
       @cards = splice @{$self->{HEADER}}, $offset, $length;	
+      $self->_rebuild_lookup();
       return wantarray ? @cards : $cards[scalar(@cards)-1];
    }
 }
@@ -454,12 +460,9 @@ sub cards {
   return map { "$_"  } @{$self->{HEADER}};
 }
 
-=back
-
-=cut
-
 # P R I V A T  E   M E T H O D S ------------------------------------------
 
+=back
 
 =begin __PRIVATE_METHODS__
 
@@ -504,8 +507,67 @@ sub _rebuild_lookup {
 
 }
 
-# T I M E   A T   T H E   B A R  --------------------------------------------
+# T I E D   I N T E R F A C E -----------------------------------------------
+#
+#=back
+#
+#=head1 TIED INTERFACE
+#
+#The C<FITS::Header> object can also be tied to a hash
+#
+#   use Astro::FITS::Header;
+#
+#   $header = new Astro::FITS::Header( Cards => \@array );
+#   tie %hash, "Astro::FITS::Header", $header   
+#
+#=cut
+#
+# constructor
+#sub TIEHASH {
+#
+#}
+#
+# fetch key and value pair
+#sub FETCH {
+#
+#}
+#
+# store key and value pair
+#sub STORE {
+#
+#}
+#
+# reports whether a key is present in the hash
+#sub EXISTS {
+#
+#}
+#
+# deletes a key and value pair
+#sub DELETE {
+#
+#}
+#
+# empties the hash
+#sub CLEAR {
+#
+#}
+#
+# implements keys() and each()
+#sub FIRSTKEY {
+#
+#}
+#
+# implements keys() and each()
+#sub NEXTKEY {
+#
+#}
+#
+# garbage collection
+#sub DESTROY {
+#
+#}
 
+# T I M E   A T   T H E   B A R  --------------------------------------------
 
 =back
 
