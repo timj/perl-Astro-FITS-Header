@@ -1,11 +1,21 @@
+2002-11-27  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.4)
+
+        * Added patch provided by Diab Jerius <djerius@cfa.harvard.edu>
+          which allows you to open files in ReadOnly mode. Additionally
+          it moves the module over to using the new Astro::FITS::CFITSIO 
+          rather than the older CFITSIO module.
+
+        * Minor documentation changes to reflect new versions of the
+          Astro::FITS::CFITSIO library now needed by the module.
+          
 2002-11-14  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* GSD/GSD.pm: Add GSD reader 
 
 	* NDF/NDF.pm (configure): Workaround a bug in NDF when reading
-	.HEADER NDFs.
+	  .HEADER NDFs.
 
-2002-06-24  Alasdair Allan <aa@astro.ex.ac.uk>
+2002-06-24  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.2)
 
         * Minor documentation tweaks to reflect Tim's changes,
           released as v2.2.

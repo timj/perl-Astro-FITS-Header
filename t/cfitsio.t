@@ -8,10 +8,10 @@ use File::Spec;
 use File::Copy;
 BEGIN { plan tests => 41 };
 
-eval "use Astro::FITS::Header::CFITSIO; use CFITSIO qw / :longnames /; use CFITSIO qw/ :constants /;";
+eval "use Astro::FITS::Header::CFITSIO; use Astro::FITS::CFITSIO qw / :longnames /; use Astro::FITS::CFITSIO qw/ :constants /;";
 if ($@) {
   for (1..41) {
-    skip("Skip CFITSIO module not available", 1);
+    skip("Skip Astro::FITS::CFITSIO module not available", 1);
   }
   exit;
 }

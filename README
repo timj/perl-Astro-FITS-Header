@@ -16,12 +16,13 @@ standard, or from the FITS extension in an extensible N-dimensional data
 format (NDF) file or from a Global Section Data file (GSD). Additionally
 the module also supports .HEADER in HDS contanier files.
 
-To work with FITS files, the Astro::FITS::Header module requires Pete 
-Ratzlaff's <pratzlaff@cfa.harvard.edu> CFITSIO.pm library (v 0.95 or greater),
-which in turn requires William Pence's CFITSIO subroutine library (v2.100 or
-greater). It should be noted that to build the CFITSIO subroutine library
-on RedHat Linux 7.x you need to use version 2.202 or above, the module will
-work fine with this version of the library.
+To work with FITS files, the Astro::FITS::Header module requires Pete
+Ratzlaff's <pratzlaff@cfa.harvard.edu> Astro::FITS::CFITSIO library
+(v 1.01 or greater), which in turn requires William Pence's CFITSIO
+subroutine library (v2.430 or greater). It should be noted that to
+build the CFITSIO subroutine library on RedHat Linux 7.x you need to
+use version 2.202 or above, however the module requires v2.400 at least
+to work with the Astro::FITS::CFITSIO module.
 
 For more information on CFITSIO, see http://heasarc.gsfc.nasa.gov/fitsio/
 
@@ -58,8 +59,9 @@ Installation is automated using the ExtUtils::MakeMaker library
      % make test
      % make install
 
-If the CFITSIO or NDF modules are not installed 'make test' will
-detect this and skip the test harness for the relevant modules with a warning.
+If the Astro::FITS::CFITSIO or NDF modules are not installed 'make
+test' will detect this and skip the test harness for the relevant
+modules with a warning.
 
 Authors
 -------
