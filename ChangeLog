@@ -1,3 +1,11 @@
+2004-03-06  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
+
+        * Header.pm: Fix tied interface so blank cards (with and without
+          equals sign in column 10) come out as proper undef items or
+          named comments, respectively.
+
+        * t/tied.t: Test for above.
+
 2004-02-29  Alasdair Allan <aa@astro.ex.ac.uk>
 
         * Item/Item.pm: Fixed bug in comment parsing.
