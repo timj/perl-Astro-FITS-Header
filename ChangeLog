@@ -1,3 +1,9 @@
+2004-02-23  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Header.pm: Added get_wcs() method to allow you direct access
+          to the WCS information in the header using the Starlink::AST
+          module and library.
+          
 2003-11-12  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.1)
 
         * Documentation updated and released.

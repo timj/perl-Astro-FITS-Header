@@ -181,6 +181,30 @@ sub item {
    return ${$self->{HEADER}}[$index];
 }
 
+
+=item B<get_wcs>
+
+Returns a Starlink::AST FrameSet object representing the WCS of the
+FITS Header. 
+
+   $ast = $header->get_wcs();
+
+=cut
+
+sub get_wcs {
+   my $self = shift;
+
+   require Starlink::AST;
+   my $fchan = Starlink::AST::FitsChan->new();
+   for my $i ( $self->cards() ) {
+      $fchan->PutFits( $i, 0);
+   }
+   $fchan->Clear( "Card" );
+   return $fchan->Read();
+   
+}
+
+
 # K E Y W O R D ------------------------------------------------------------
 
 =item B<keyword>
