@@ -15,6 +15,10 @@
 	the comment string associated with an item by adding '_COMMENT' to
 	the keyword.
 
+2002-01-19  Malcolm J. Currie <mjc@star.rl.ac.uk>
+
+        * Item/Item.pm: Added support for HIERARCH hierarchical keywords.
+
 2002-12-05  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (FETCH): Tied interface now returns a hash ref when a
