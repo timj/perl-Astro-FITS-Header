@@ -987,7 +987,15 @@ sub STORE {
   # cheesily via recursion -- would be more efficient, but less readable, 
   # to propagate the comment through the code...
 
-  if( $keyword !~ m/(COMMENT)|(HISTORY)/ and 
+  # I think this is fundamentally flawed. If I store a string "foo/bar"
+  # in a hash and then read it back I expect to get "foo/bar" not "foo".
+  # I can not be expected to know that this hash happens to be tied to
+  # a FITS header that is trying to spot FITS item formatting. - TJ
+
+  # Make sure that we do not stringify reference arguments by mistake
+  # when looking from slashes
+
+  if ( !ref($value) && $keyword !~ m/(COMMENT)|(HISTORY)/ and 
       $value =~ s:\s*(?<!\\)/\s*(.*)::         # Identify any '/' not preceded by '\'
       ) { 
     my $comment = $1;
@@ -998,8 +1006,11 @@ sub STORE {
 
   }
 
-  $value =~ s:\\\\:\\:g;
-  $value =~ s:\\\/:\/:g;
+  # unescape (unless we are blessed)
+  if (!ref($value)) {
+    $value =~ s:\\\\:\\:g;
+    $value =~ s:\\\/:\/:g;
+  }
 
   # skip the shenanigans for the normal case
   # or if we have an Astro::FITS::Header
@@ -1024,7 +1035,7 @@ sub STORE {
 
     }
 
-  } elsif((ref $value) || (length $value > 70) || $value =~ m/\n/s ) {
+  } elsif((ref $value eq 'ARRAY') || (length $value > 70) || $value =~ m/\n/s ) {
     my @val;
     # @val gets intermediate breakdowns, @values gets line-by-line breakdowns.
 
@@ -1054,6 +1065,9 @@ sub STORE {
     }
   }   ## End of complicated case
   else {
+
+
+
     @values = ($value);
   }
 
