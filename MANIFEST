@@ -7,8 +7,6 @@ GPL
 Header.pm
 Item/Item.pm
 Item/Makefile.PL
-Item/MANIFEST
-Item/t/parse.t
 Makefile.PL
 MANIFEST
 NDF/NDF.pm
@@ -20,6 +18,7 @@ t/ast.t
 t/cfitsio.fit
 t/cfitsio.t
 t/ndf.t
+t/item.t
 t/parse.t
 t/tied.t
 t/test.gsd

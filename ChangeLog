@@ -6,7 +6,12 @@
           
         * AST/AST.pm: Added constructor method which takes a Starlink::AST
           FrameSet as a parameter.
-            
+          
+        * Moved test suite for Astro::FITS::Header::Item to main directory,
+          and deleted separate MANIFEST for this module. Pretty much tied to
+          the main Astro::FITS::Header infrastructure now, unlikely to be
+          distributed separately anymore.
+              
 2003-11-12  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.1)
 
         * Documentation updated and released.
