@@ -43,7 +43,7 @@ for my $i (0 .. $#raw) {
 
 # grab the WCS
 my $wcsinfo = $header->get_wcs();
-isa_ok( $wcsinfo, "AstFrameSetPtr" );
+isa_ok( $wcsinfo, "Starlink::AST::FrameSet" );
 
 # Mappings
 # --------
@@ -82,7 +82,7 @@ is( $$yworld[1], 128, "Reverse mapping of upper bound Y co-ordinate" );
 my $ast_header = new Astro::FITS::Header::AST( FrameSet => $wcsinfo );
 
 # test the header
-is( $ast_header->sizeof(), 8, "Size of returned header" );
+is( $ast_header->sizeof(), 9, "Size of returned header" );
 
 exit;
 
