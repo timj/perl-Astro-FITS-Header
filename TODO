@@ -4,3 +4,6 @@
 - Read HISTORY from NDF and merge it into FITS header
 
 - Provide option to extract WCS from FITS header and store it in AST object
+
+- Support subheaders (ie those in Multi-extension fits files that are
+  not part of the main header, or the headers in UKIRT data (.I1, .I2)
