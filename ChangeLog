@@ -1,5 +1,9 @@
 2001-03-15  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* Item/t/parse.t: Add caching test 
+
+	* Item/Item.pm: Fix caching
+
 	* Item/t/parse.t: Rewrite to use a for loop and add some harder tests
 
 	* Item/Item.pm: Fix some warnings with undef and add an UNDEF type
