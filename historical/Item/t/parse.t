@@ -121,6 +121,14 @@ foreach my $n (0..$#raw) {
   ok( "$item", $card);
 }
 
+# Test that the caching is working. We do this by using
+# a card that we know is not conformant
+my $c = "LNGSTR  = 'a very long string that is long' /Long string                        ";
+
+my $i = new Astro::FITS::Header::Item( Card => $c);
+ok("$i", $c);
+
+
 
 #keyword
 #value
