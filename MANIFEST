@@ -16,7 +16,7 @@ NDF/Makefile.PL
 GSD/GSD.pm
 GSD/Makefile.PL
 README
-t/ast.ta
+t/ast.t
 t/cfitsio.fit
 t/cfitsio.t
 t/ndf.t
