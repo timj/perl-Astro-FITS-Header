@@ -1,0 +1,4 @@
+2001-03-12  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* t/parse.t: Update test to fix array comparison.
+
