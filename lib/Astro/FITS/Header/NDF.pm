@@ -104,7 +104,10 @@ sub configure {
     if ($status == $good) {
 
       # If we have an NDF we can simply reopen it
-      if ($type =~ /NDF/i) {
+      # Additionally if we have no description of the component
+      # at all we assume NDF. This overcomes a bug in the acquisition
+      # for SCUBA where a blank type field is used.
+      if ($type =~ /NDF/i || $type !~ /\w/) {
 	$ndffile = $file;
       } else {
 	# For now simply assume we can find a .HEADER
