@@ -570,6 +570,11 @@ sub _stringify {
     # Comments are from character 11 - 80
     $card = sprintf("%-10s%-70s", $card, $comment);
 
+  } elsif (!defined $type && !defined $value && !defined $comment) {
+
+    # This is a blank line
+    $card = " " x 80;
+
   } else {
     # A real keyword/value so add the "= "
     $card .= "= ";

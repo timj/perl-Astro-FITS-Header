@@ -1,3 +1,9 @@
+2002-06-19  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Item/Item.pm (_stringify): Support blank lines
+
+	* Header.pm: Add stringification overload 
+
 2002-06-12  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* t/tied.t: Use two argument form of ok()
