@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 258 };
+BEGIN { plan tests => 264 };
 
 # load modules
 use Astro::FITS::Header;
