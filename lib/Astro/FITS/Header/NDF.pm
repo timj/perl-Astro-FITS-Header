@@ -89,8 +89,8 @@ sub configure {
   # starlink)
   err_begin( $status );
 
-  # Start NDF
-  ndf_begin();
+  # did we start NDF
+  my $ndfstarted;
 
   # Read the args hash
   if (exists $args{ndfID}) {
@@ -100,6 +100,10 @@ sub configure {
     # Remove trailing .sdf
     my $file = $args{File};
     $file =~ s/\.sdf$//;
+
+    # Start NDF
+    ndf_begin();
+    $ndfstarted = 1;
 
     # First we need to find whether we have an HDS container or a
     # straight NDF. Rather than simply trying an ndf_find on both
@@ -207,16 +211,17 @@ sub configure {
   }
 
   # Shutdown
-  ndf_end($status);
+  ndf_end($status) if $ndfstarted;
 
   # Handle errors
   if ($status != $good) {
-    my ( $param, $parlen, $opstr, $oplen, @errs );
+    my ( $oplen, @errs );
     do {
-      err_load( $param, $parlen, $opstr, $oplen, $status );
+      err_load( my $param, my $parlen, my $opstr, $oplen, $status );
       push @errs, $opstr;
     } until ( $oplen == 1 );
     err_annul($status);
+    err_end( $status );
     croak "Error during header read from NDF:\n" . join "\n", @errs;
   }
   err_end($status);
@@ -238,7 +243,7 @@ Write a FITS header to an NDF.
 Accepts an NDF identifier or a filename.  If both C<ndfID> and C<File> keys
 exist, C<ndfID> key takes priority.
 
-Returns C<undef> on error, true if the header was written successfully.
+Throws an exception (croaks) on error.
 
 =cut
 
@@ -256,8 +261,8 @@ sub writehdr {
   # starlink)
   err_begin( $status );
 
-  # Start NDF
-  ndf_begin();
+  # Indicate whether we have started an NDF context or not
+  my $ndfstarted;
 
   # Look in the args hash and open the output file if needed
   my $ndfid;
@@ -266,6 +271,11 @@ sub writehdr {
   } elsif (exists $args{File}) {
     my $file = $args{File};
     $file =~ s/\.sdf//;
+
+    # Start NDF
+    ndf_begin();
+    $ndfstarted = 1;
+
     ndf_open(&NDF::DAT__ROOT(), $file, 'UPDATE', 'UNKNOWN',
 	     $ndfid, my $place, $status);
 
@@ -274,11 +284,13 @@ sub writehdr {
     if ($status != $good or $ndfid == 0) {
       # dont want to contaminate existing status
       my $lstat = $good;
-      my $hdsfile .= $file . ".HEADER";
+      my $hdsfile = $file . ".HEADER";
+      err_mark();
       ndf_open(&NDF::DAT__ROOT(), $hdsfile, 'UPDATE', 'UNKNOWN',
 	       $ndfid, $place, $lstat);
+      err_rlse();
 
-      # flush bad status if we succedded
+      # flush bad status if we succeeded
       err_annul($status) if $lstat == $good;
 
     }
@@ -291,7 +303,8 @@ sub writehdr {
     }
 
   } else {
-    return undef;
+    err_end( $status );
+    croak "Missing argument to writehdr. Must include either ndfID or File key";
   }
 
   # Now need to find out whether we have a FITS header in the
@@ -315,25 +328,23 @@ sub writehdr {
   }
 
   # Shutdown
-  ndf_end($status);
+  ndf_end($status) if $ndfstarted;
 
   # Handle errors
   if ($status != $good) {
-    my ( $param, $parlen, $opstr, $oplen, @errs );
+    my @errs;
+    my $oplen;
     do {
-      err_load( $param, $parlen, $opstr, $oplen, $status );
+      err_load( my $param, my $parlen, my $opstr, $oplen, $status );
       push @errs, $opstr;
     } until ( $oplen == 1 );
     err_annul($status);
+    err_end($status);
     croak "Error during header write to NDF:\n" . join "\n", @errs;
   }
   err_end($status);
 
-  # It is possible to annul the errors before exiting if we want
-  # or to flush them out.
   return;
-
-
 }
 
 
@@ -356,8 +367,21 @@ Brad Cavanagh E<lt>b.cavanagh@jach.hawaii.eduE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2004 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful,but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+Place,Suite 330, Boston, MA  02111-1307, USA
 
 =cut
 

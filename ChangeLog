@@ -1,3 +1,8 @@
+2005-03-07  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* NDF/NDF.pm (writehdr): Tidy up error handling. Document that
+	writehdr croaks rather than returning bad status.
+
 2004-10-21  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Item/Item.pm (type): Make sure that type is upper cased. Also
