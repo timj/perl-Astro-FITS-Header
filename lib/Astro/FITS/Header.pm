@@ -555,6 +555,19 @@ sub cards {
   return map { "$_" } @{$self->{HEADER}};
 }
 
+=item B<sizeof>
+
+Return the number of FITS cards in the header
+
+  $number = $header->sizeof;
+
+=cut
+
+sub sizeof {
+  my $self = shift;
+  return $#{$self->{HEADER}};
+}
+
 # A L L I T E M S ---------------------------------------------------------
 
 =item B<allitems>

@@ -4,6 +4,9 @@
           to the WCS information in the header using the Starlink::AST
           module and library.
           
+        * AST/AST.pm: Added constructor method which takes a Starlink::AST
+          FrameSet as a parameter.
+            
 2003-11-12  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.1)
 
         * Documentation updated and released.

@@ -1,3 +1,5 @@
+AST/AST.pm
+AST/Makefile.PL
 CFITSIO/CFITSIO.pm
 CFITSIO/Makefile.PL
 ChangeLog
@@ -14,6 +16,7 @@ NDF/Makefile.PL
 GSD/GSD.pm
 GSD/Makefile.PL
 README
+t/ast.ta
 t/cfitsio.fit
 t/cfitsio.t
 t/ndf.t

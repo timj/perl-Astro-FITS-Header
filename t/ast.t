@@ -10,18 +10,23 @@ BEGIN {
    plan skip_all => "Skip Starlink::AST not available.";
    exit;
  } else {
-   plan tests => 48
+   plan tests => 49;
  }  
 };
 
 # load modules
 use Astro::FITS::Header;
+use Astro::FITS::Header::AST;
 use Astro::FITS::Header::Item;
 
 
 # T E S T   H A R N E S S --------------------------------------------------
 
 ok(1);
+
+
+# GET_WCS() in ASTRO::FITS::HEADER
+# --------------------------------
 
 # read header from DATA block
 my @raw = <DATA>;
@@ -49,7 +54,6 @@ my $xpixel = \@x;
 my $ypixel = \@y;
 
 # FORWARD MAPPING
-# ---------------
 $x[0] = 0;
 $y[0] = 0;;
 $x[1] = 114;
@@ -62,7 +66,6 @@ is( $$xworld[1], 118.5, "Forward mapping of upper bound X co-ordinate" );
 is( $$yworld[1], 127.5, "Forward mapping of upper bound Y co-ordinate" );
 
 # REVERSE MAPPING
-# ---------------
 $x[0] = 4.5;
 $y[0] = -0.5;
 $x[1] = 118.5;
@@ -73,7 +76,15 @@ is( $$yworld[0], 0, "Reverse mapping of lower bound Y co-ordinate" );
 is( $$xworld[1], 114, "Reverse mapping of upper bound X co-ordinate" ); 
 is( $$yworld[1], 128, "Reverse mapping of upper bound Y co-ordinate" );
 
-# Done!
+# new ASTRO::FITS::HEADER::AST()
+# ------------------------------
+
+my $ast_header = new Astro::FITS::Header::AST( FrameSet => $wcsinfo );
+
+# test the header
+is( $ast_header->sizeof(), 8, "Size of returned header" );
+
+exit;
 
 __DATA__
 SIMPLE  =                    T / file does conform to FITS standard             
