@@ -26,6 +26,7 @@ my $header = new Astro::FITS::Header( Cards => \@raw );
 # test the header
 for my $i (0 .. $#raw) {
   my $card = $header->item($i);
+  $card->card( undef ); # clear cache
   ok( "$card", $raw[$i]);  
 }
 

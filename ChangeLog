@@ -1,3 +1,8 @@
+2004-10-21  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* t/parse.t: Make sure that the cache is cleared before we test
+	card creation
+
 2004-08-31  Brad Cavanagh  <b.cavanagh@jach.hawaii.edu>
 
 	* NDF/NDF.pm (Repository): use err_load to prevent errors
