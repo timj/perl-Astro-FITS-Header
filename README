@@ -12,7 +12,8 @@ Requirements
 The Astro::FITS::Header module can work with FITS Header blocks, either
 directly from the primary FITS HDU of a file complying with the FITS data
 standard, or from the FITS extension in an extensible N-dimensional data 
-format (NDF) file.
+format (NDF) file. Additionally the module also supports .HEADER in HDS
+contanier files.
 
 To work with FITS files, the Astro::FITS::Header module requires Pete 
 Ratzlaff's <pratzlaff@cfa.harvard.edu> CFITSIO.pm library (v 0.95 or greater),
@@ -23,7 +24,7 @@ work fine with this version of the library.
 
 For more information on CFITSIO, see http://heasarc.gsfc.nasa.gov/fitsio/
 
-To work with NDF files, the Astro::FITS::Header module requires Tim
+To work with NDF and HDS files, the Astro::FITS::Header module requires Tim
 Jenness' <t.jenness@jach.hawaii.edu> Starlink::NDF.pm module (version 1.42 or
 greater). This module is installed as part of the PERLMODS package in the
 Starlink Software Collection.

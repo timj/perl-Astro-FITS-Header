@@ -1,3 +1,8 @@
+2002-06-24  Alasdair Allan <aa@astro.ex.ac.uk>
+
+        * Minor documentation tweaks to reflect Tim's changes,
+          released as v2.2.
+
 2002-06-19  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* NDF/NDF.pm: Add first support for .HEADER HDS containers 

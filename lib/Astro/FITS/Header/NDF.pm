@@ -18,7 +18,7 @@ Astro::FITS::Header::NDF - Manipulate FITS headers from NDF files
 =head1 DESCRIPTION
 
 This module makes use of the Starlink L<NDF|NDF> module to read and write to
-and NDF FITS extension.
+and NDF FITS extension or to a C<.HEADER> block in an HDS container file.
 
 It stores information about a FITS header block in an object. Takes an hash as an arguement, with either an array reference pointing to an array of FITS header cards, or a filename, or (alternatively) and NDF identifier.
 
