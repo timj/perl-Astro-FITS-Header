@@ -4,18 +4,20 @@
 use strict;
 
 use Test::More;
-BEGIN { plan tests => 48 };
+BEGIN { 
+ eval "use Starlink::AST;";
+ if ($@) {
+   plan skip_all => "Skip Starlink::AST not available.";
+   exit;
+ } else {
+   plan tests => 48
+ }  
+};
 
 # load modules
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
-eval "use Starlink::AST;";
-if ($@) {
-  for (1 ... 48) {
-    skip("Skip Starlink::AST not available.", 1);
-  }
-  exit;
-}
+
 
 # T E S T   H A R N E S S --------------------------------------------------
 
