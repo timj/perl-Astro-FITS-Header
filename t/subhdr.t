@@ -4,10 +4,15 @@
 # Needs a better suite of tests.
 use strict;
 use Test;
-BEGIN { plan tests => 8 };
+BEGIN { plan tests => 11 };
 
 use Astro::FITS::Header;
 use Astro::FITS::Header::Item;
+
+# Need to disable string overloading for tests
+package Astro::FITS::Header;
+no overload '""';
+package main;
 
 # build a test card
 my $int_card = new Astro::FITS::Header::Item(
@@ -73,9 +78,9 @@ $header{NEWTIE} = \%sub;
 my $newtie = $header{NEWTIE};
 my $tieobj = tied %$newtie;
 
-# We need to disable the stringify operator so that we can compare
-# objects directly
-eval 'no overload \'""\';';
+# Make sure we have a short stringification
+ok( length($tieobj) < 40);
+ok( "$tieobj" =~ /Astro::FITS::Header/);
 
 printf "# The tied object is: %s\n",$tieobj;
 printf "# The original object is:: %s\n",$subhdr;
