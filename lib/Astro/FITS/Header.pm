@@ -889,14 +889,12 @@ sub FETCH {
       @out = @values;
     } else {
 
-      # Multi values so join
-      @out = ( join("\n", @values) );
+      # Multi values so join [protecting warnings from undef]
+      @out = ( join("\n", map { defined $_ ? $_ : '' } @values) );
 
       # This is a hangover from the STORE (where we add a \ continuation 
       # character to multiline strings)
-      for my $out (@out) {
-	$out =~ s/\\\n//gs if (defined($out));
-      }
+      $out[0] =~ s/\\\n//gs if (defined($out[0]));
     }
   }
 
