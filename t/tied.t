@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 264 };
+BEGIN { plan tests => 266 };
 
 # load modules
 use Astro::FITS::Header;
@@ -25,7 +25,7 @@ my $header = new Astro::FITS::Header( Cards => \@raw );
 
 # tie
 my %keywords;
-tie %keywords, "Astro::FITS::Header", $header;   
+tie %keywords, "Astro::FITS::Header", $header;
 
 # fetch
 my $value = $keywords{"TELESCOP"};
@@ -125,6 +125,13 @@ foreach $key (keys %keywords) {
     }	until(($header->keyword($line)||'') ne 'COMMENT' || $key ne 'COMMENT');
 
 }
+
+# Test that we can copy in a new hash
+# This test will fail in v2.4 of Astro::FITS::Header
+my $href = \%keywords;
+%{ $href } = ( TELESCOP => 'GEMINI', instrume => 'MICHELLE' );
+ok($href->{TELESCOP}, 'GEMINI');
+ok($href->{INSTRUME}, 'MICHELLE');
 
 #clear
 undef %keywords;

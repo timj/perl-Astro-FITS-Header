@@ -282,13 +282,21 @@ modify all inserted copies.
 
 sub insert{
    my ($self, $index, $item) = @_;
-   
+
+   # If the array is empty and we get a negative index we
+   # must convert it to an index of 0 to prevent a:
+   #   Modification of non-creatable array value attempted, subscript -1
+   # fatal error
+   # This can occur with a tied hash and the %{$tieref} = %new
+   # construct
+   $index = 0 if (scalar(@{$self->{HEADER}} == 0 && $index < 0));
+
    # splice the new FITS header card into the array
    splice @{$self->{HEADER}}, $index, 0, $item;
-   
+
    # rebuild the lookup table from the modified header
-   $self->_rebuild_lookup();   
-   
+   $self->_rebuild_lookup();
+
 }
 
 

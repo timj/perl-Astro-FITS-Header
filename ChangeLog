@@ -1,3 +1,8 @@
+2002-12-03  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Header.pm (insert{): Fix problem with tied hash when
+	doing %$tieref = %new
+
 2002-12-02  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* NDF/NDF.pm (configure): Fix problem with SCUBA raw data. The
