@@ -17,14 +17,17 @@ Astro::FITS::Header::Item - A card image from a FITS header
   $value = $item->value();
   $comment = $item->comment();
 
-  $card = $item->stringify();
+  $card = $item->card();
+
+  $card = "$item";
+
 
 =head1 DESCRIPTION
 
 Stores information about a FITS header item (in the FITS standard these
 are called B<Card Images>). FITS Card Images can be parsed and broken
 into their component keyword, values and comments. Card Images can also
-be created from an object.
+be created from its components keyword, value and comment.
 
 =cut
 
@@ -506,7 +509,7 @@ sub parse_card {
 
 =begin __private
 
-=item B<_make_card>
+=item B<_stringify>
 
 Internal routine to generate a FITS header card using the contents of
 the object. This rouinte should not be called directly. Use the 
@@ -633,6 +636,9 @@ sub _stringify {
 
 Copyright (C) 2001 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =head1 AUTHORS
 
