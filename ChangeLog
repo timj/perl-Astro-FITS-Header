@@ -1,3 +1,16 @@
+          
+2003-07-02  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.7.1)
+
+        * Applied patches, updated documentation and shipped as 2.7.1
+
+2003-07-02  Craig DeForest  <djerius@cfa.harvard.edu>
+
+        * Patched to correct the column locations in the COMMENT and HEADER
+          cards, and removed explicit stripping of leading blanks from COMMENT
+          and HEADER card values upon input.
+          
+        * Fixed test errors and added more explicit tests on the parsing.    
+          
 2003-07-02  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.7)
 
         * Applied patches, updated documentation and shipped as 2.7

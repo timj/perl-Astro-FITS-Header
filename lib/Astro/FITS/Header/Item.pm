@@ -415,8 +415,6 @@ sub parse_card {
     # We have comments
     $comment = substr($card,8);
     $comment =~ s/\s+$//;  # Trailing spaces
-    $comment =~ s/^\s+\///; # Leading spaces and slashes
-    $comment =~ s/^\s+//;  # Leading space
 
     # Alasdair wanted to store this as a value
     $self->comment( $comment );

@@ -9,7 +9,7 @@ use Astro::FITS::Header::Item;
 
 # load test
 use Test;
-BEGIN { plan tests => 26 };
+BEGIN { plan tests => 68 };
 
 # T E S T   H A R N E S S --------------------------------------------------
 
@@ -79,12 +79,12 @@ my @ANSWER = (
 	      },
 	      {
 	       Keyword => 'HISTORY',
-	       Comment => 'Testing the HISTORY type',
+	       Comment => '  Testing the HISTORY type',
 	       Type    => 'COMMENT',
 	      },
 	      {
 	       Keyword => 'STRANGE',
-	       Comment => 'Testing the non-standard COMMENT',
+	       Comment => '  Testing the non-standard COMMENT',
 	       Type    => 'COMMENT',
 	      },
 	      {
@@ -112,6 +112,15 @@ foreach my $n (0..$#raw) {
   # Compare the actual card with the reconstructed version
   # This tests the parsing of header cards
   ok( "$item", $card );
+
+  # Test that the parsed card fields match what they're supposed to be
+  # LOGICAL values are translated to booleans by the object, so must
+  # convert values
+  ok( eval '$item->'.lc($_),
+      ('Value' eq $_ && 'LOGICAL' eq $ANSWER[$n]{Type}) ?
+        { T => 1, F => 0 }->{$ANSWER[$n]{$_}} : $ANSWER[$n]{$_},
+    ) foreach keys %{$ANSWER[$n]};
+
 
   # Now create a new item from the bits
   $item = new Astro::FITS::Header::Item( %{ $ANSWER[$n] });
@@ -149,7 +158,7 @@ STRING  = 'string  '           / Testing the STRING type
 LNGSTR  = 'a very long string that is long' / Long string                       
 QUOTE   = 'a '' single quote'  / Single quote                                   
 ZERO    = ''                   / Zero length quote                              
-COMMENT   Testing the COMMENT type                                              
+COMMENT Testing the COMMENT type                                                
 HISTORY   Testing the HISTORY type                                              
 STRANGE   Testing the non-standard COMMENT                                      
 END                                                                             
