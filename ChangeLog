@@ -17,6 +17,11 @@
 	   header read by CFITSIO, which is not always the case.  Now
 	   explictily adds one.
 
+2003-03-13  Malcolm J. Currie <mjc@star.rl.ac.uk>
+
+        * Item/Item.pm: Allow for a HIERARCH hierarchical header following
+          a blank keyword.
+
 2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.1)
 
         * t/hierarch.t: Added more test cases.
