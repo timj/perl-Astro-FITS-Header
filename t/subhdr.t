@@ -95,7 +95,7 @@ ok($header{NEWTIE}->{VALUE}, $another_card->value);
 # Test autovivification
 # Note that $hdr{BLAH}->{YYY} = 5 does not work
 my $void = $header{BLAH}->{XXX};
-print "# VOID is $void\n";
+printf "# VOID is %s\n", defined $void ? $void : '(undef)';
 ok(ref($header{BLAH}), 'HASH');
 $header{BLAH}->{XXX} = 5;
 ok($header{BLAH}->{XXX}, 5);

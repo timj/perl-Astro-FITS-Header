@@ -1,3 +1,22 @@
+2003-04-28  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.2)
+
+        * Applied patch by Diab, shipped as 2.6.2
+
+2003-03-28  Diab Jerius  <djerius@cfa.harvard.edu>
+
+	* t/subhdr.t: code cleanup to avoid undefined warning
+
+2003-03-26  Diab Jerius  <djerius@cfa.harvard.edu>
+
+	* CFITSIO/CFITSIO.pm (writehdr):
+	   if there was no END card in the existing header the initial
+	   card was not written.  also, additional streamlining of code.
+	
+	* CFITSIO/CFITSIO.pm (configure):
+	   the code assumed that there was an END card in the existing
+	   header read by CFITSIO, which is not always the case.  Now
+	   explictily adds one.
+
 2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.1)
 
         * t/hierarch.t: Added more test cases.

@@ -131,13 +131,19 @@ sub configure {
 
      # Set the FITS array to empty
      my @fits = ();
-     
-     # read the cards, including END card
-     for my $i (0 .. $numkeys) {
-        $ifits->read_record($i+1, my $card, $status);
-        push(@fits, $card);   
+
+     # read the cards. Note that CFITSIO doesn't include the END card
+     # in it's counting
+     for my $i (1 .. $numkeys) {
+        $ifits->read_record($i, my $card, $status);
+        push(@fits, $card);
      }
-     
+
+     # add an END card. previously this was extracted from CFITSIO
+     # by reading an extra card.  however, the header may not have
+     # been completed by CFITSIO, so that extra card might not exist.
+     push @fits, Astro::FITS::Header::Item->new( Keyword => 'END')->card;
+
      if ($status == 0) {
         # Parse the FITS array
         $self->SUPER::configure( Cards => \@fits );
@@ -198,46 +204,30 @@ sub writehdr {
 
   # file sucessfully opened?
   if( $status == 0 ) {
-  
-    # Get the fits array
-    my @cards = $self->cards; 
 
     # Get size of FITS header
     my ($numkeys, $morekeys);
-    $ifits->get_hdrspace( $numkeys, $morekeys, $status);      
+    $ifits->get_hdrspace( $numkeys, $morekeys, $status);
 
-    # delete keys
-    my @deleted_keys;
-    for my $i ( 1 .. $numkeys ) {
-       # grab the keyword
-       $ifits->read_keyn( $i, my $keyword, my $value, my $comment, $status);
-       # mark it for cleanup
-       push(@deleted_keys, $keyword); 
-    }
-    
-    # This is a kludge, for some reason you can't reliably delete
-    # cards by index using CFITSIO (reserved keywords?), but you 
-    # can by name, so we delete the entire header by name. Icky!
-    for  my $j ( 0 .. $#deleted_keys ) { 
-       # delete it if it doesn't exist
-       $ifits->delete_key($deleted_keys[$j], $status) ;
-    }
+    # delete the cards in the current header. as cards are deleted the
+    # ones below it are shifted up (according to the CFITSIO docs).
+    # we thus delete from the bottom up to avoid all of that work.
+    $ifits->delete_record( $numkeys--, $status )
+      while $numkeys;
 
-    # write the new cards, not including END card
-    my @end_cards = $self->index('END'); 
-    for my $j (0 .. $#cards ) {
-       # write the card unless its the END card, 
-       # which we've kept from the old header
-       $ifits->write_record($cards[$j], $status ) unless $end_cards[0] == $j;
-    } 
+    # write the new cards, not including END card if it exists
+    my @cards = $self->cards;
+    if ( defined (my $end_card = $self->index('END')) )
+      { splice( @cards, $end_card, 1 ) }
+    $ifits->write_record($_, $status ) foreach @cards;
 
   }
- 
+
   # clean up
   if ( $status != 0 ) {
      croak("Error $status opening FITS file");
   }
-    
+
   # close file, but only if we opened it
   $ifits->close_file( $status )
     unless exists $args{fitsID};
