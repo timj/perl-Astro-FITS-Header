@@ -191,7 +191,7 @@ sub writehdr {
      $ifits = $args{fitsID};
   } elsif (exists $args{File}) {
      $ifits = Astro::FITS::CFITSIO::open_file( $args{File}, 
-					       Astro::FITS::CFITSIO::READWRITE(), $status );
+			 Astro::FITS::CFITSIO::READWRITE(), $status );
   } else {
      croak("Argument hash does not contain fitsID, File or Cards");
   }
