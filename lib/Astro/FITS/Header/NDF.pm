@@ -22,12 +22,10 @@ use strict;
 use Carp;
 use NDF qw/ :ndf :dat :err /;
 
-use Astro::FITS::Header;
-#use base qw/ Astro::FITS::Header /;
+use base qw/ Astro::FITS::Header /;
 
-use vars qw/ $VERSION @ISA /;
+use vars qw/ $VERSION /;
 
-@ISA = qw/ Astro::FITS::Header /;
 $VERSION = '0.01';
 
 =head1 METHODS
