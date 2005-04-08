@@ -529,34 +529,28 @@ is negative, counts from the end of the FITS header.
 
 sub splice {
    my $self = shift;
-   
+
    # check for arguments
    my @cards;
-   
+
    if ( scalar(@_) == 0 ) {
       # none
       @cards = splice @{$self->{HEADER}};
-      $self->_rebuild_lookup();
-      return wantarray ? @cards : $cards[scalar(@cards)-1];
    } elsif ( scalar(@_) == 1 ) {
       # $offset
       my ( $offset ) = @_;
-      @cards = splice @{$self->{HEADER}}, $offset;          
-      $self->_rebuild_lookup();
-      return wantarray ? @cards : $cards[scalar(@cards)-1];
+      @cards = splice @{$self->{HEADER}}, $offset;
    } elsif ( scalar(@_) == 2 ) {
       # $offset and $length
       my ( $offset, $length ) = @_;
       @cards = splice @{$self->{HEADER}}, $offset, $length;
-      $self->_rebuild_lookup();
-      return wantarray ? @cards : $cards[scalar(@cards)-1];
    } else {
       # $offset, $length and @list 
       my ( $offset, $length, @list ) = @_;
-      @cards = splice @{$self->{HEADER}}, $offset, $length;	
-      $self->_rebuild_lookup();
-      return wantarray ? @cards : $cards[scalar(@cards)-1];
+      @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
    }
+   $self->_rebuild_lookup();
+   return wantarray ? @cards : $cards[scalar(@cards)-1];
 }
 
 # C A R D S --------------------------------------------------------------

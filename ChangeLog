@@ -1,5 +1,8 @@
 2005-04-07  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* Header.pm (splice): Fix splice(offset,length,list). It's never
+	worked. Fix corresponding (broken) test in t/parse.t
+
 	* t/subhdr.t: Extend tests to support both forms of subheader. 
 
 	* Header.pm (TIEARRAY): Add support for tied subheaders using a

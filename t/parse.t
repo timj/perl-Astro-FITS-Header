@@ -5,7 +5,7 @@ use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 160 };
+BEGIN { plan tests => 162 };
 
 # load modules
 use Astro::FITS::Header;
@@ -87,6 +87,10 @@ my @comp = ( $raw[0], $int_card, $raw[1], $raw[2], $raw[3], $raw[4] );
 for my $i (0 .. $#cards) {
   ok( "$cards[$i]", "$comp[$i]");   
 }
+my $first = $header->item(0);
+ok( "$first", "$string_card");
+$first = $header->splice(0,1);
+ok( "$first", "$string_card");
 
 # item
 my $test_item = $header->item(1);
