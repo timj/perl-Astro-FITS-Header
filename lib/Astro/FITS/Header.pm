@@ -874,9 +874,15 @@ force string evaluation, feed in a trivial array ref:
 Calls to keys() or each() will, by default, return the keywords in the order
 in which they appear in the header.
 
-When the key refers to a subheader entry, a hash reference is returned.
-If a hash reference is stored in a value it is converted to a
-C<Astro::FITS::Header> object.
+=head2 Sub-headers
+
+When the key refers to a subheader entry (ie an item of type
+"HEADER"), a hash reference is returned.  If a hash reference is
+stored in a value it is converted to a C<Astro::FITS::Header> object.
+
+If the special key "SUBHEADERS" is used, it will return the array of
+subheaders, (as stored using the C<subhdrs> method) each of which will
+be tied to a hash. Subheaders can be stored using normal array operations.
 
 =head2 SIMPLE and END cards
 
@@ -935,6 +941,13 @@ sub FETCH {
   my ($self, $key) = @_;
 
   $key = uc($key);
+
+  # if the key is called SUBHEADERS we should tie to an array
+  if ($key eq 'SUBHEADERS') {
+    my @dummy;
+    tie @dummy, "Astro::FITS::HeaderCollection", scalar $self->subhdrs;
+    return \@dummy;
+  }
 
   # If the key has a _COMMENT suffix we are looking for a comment
   my $wantvalue = 1;
@@ -1225,8 +1238,14 @@ sub STORE {
 
 
 # reports whether a key is present in the hash
+# SUBHEADERS only exist if there are subheaders
 sub EXISTS {
   my ($self, $keyword) = @_;
+  $keyword = uc($keyword);
+
+  if ($keyword eq 'SUBHEADERS') {
+    return ( scalar(@{$self->subhdrs}) > 0 ? 1 : 0);
+  }
 
   if( !exists( ${$self->{LOOKUP}}{$keyword} ) ) {
     return undef;
@@ -1267,7 +1286,17 @@ sub FIRSTKEY {
 # implements keys() and each()
 sub NEXTKEY {
   my ($self, $keyword) = @_; 
-  return undef if $self->{LASTKEY}+1 == scalar(@{$self->{HEADER}}) ;
+
+  # abort if the number of keys we have served equals the number in the
+  # header array. One wrinkle is that if we have SUBHDRS we want to go
+  # rount one more time
+  if ($self->{LASTKEY}+1 == scalar(@{$self->{HEADER}})) {
+    if (scalar(@{ $self->subhdrs}) && !$self->{SEENKEY}->{SUBHEADERS}) {
+      $self->{SEENKEY}->{SUBHEADERS} = 1;
+      return "SUBHEADERS";
+    }
+    return undef
+  }
 
   # Skip later lines of multi-line cards...
   my($a);
@@ -1311,6 +1340,155 @@ Brad Cavanagh E<lt>b.cavanagh@jach.hawaii.eduE<gt>
 
 
 =cut
+
+package Astro::FITS::HeaderCollection;
+
+use 5.006;
+use warnings;
+use strict;
+use Carp;
+
+# Class wrapper for subhdrs tie. Not (yet) a public interface
+# we simply need a class that we can tie the subhdrs array to.
+
+sub TIEARRAY {
+  my ($class, $container) = @_;
+  # create an object, but we want to avoid blessing the actual
+  # array into this class
+  return bless { SUBHDRS => $container }, $class;
+}
+
+# must return a new tie
+sub FETCH {
+  my $self = shift;
+  my $index = shift;
+
+  my $arr = $self->{SUBHDRS};
+  if ( $index >= 0 && $index <= $#$arr ) {
+    return $self->_hdr_to_tie( $arr->[$index] );
+  } else {
+    return undef;
+  }
+}
+
+sub STORE {
+  my $self = shift;
+  my $index = shift;
+  my $value = shift;
+
+  my $hdr = $self->_tie_to_hdr( $value );
+  $self->{SUBHDRS}->[$index] = $hdr;
+}
+
+sub FETCHSIZE {
+  my $self = shift;
+  return scalar( @{ $self->{SUBHDRS} });
+}
+
+sub STORESIZE {
+  croak "Tied STORESIZE for SUBHDRS not yet implemented\n";
+}
+
+sub EXTEND {
+
+}
+
+sub EXISTS {
+  my $self = shift;
+  my $index = shift;
+  my $arr = $self->{SUBHDRS};
+
+  return 0 if $index > $#$arr || $index < 0;
+  return 1 if defined $self->{SUBHDRS}->[$index];
+  return 0;
+}
+
+sub DELETE {
+  my $self = shift;
+  my $index = shift;
+  $self->{SUBHDRS}->[$index] = undef;
+}
+
+sub CLEAR {
+  my $self = shift;
+  @{ $self->{SUBHDRS} } = ();
+}
+
+sub PUSH {
+  my $self = shift;
+  my @list = @_;
+
+  # convert
+  @list = map { $self->_tie_to_hdr($_) } @list;
+  push(@{ $self->{SUBHDRS} }, @list);
+}
+
+sub POP {
+  my $self = shift;
+  my $popped = pop( @{ $self->{SUBHDRS} } );
+  return $self->_hdr_to_tie($popped);
+}
+
+sub SHIFT {
+  my $self = shift;
+  my $shifted = shift( @{ $self->{SUBHDRS} } );
+  return $self->_hdr_to_tie($shifted);
+}
+
+sub UNSHIFT {
+  my $self = shift;
+  my @list = @_;
+
+  # convert
+  @list = map { $self->_tie_to_hdr($_) } @list;
+  unshift(@{ $self->{SUBHDRS} }, @list);
+
+}
+
+# internal mappings
+
+# Given an Astro::FITS::Header object, return the thing that 
+# should be returned to the user of the tie
+sub _hdr_to_tie {
+  my $self = shift;
+  my $hdr = shift;
+
+  if (defined $hdr) {
+    my %header;
+    tie %header, ref($hdr), $hdr;
+    return \%header;
+  }
+  print "UNDEF\n";
+  return undef;
+}
+
+# convert an input argument as either a Astro::FITS::Header object
+# or a hash, to an internal representation (an A:F:H object)
+sub _tie_to_hdr {
+  my $self = shift;
+  my $value = shift;
+
+  if (UNIVERSAL::isa($value, "Astro::FITS::Header")) {
+    return $value;
+  } elsif (ref($value) eq 'HASH') {
+    my $tied = tied %$value;
+    if (defined $tied && UNIVERSAL::isa($tied, "Astro::FITS::Header")) {
+      # Just take the object
+      return $tied;
+    } else {
+      # Convert it to a hash
+      my @items = map { new Astro::FITS::Header::Item( Keyword => $_,
+                                                       Value => $value->{$_}
+                                                     ) } keys (%{$value});
+
+      # Create the Header object.
+      return new Astro::FITS::Header( Cards => \@items );
+
+    }
+  } else {
+    croak "Do not know how to store '$value' in a SUBHEADER\n";
+  }
+}
 
 # L A S T  O R D E R S ------------------------------------------------------
 

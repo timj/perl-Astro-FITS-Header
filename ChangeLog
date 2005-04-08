@@ -1,6 +1,12 @@
 2005-04-07  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* t/subhdr.t: Extend tests to support both forms of subheader. 
+
+	* Header.pm (TIEARRAY): Add support for tied subheaders using a
+	SUBHEADERS keyword.
+	
 	* Header.pm (subhdrs): Check class of arguments before storing them.
+
 
 2005-03-07  Tim Jenness  <timj@jach.hawaii.edu>
 
@@ -26,33 +32,33 @@
         
 2004-03-06  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
 
-        * Header.pm: Fix tied interface so blank cards (with and without
-          equals sign in column 10) come out as proper undef items or
-          named comments, respectively.
+	* Header.pm: Fix tied interface so blank cards (with and without
+	equals sign in column 10) come out as proper undef items or named
+	comments, respectively.
 
-        * t/tied.t: Test for above.
+	* t/tied.t: Test for above.
 
 2004-02-29  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Item/Item.pm: Fixed bug in comment parsing.
+	* Item/Item.pm: Fixed bug in comment parsing.
         
 2004-02-23  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Header.pm: Added get_wcs() method to allow you direct access
-          to the WCS information in the header using the Starlink::AST
-          module and library.
+	* Header.pm: Added get_wcs() method to allow you direct access to
+	the WCS information in the header using the Starlink::AST module
+	and library.
           
-        * AST/AST.pm: Added constructor method which takes a Starlink::AST
-          FrameSet as a parameter.
+	* AST/AST.pm: Added constructor method which takes a Starlink::AST
+	FrameSet as a parameter.
           
-        * Moved test suite for Astro::FITS::Header::Item to main directory,
-          and deleted separate MANIFEST for this module. Pretty much tied to
-          the main Astro::FITS::Header infrastructure now, unlikely to be
-          distributed separately anymore.
+	* Moved test suite for Astro::FITS::Header::Item to main
+	directory, and deleted separate MANIFEST for this module. Pretty
+	much tied to the main Astro::FITS::Header infrastructure now,
+	unlikely to be distributed separately anymore.
               
 2003-11-12  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.1)
 
-        * Documentation updated and released.
+	* Documentation updated and released.
         
 2003-10-22  Brad Cavanagh  <b.cavanagh@jach.hawaii.edu>
 
@@ -64,31 +70,31 @@
 
 2003-10-21  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.8.0)
  
-        * Applied patches supplied by Jim Lewis <jrl@ast.cam.ac.uk> which
-          add support for MEF files. Modified documentation and shipped
-          as version 2.8.0
+	* Applied patches supplied by Jim Lewis <jrl@ast.cam.ac.uk> which
+	add support for MEF files. Modified documentation and shipped as
+	version 2.8.0
          
 2003-07-02  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.7.1)
 
-        * Applied patches, updated documentation and shipped as 2.7.1
+	* Applied patches, updated documentation and shipped as 2.7.1
 
 2003-07-02  Craig DeForest  <djerius@cfa.harvard.edu>
 
-        * Patched to correct the column locations in the COMMENT and HEADER
-          cards, and removed explicit stripping of leading blanks from COMMENT
-          and HEADER card values upon input.
+	* Patched to correct the column locations in the COMMENT and
+	HEADER cards, and removed explicit stripping of leading blanks
+	from COMMENT and HEADER card values upon input.
           
-        * Fixed test errors and added more explicit tests on the parsing.    
+	* Fixed test errors and added more explicit tests on the parsing.
           
 2003-07-02  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.7)
 
-        * Applied patches, updated documentation and shipped as 2.7
+	* Applied patches, updated documentation and shipped as 2.7
 
 2003-06-27  Craig DeForest  <djerius@cfa.harvard.edu>
 
-        * Header.pm: Added slash-based comment parsing to the tied interface
+	* Header.pm: Added slash-based comment parsing to the tied interface
 
-        * t/tied.t: Added test cases.
+	* t/tied.t: Added test cases.
         
 2003-06-23  Diab Jerius  <djerius@cfa.harvard.edu>
 
@@ -108,7 +114,7 @@
 	
 2003-04-28  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.2)
 
-        * Applied patch by Diab, shipped as 2.6.2
+	* Applied patch by Diab, shipped as 2.6.2
 
 2003-03-28  Diab Jerius  <djerius@cfa.harvard.edu>
 
@@ -127,20 +133,20 @@
 
 2003-03-13  Malcolm J. Currie <mjc@star.rl.ac.uk>
 
-        * Item/Item.pm: Allow for a HIERARCH hierarchical header following
-          a blank keyword.
+	* Item/Item.pm: Allow for a HIERARCH hierarchical header following
+	a blank keyword.
 
 2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6.1)
 
-        * t/hierarch.t: Added more test cases.
+	* t/hierarch.t: Added more test cases.
 
 2003-03-12 Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.6)
 
-        * Minor documentation tweaks and released as Version 2.6
+	* Minor documentation tweaks and released as Version 2.6
         
 2003-03-12 Craig DeForest <deforest@boulder.swri.edu> 
 
-        * Header.pm 
+	* Header.pm 
 	   - FETCH: END card always returns ' ' if present, undef if not.
 	   - STORE: END & SIMPLE cards are always put in the right place.
 	   - STORE: Cleaned out some extra cruft in the card assignment 
@@ -155,9 +161,9 @@
 	   
 2003-03-11  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.5.1)
 
-        * Minor documentation tweaks, badged as version 2.5
+	* Minor documentation tweaks, badged as version 2.5
         
-        * t/hierarch.t: Added test harness for ESO HIERARCH header keywords
+	* t/hierarch.t: Added test harness for ESO HIERARCH header keywords
 
 2003-03-10  Tim Jenness  <timj@jach.hawaii.edu>
 
@@ -174,7 +180,7 @@
 
 2002-01-19  Malcolm J. Currie <mjc@star.rl.ac.uk>
 
-        * Item/Item.pm: Added support for HIERARCH hierarchical keywords.
+	* Item/Item.pm: Added support for HIERARCH hierarchical keywords.
 
 2002-12-05  Tim Jenness  <timj@jach.hawaii.edu>
 
@@ -204,13 +210,13 @@
 
 2002-11-27  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.4)
 
-        * Added patch provided by Diab Jerius <djerius@cfa.harvard.edu>
-          which allows you to open files in ReadOnly mode. Additionally
-          it moves the module over to using the new Astro::FITS::CFITSIO 
-          rather than the older CFITSIO module.
+	* Added patch provided by Diab Jerius <djerius@cfa.harvard.edu>
+	which allows you to open files in ReadOnly mode. Additionally it
+	moves the module over to using the new Astro::FITS::CFITSIO rather
+	than the older CFITSIO module.
 
-        * Minor documentation changes to reflect new versions of the
-          Astro::FITS::CFITSIO library now needed by the module.
+	* Minor documentation changes to reflect new versions of the
+	Astro::FITS::CFITSIO library now needed by the module.
           
 2002-11-14  Tim Jenness  <timj@jach.hawaii.edu>
 
@@ -221,8 +227,8 @@
 
 2002-06-24  Alasdair Allan <aa@astro.ex.ac.uk> (Version 2.2)
 
-        * Minor documentation tweaks to reflect Tim's changes,
-          released as v2.2.
+	* Minor documentation tweaks to reflect Tim's changes, released as
+	v2.2.
 
 2002-06-19  Tim Jenness  <timj@jach.hawaii.edu>
 
@@ -240,42 +246,43 @@
 
 2002-06-10  Alasdair Allan <aa@astro.ex.ac.uk> 
 
-        * Minor documentation changes, integrated patches into the main
-          CVS tree, released as v2.1. The major change from v1.x is a
-          much improved tied interface, see the POD for details.
+	* Minor documentation changes, integrated patches into the main
+	CVS tree, released as v2.1. The major change from v1.x is a much
+	improved tied interface, see the POD for details.
 
 2002-05-14   Craig DeForest <deforest@boulder.swri.edu>
 
-        * Header.pm: Fix to typecasting of string in tied interface 
+	* Header.pm: Fix to typecasting of string in tied interface 
 
-        * t/parse.t: Added single-quote case
+	* t/parse.t: Added single-quote case
 
 2002-05-10   Craig DeForest <deforest.@boulder.swri.edu>
  
-        * Header.pm: Minor bug fix for FETCH of undefined tag values 
+	* Header.pm: Minor bug fix for FETCH of undefined tag values
           (used to return ''; now returns undef)
 
-        * Header.pm: FETCH and STORE convert tags to ALL UPPERCASE
-          per the FITS standard.
+	* Header.pm: FETCH and STORE convert tags to ALL UPPERCASE per the
+	FITS standard.
 
-        * Header.pm: undefine the type of newly-assigned cards in the 
-          tied-hash code, so that the autotyper can figure it out.
+	* Header.pm: undefine the type of newly-assigned cards in the
+	tied-hash code, so that the autotyper can figure it out.
 
-        * Header.pm: Hash-ref passing now forces string interpretation
+	* Header.pm: Hash-ref passing now forces string interpretation
          
 2002-05-09   Craig DeForest <deforest@boulder.swri.edu>
 
-        * Header.pm: Added multiline support to the tied interface, using
-          multiline string return -- which should preserve 0th-element 
-          functionality in arithmetic expressions, as expected by legacy code.
+	* Header.pm: Added multiline support to the tied interface, using
+	multiline string return -- which should preserve 0th-element
+	functionality in arithmetic expressions, as expected by legacy
+	code.
 
-        * t/tied.t: added multline tests.
+	* t/tied.t: added multline tests.
 
 2002-03-29   Alasdair Allan <aa@astro.ex.ac.uk> 
 
-        * Header.pm: Added freeze() function
+	* Header.pm: Added freeze() function
         
-        * Item.pm: Added freeze() function
+	* Item.pm: Added freeze() function
         
 2001-10-16   Diab Jerius  <dj@head-cfa.harvard.edu>
 
@@ -286,37 +293,37 @@
 	
 2001-06-26  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Header.pm: Fixed bug in removebyname() method
+	* Header.pm: Fixed bug in removebyname() method
 
 2001-06-18  Alasdair Allan <aa@astro.ex.ac.uk>
         
-        * Header.pm: Added allitems() method	
+	* Header.pm: Added allitems() method	
 
 2001-03-30  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Packaged for CPAN distribution, included README and GPL files
+	* Packaged for CPAN distribution, included README and GPL files
 	
 2001-03-29  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * CFITSIO/CFITSIO.pm: Implemented writehdr
+	* CFITSIO/CFITSIO.pm: Implemented writehdr
 	
 	* t/cfitsio.t: Added test harness for new class
 
 2001-03-28  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * CFITSIO/CFITSIO.pm: Implemented configure
+	* CFITSIO/CFITSIO.pm: Implemented configure
 	
 2001-03-27  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Header.pm: Added tied hash to header class
+	* Header.pm: Added tied hash to header class
 	
 	* t/tied.t: Added test harness for new tied interface
 
 2001-03-24  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * CFITSIO/CFITSIO.pm: Skeleton structre for CFITSIO module added
+	* CFITSIO/CFITSIO.pm: Skeleton structre for CFITSIO module added
  	
-        * t/parse.t: Rewrote test harness for Header
+	* t/parse.t: Rewrote test harness for Header
 	
 	* Header.pm: Fixed bugs in array maps being returned by some functions
 	
@@ -328,7 +335,7 @@
 
 2001-03-16  Tim Jenness  <timj@jach.hawaii.edu>
 
-        * NDF/NDF.pm: Add
+	* NDF/NDF.pm: Add
 
 	* t/ndf.t: Add test
 
@@ -346,9 +353,9 @@
 
 2001-03-15  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * t/parse.t: Rewrote test harness
+	* t/parse.t: Rewrote test harness
 
-        * Item/Item.pm: Added some work arounds for common non-standard entries
+	* Item/Item.pm: Added some work arounds for common non-standard entries
 
 2001-03-12  Tim Jenness  <timj@jach.hawaii.edu>
 
@@ -356,4 +363,4 @@
 
 2001-03-10  Alasdair Allan <aa@astro.ex.ac.uk>
 
-        * Original version
+	* Original version

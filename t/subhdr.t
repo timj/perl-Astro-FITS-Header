@@ -3,7 +3,7 @@
 # Test that sub-headers work correctly
 # Needs a better suite of tests.
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 28;
 
 require_ok( "Astro::FITS::Header" );
 require_ok( "Astro::FITS::Header::Item");
@@ -130,4 +130,56 @@ printf "# VOID is %s\n", defined $void ? $void : '(undef)';
 is(ref($header{BLAH}), 'HASH');
 $header{BLAH}->{XXX} = 5;
 is($header{BLAH}->{XXX}, 5);
+
+# Test tied array subheader
+ok(exists $header{SUBHEADERS}, "Does the subheader exist?");
+my $subh = $header{SUBHEADERS};
+is( ref($subh), "ARRAY", "Do we have a tie?");
+is(@$subh, 2, "Got correct number of array subheaders");
+is($subh->[1]->{H2AM}, "AM", "array to tied hash");
+
+# make sure we get SUBHEADERS as a valid key
+my $got;
+for my $k (keys %header) {
+  $got = 1 if $k eq 'SUBHEADERS';
+}
+ok( $got, "SUBHEADERS appeared in foreach");
+
+my $p = pop( @$subh );
+is($p->{H2AM}, "AM", "pop?");
+
+# push it back on the front
+unshift( @$subh, $p);
+is($subh->[0]->{H2AM}, "AM", "unshift?");
+
+# shift it off
+my $s = shift( @$subh );
+is($s->{H2AM}, "AM", "shift?");
+
+# and push it on the end
+push(@$subh, $s);
+is($subh->[1]->{H2AM}, "AM", "push?");
+
+# Now remove the subhdrs using the tie
+@$subh = ();
+
+# store the subheader from the earlier item
+$subh->[2] = $header{BLAH};
+is($subh->[2]->{XXX}, 5);
+
+# Store a hash
+$subh->[3] = { AAA => "22"};
+is($subh->[3]->{AAA}, 22);
+
+# Clear using the objecy
+@{ $hdr->subhdrs } = ();
+
+ok(!exists $header{SUBHEADERS}, "Subheader should not exist");
+
+# make sure we do not get SUBHEADERS as a valid key
+$got = 0;
+for my $k (keys %header) {
+  $got = 1 if $k eq 'SUBHEADERS';
+}
+ok( !$got, "SUBHEADERS should not appear in foreach");
 
