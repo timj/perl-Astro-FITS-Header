@@ -1,3 +1,7 @@
+2005-04-07  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Header.pm (subhdrs): Check class of arguments before storing them.
+
 2005-03-07  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* NDF/NDF.pm (writehdr): Tidy up error handling. Document that

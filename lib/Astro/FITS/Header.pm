@@ -22,12 +22,13 @@ package Astro::FITS::Header;
 #    Tim Jenness (t.jenness@jach.hawaii.edu)
 #    Craig DeForest (deforest@boulder.swri.edu)
 #    Jim Lewis (jrl@ast.cam.ac.uk)
+#    Brad Cavanagh (b.cavanagh@jach.hawaii.edu)
 
 #  Revision:
 #     $Id$
 
 #  Copyright:
-#     Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council. 
+#     Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
 #     Portions copyright (C) 2002 Southwest Research Institute
 #     All Rights Reserved.
 
@@ -55,6 +56,7 @@ of FITS header cards as input.
 
 use strict;
 use vars qw/ $VERSION /;
+use Carp;
 
 use Astro::FITS::Header::Item;
 
@@ -116,7 +118,7 @@ sub new {
 
 =over 4
 
-=item B<tieRetRef>
+=item B<tiereturnsref>
 
 Indicates whether the tied object should return multiple values
 as a single string joined by newline characters (false) or 
@@ -142,10 +144,18 @@ sub tiereturnsref {
 
 =item B<subhdrs>
 
-Set or return the subheaders for a Header object
+Set or return the subheaders for a Header object. Arguments must be
+given as C<Astro::FITS::Header> objects.
 
     $header->subhdrs(@hdrs);
     @hdrs = $header->subhdrs;
+
+This method should be used when you have additional header components
+that should be associated with the primary header but they are not
+associated with a particular name, just an ordering.
+
+FITS headers that are associated with a name can be stored directly
+in the header using an C<Astro::FITS::Header::Item> of type 'HEADER'.
 
 =cut
 
@@ -153,6 +163,15 @@ sub subhdrs {
     my $self = shift;
 
     if (@_) {
+        # verify the class
+        my $i;
+        for my $h (@_) {
+	  croak "Argument $i supplied to subhdrs method is not a Astro::FITS::Header object\n"
+	    unless UNIVERSAL::isa( $h, "Astro::FITS::Header" );
+          $i++;
+        }
+
+        # store them
         @{$self->{SUBHDRS}} = @_;
     }
     if (wantarray()) {
@@ -787,7 +806,7 @@ string.  Extra-long string values are handled gracefully: they get
 split among multiple cards, with a backslash at the end of each card
 image.  They're transparently reassembled when you access the data, so
 that there is a strong analogy between multiline string values and multiple
-cards.  
+cards.
 
 In general, appending to hash entries that look like strings does what
 you think it should.  In particular, comment cards have a newline
@@ -852,8 +871,8 @@ force string evaluation, feed in a trivial array ref:
   $hash{ALPHA} = "T";      # generates a LOGICAL card containing T. 
   $hash{ALPHA} = ["T"];    # generates a STRING card containing "T".
 
-Calls to keys() or each() will, by default, return the keywords in the order 
-n which they appear in the header.
+Calls to keys() or each() will, by default, return the keywords in the order
+in which they appear in the header.
 
 When the key refers to a subheader entry, a hash reference is returned.
 If a hash reference is stored in a value it is converted to a
@@ -861,12 +880,12 @@ C<Astro::FITS::Header> object.
 
 =head2 SIMPLE and END cards
 
-No FITS interface would becomplete without special cases.  
- 
+No FITS interface would becomplete without special cases.
+
 When you assign to SIMPLE or END, the tied interface ensures that they
 are first or last, respectively, in the deck -- as the FITS standard
 requires.  Other cards are inserted in between the first and last
-elements, in the order that you define them.  
+elements, in the order that you define them.
 
 The SIMPLE card is forced to FITS LOGICAL (boolean) type.  The FITS
 standard forbids you from setting it to F, but you can if you want --
@@ -1088,7 +1107,7 @@ sub STORE {
       @val = @$value;
 
     } elsif (ref $value) {
-      die "Can't put non-array ref values into a tied FITS header\n";
+      croak "Can't put non-array ref values into a tied FITS header\n";
 
     } elsif( $value =~ m/\n/s ) {
       @val = split("\n",$value);
@@ -1268,9 +1287,14 @@ sub NEXTKEY {
 
 # T I M E   A T   T H E   B A R  --------------------------------------------
 
+=head1 SEE ALSO
+
+C<Astro::FITS::Header::Item>, C<Starlink::AST>,
+C<Astro::FITS::Header::CFITSIO>, C<Astro::FITS::Header::Item::NDF>.
+
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council
+Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council
 and portions Copyright (C) 2002 Southwest Research Institute.
 All Rights Reserved.
 
@@ -1282,7 +1306,9 @@ it under the same terms as Perl itself.
 Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
 Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>,
 Craig DeForest E<lt>deforest@boulder.swri.eduE<gt>,
-Jim Lewis E<lt>jrl@ast.cam.ac.ukE<gt>
+Jim Lewis E<lt>jrl@ast.cam.ac.ukE<gt>,
+Brad Cavanagh E<lt>b.cavanagh@jach.hawaii.eduE<gt>
+
 
 =cut
 
