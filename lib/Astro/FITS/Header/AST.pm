@@ -62,8 +62,8 @@ Accepts a reference to an Starlink::AST FrameSet object.
 sub configure {
   my $self = shift;
   my %args = @_;
-  
-  # itialise the inherited status to OK.  
+
+  # initialise the inherited status to OK.
   my $status = 0;
 
   return $self->SUPER::configure(%args) 
@@ -88,12 +88,16 @@ sub configure {
 # shouldn't need to do this, croak! croak!
 sub writehdr {
   my $self = shift;
-  croak("Not yet implemented");   
+  croak("Not yet implemented");
 }
 
 # T I M E   A T   T H E   B A R  --------------------------------------------
 
 =back
+
+=head1 SEE ALSO
+
+C<Starlink::AST>, C<Astro::FITS::Header>
 
 =head1 AUTHORS
 
@@ -101,7 +105,7 @@ Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify

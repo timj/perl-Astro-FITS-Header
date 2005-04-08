@@ -732,9 +732,13 @@ sub _stringify {
 
 =back
 
+=head1 SEE ALSO
+
+C<Astro::FITS::Header>
+
 =head1 COPYRIGHT
 
-Copyright (C) 2001 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify
