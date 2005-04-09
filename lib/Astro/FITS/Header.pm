@@ -356,11 +356,11 @@ C<undef> if the keyword does not exist.
 
 sub comment {
    my ( $self, $keyword ) = @_;
-      
+
    # resolve the comments from the index array from lookup table
    my @comments =
      map { ${$self->{HEADER}}[$_]->comment() } $self->index($keyword);
-   
+
    # loop over the indices and grab the comments
    return wantarray ?  @comments : @comments ? $comments[0] : undef;
 }
@@ -377,25 +377,18 @@ the object $item is not copied, multiple inserts of the same object mean
 that future modifications to the one instance of the inserted object will
 modify all inserted copies.
 
+The insert position can be negative.
+
 =cut
 
 sub insert{
    my ($self, $index, $item) = @_;
 
-   # If the array is empty and we get a negative index we
-   # must convert it to an index of 0 to prevent a:
-   #   Modification of non-creatable array value attempted, subscript -1
-   # fatal error
-   # This can occur with a tied hash and the %{$tieref} = %new
-   # construct
-   $index = 0 if (scalar(@{$self->{HEADER}} == 0 && $index < 0));
-
    # splice the new FITS header card into the array
-   splice @{$self->{HEADER}}, $index, 0, $item;
+   # Splice automatically triggers a lookup table rebuild
+   $self->splice($index, 0, $item);
 
-   # rebuild the lookup table from the modified header
-   $self->_rebuild_lookup();
-
+   return;
 }
 
 
@@ -413,18 +406,11 @@ returns the replaced card.
 
 sub replace{
    my ($self, $index, $item) = @_;
-
    # remove the specified item and replace with $item
-   my @cards = splice @{$self->{HEADER}}, $index, 1, $item;
-   
-   # rebuild the lookup table from the modified header
-   $self->_rebuild_lookup();
-   
-   # return removed items
-   return wantarray ? @cards : $cards[scalar(@cards)-1];
-   
-} 
- 
+   # Splice triggers a rebuild so we do not have to
+   return $self->splice( $index, 1, $item);
+}
+
 # R E M O V E -------------------------------------------------------------
 
 =item B<remove>
@@ -439,17 +425,10 @@ returns the removed card.
 
 sub remove{
    my ($self, $index) = @_;
-   
    # remove the  FITS header card from the array
-   my @cards = splice @{$self->{HEADER}}, $index, 1;
-   
-   # rebuild the lookup table from the modified header
-   $self->_rebuild_lookup();
-   
-   # return removed items
-   return wantarray ? @cards : $cards[scalar(@cards)-1];
-   
-} 
+   # Splice always triggers a lookup table rebuild so we don't have to
+   return $self->splice( $index, 1);
+}
 
 # R E P L A C E  B Y  N A M E ---------------------------------------------
 
@@ -457,7 +436,7 @@ sub remove{
 
 Replace FITS header cards with keyword $keyword with card $item
 
-   $card = $header->replacebyname($keyword, $item);  
+   $card = $header->replacebyname($keyword, $item);
 
 returns the replaced card. The keyword may be a regular expression
 created with the C<qr> operator.
@@ -466,15 +445,17 @@ created with the C<qr> operator.
 
 sub replacebyname{
    my ($self, $keyword, $item) = @_;
-   
+
    # grab the index array from lookup table
    my @index = $self->index($keyword);
 
    # loop over the keywords
+   # We use a real splice rather than the class splice for efficiency
+   # in order to prevent an index rebuild for each index
    my @cards = map { splice @{$self->{HEADER}}, $_, 1, $item;} @index;
 
-   # rebuild the lookup table from the modified header
-   $self->_rebuild_lookup();
+   # force rebuild
+   $self->_rebuild_lookup;
 
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
@@ -496,20 +477,21 @@ created with the C<qr> operator.
 
 sub removebyname{
    my ($self, $keyword) = @_;
-   
+
    # grab the index array from lookup table
    my @index = $self->index($keyword);
 
    # loop over the keywords
+   # We use a real splice rather than the class splice for efficiency
+   # in order to prevent an index rebuild for each index
    my @cards = map { splice @{$self->{HEADER}}, $_, 1; } @index;
 
-   # rebuild the lookup table from the modified header
-   $self->_rebuild_lookup();
-   
+   # force rebuild
+   $self->_rebuild_lookup;
+
    # return removed items
    return wantarray ? @cards : $cards[scalar(@cards)-1];
-   
-} 
+}
 
 # S P L I C E --------------------------------------------------------------
 
@@ -529,26 +511,42 @@ is negative, counts from the end of the FITS header.
 
 sub splice {
    my $self = shift;
+   my ($offset, $length, @list) = @_;
 
-   # check for arguments
+   # If the array is empty and we get a negative offset we
+   # must convert it to an offset of 0 to prevent a:
+   #   Modification of non-creatable array value attempted, subscript -1
+   # fatal error
+   # This can occur with a tied hash and the %{$tieref} = %new
+   # construct
+   if (defined $offset) {
+     $offset = 0 if (@{$self->{HEADER}} == 0 && $offset < 0);
+   }
+
+   # the removed cards
    my @cards;
 
-   if ( scalar(@_) == 0 ) {
-      # none
-      @cards = splice @{$self->{HEADER}};
-   } elsif ( scalar(@_) == 1 ) {
-      # $offset
-      my ( $offset ) = @_;
-      @cards = splice @{$self->{HEADER}}, $offset;
-   } elsif ( scalar(@_) == 2 ) {
-      # $offset and $length
-      my ( $offset, $length ) = @_;
-      @cards = splice @{$self->{HEADER}}, $offset, $length;
+   if (@list) {
+     # all arguments supplied
+     for my $i (@list) {
+       croak "Arguments to splice must be Astro::FITS::Header::Item objects"
+         unless UNIVERSAL::isa($i, "Astro::FITS::Header::Item");	
+     }
+     @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
+
+   } elsif (defined $length) {
+     # length and (presumably) offset
+     @cards = splice @{$self->{HEADER}}, $offset, $length;
+
+   } elsif (defined $offset) {
+     # offset only
+     @cards = splice @{$self->{HEADER}}, $offset;
    } else {
-      # $offset, $length and @list 
-      my ( $offset, $length, @list ) = @_;
-      @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
+     # none
+     @cards = splice @{$self->{HEADER}};
    }
+
+   # update the internal lookup table and return
    $self->_rebuild_lookup();
    return wantarray ? @cards : $cards[scalar(@cards)-1];
 }
