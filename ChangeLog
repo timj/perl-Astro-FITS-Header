@@ -1,3 +1,9 @@
+2005-04-08  Tim Jenness  <timj@jach.hawaii.edu>
+
+	* Header.pm (merge_primary): Add facility for merging two FITS
+	headers into a single header with the shared keys, plus a set of
+	unique headers.
+
 2005-04-07  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Header.pm (splice): Fix splice(offset,length,list). It's never

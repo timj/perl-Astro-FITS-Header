@@ -24,4 +24,5 @@ t/tied.t
 t/test.gsd
 t/gsd.t
 t/subhdr.t
+t/merge.t
 TODO

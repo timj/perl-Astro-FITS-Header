@@ -568,7 +568,8 @@ sub cards {
 
 =item B<sizeof>
 
-Return the number of FITS cards in the header
+Returns the highest index in use in the FITS header.
+To get the total number of header items, add 1.
 
   $number = $header->sizeof;
 
@@ -646,6 +647,155 @@ sub configure {
 			      );
 	$self->_rebuild_lookup; 
     }
+}
+
+=item B<merge_primary>
+
+Given the current header and a set of C<Astro::FITS::Header> objects,
+return a merged FITS header (with the cards that have the same value
+and comment across all headers) along with, for each input, header
+objects containing all the header items that differ (including, by
+default, keys that are not present in all headers). Only the primary
+headers are merged, subheaders are ignored.
+
+ ($same, @different) = $Hdr->merge_primary( $fits1, $fits2, ...);
+ ($same, @different) = $Hdr->merge_primary( \%options, $fits1, $fits2, ...);
+
+@different can be empty if all headers match (but see the
+C<force_return_diffs> option) but if any headers are different there
+will always be the same number of headers in @different as supplied to
+the function (including the reference header). An empty list is
+returned if no headers are supplied.
+
+The options hash is itself optional. It contains the following keys:
+
+ merge_unique - if a keyword is only present in one header, propogate
+                to the merged header rather than retaining it.
+
+ force_return_diffs - return an empty object per input header
+                      even if there are no diffs
+
+=cut
+
+sub merge_primary {
+  my $self = shift;
+
+  # optional options handling
+  my %opt = ( merge_unique => 0,
+	      force_return_diffs => 0,
+	    );
+  if (ref($_[0]) eq 'HASH') {
+    my $o = shift;
+    %opt = ( %opt, %$o );
+  }
+
+  # everything else is fits headers
+  my @fits = @_;
+  return () unless @fits;
+  return $fits[0] unless @fits > 0;
+
+  # Convert all the headers into cards for easy manipulation.
+  # Include the reference object first.
+  my @cards = map { [ $_->cards ]} $self, @fits;
+
+  # Calculate the histogram of keyword usage. This is only used
+  # if merge_unique is true (since otherwise we only need to worry
+  # about item equality as a whole)
+  my %keyfreq;
+  if ($opt{merge_unique}) {
+    for my $h ($self, @fits) {
+      for my $i ($h->allitems) {
+	$keyfreq{$i->keyword}++;
+      }
+    }
+  }
+
+  # Now we need to find an easy way of comparing the concatenated header
+  # with individual header. We do this by forming a hash for each header
+  # with the card as the keyword and the value as the original location
+  # of that keyword in the header. We store these hashes in an array
+  # in the same order as the original headers.
+  my @cardhash;
+  for my $f (@cards) {
+    # the card is the hash key and the value is the location in the
+    # original array
+    my $i = 0;
+    my %keys = map { $_, $i++ } @$f;
+    push(@cardhash, \%keys);
+  }
+
+  # Now we need to generate an array of all the unique cards we
+  # have available to us in the order we were given them originally.
+  # We can not use a simple hash directly. We use "existence" to control
+  # whether or not to store the card
+  my %allcards;
+  my @unique;
+  # loop over each header (we could optimize by assuming the first fits header
+  # only has unique cards)
+  for my $h (@cards) {
+    # loop over individual cards
+    for my $c (@$h) {
+      if (!exists $allcards{$c}) {
+	$allcards{$c}++;
+	push(@unique, $c);
+      }
+    }
+  }
+
+  # and loop over them all to get the merged header (we already can work
+  # out the coverage by looking at %allcards but we need to know where
+  # a card came from if it is only in one or two places)
+  my @merge;
+  for my $c (@unique) {
+
+    # does the card exist?
+    my $exists = grep { exists $_->{$c} } @cardhash;
+
+    if ($exists == scalar(@cardhash) ||
+	($opt{merge_unique} && $exists == 1) ) {
+
+      # verify that this unique match is a unique key
+      # rather than just a unique value of a repeated key
+      # The merge facility really points to using the Item objects
+      # for equality checking rather than the cards.
+      if ($exists ==1) {
+	my $item = new Astro::FITS::Header::Item( Card => $c);
+	next unless $keyfreq{$item->keyword} == 1;
+      }
+
+      # We have match across all inputs or a unique match
+      # so store it in the merged header
+      push(@merge, $c);
+
+      # and remove it from each of the input headers
+      for my $i (0..$#cards) {
+	# can not delete it yet (we do not want the count to change)
+	# so undef the value
+	# merge_unique==true does allow this to trigger without a
+	# corresponding lookup existing
+	my $index = (exists $cardhash[$i]->{$c} ? $cardhash[$i]->{$c} : undef);
+	next unless defined $index;
+	$cards[$i]->[$index] = undef;
+      }
+    }
+
+  }
+
+  # filter out the undef values
+  for my $c (@cards) {
+    @$c = grep { defined $_ } @$c;
+  }
+
+  # and clear @cards in the special case where none have any headers
+  if (!$opt{force_return_diffs}) {
+    @cards = () unless grep { @$_ != 0 } @cards;
+  }
+
+  # convert back to FITS object
+  my $same = $self->new( Cards => \@merge );
+  my @diff = map { $self->new( Cards => $_ ) } @cards;
+
+  return ($same, @diff);
 }
 
 =item B<freeze>
