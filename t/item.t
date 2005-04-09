@@ -3,10 +3,9 @@
 # strict
 use strict;
 
-use Test::More tests => 93;
+use Test::More tests => 92;
 
 # load test modules
-require_ok( "Astro::FITS::Header" );
 require_ok( "Astro::FITS::Header::Item");
 
 # read comparison header from the end of the test file
