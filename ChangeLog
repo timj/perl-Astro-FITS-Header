@@ -1,5 +1,8 @@
 2005-04-08  Tim Jenness  <timj@jach.hawaii.edu>
 
+	* Item/Item.pm (equals): Add equals() method to allow comparison
+	of two Items
+
 	* Header.pm (merge_primary): Add facility for merging two FITS
 	headers into a single header with the shared keys, plus a set of
 	unique headers.

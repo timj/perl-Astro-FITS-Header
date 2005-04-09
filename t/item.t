@@ -3,20 +3,13 @@
 # strict
 use strict;
 
+use Test::More tests => 93;
+
 # load test modules
-use Astro::FITS::Header;
-use Astro::FITS::Header::Item;
+require_ok( "Astro::FITS::Header" );
+require_ok( "Astro::FITS::Header::Item");
 
-# load test
-use Test;
-BEGIN { plan tests => 68 };
-
-# T E S T   H A R N E S S --------------------------------------------------
-
-# test the test system
-ok(1);
-
-# read header file
+# read comparison header from the end of the test file
 my @raw = <DATA>;
 chomp @raw;
 
@@ -111,23 +104,30 @@ foreach my $n (0..$#raw) {
 
   # Compare the actual card with the reconstructed version
   # This tests the parsing of header cards
-  ok( "$item", $card );
+  is( "$item", $card, "Compare card $n" );
 
   # Test that the parsed card fields match what they're supposed to be
   # LOGICAL values are translated to booleans by the object, so must
   # convert values
-  ok( eval '$item->'.lc($_),
+  is( eval '$item->'.lc($_),
       ('Value' eq $_ && 'LOGICAL' eq $ANSWER[$n]{Type}) ?
         { T => 1, F => 0 }->{$ANSWER[$n]{$_}} : $ANSWER[$n]{$_},
-    ) foreach keys %{$ANSWER[$n]};
+    "Compare method $_") foreach keys %{$ANSWER[$n]};
 
 
   # Now create a new item from the bits
-  $item = new Astro::FITS::Header::Item( %{ $ANSWER[$n] });
+  my $item2 = new Astro::FITS::Header::Item( %{ $ANSWER[$n] });
 
   # Compare the brand new card with the old version
   # This tests the construction of a card from the raw "bits"
-  ok( "$item", $card);
+  is( "$item2", $card, "Compare reconstructed card $n");
+
+  # Also compare using the equality method
+  # first compare it with itself
+  ok( $item->equals($item), "Is the object equal to itself?" );
+
+  # and then with the comparison card
+  ok( $item->equals($item2),"Is the object equal to the new object?");
 }
 
 # Test that the caching is working. We do this by using
@@ -135,7 +135,7 @@ foreach my $n (0..$#raw) {
 my $c = "LNGSTR  = 'a very long string that is long' /Long string                        ";
 
 my $i = new Astro::FITS::Header::Item( Card => $c);
-ok("$i", $c);
+is("$i", $c, "test cache");
 
 
 

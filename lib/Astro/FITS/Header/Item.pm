@@ -273,7 +273,7 @@ Configures the object from multiple pieces of information.
 
 Takes a hash as argument with the following keywords:
 
-=over 4
+=over 8
 
 =item B<Card>
 
@@ -580,6 +580,86 @@ sub parse_card {
   return($keyword, $value, $comment);
 
 }
+
+=item B<equals>
+
+Compares this Item with another and returns true if the keyword,
+value, type and comment are all equal.
+
+  $isident = $item->equals( $item2 );
+
+=cut
+
+sub equals {
+  my $self = shift;
+  my $ref = shift;
+
+  # Loop over the string keywords
+  for my $method (qw/ keyword type comment /) {
+    my $val1 = $self->$method;
+    my $val2 = $ref->$method;
+
+    if (defined $val1 && defined $val2) {
+      # These are all string comparisons
+      if ($val1 ne $val2) {
+	return 0;
+      }
+    } elsif (!defined $val1 && !defined $val2) {
+      # both undef so equal
+    } else {
+      # one undef, the other defined
+      return 0;
+    }
+  }
+
+  # value comparison will depend on type
+  # we know the types are the same
+  my $val1 = $self->value;
+  my $val2 = $ref->value;
+  my $type = $self->type;
+
+  return 0 if ((defined $val1 && !defined $val2) ||
+	       (defined $val2 && !defined $val1));
+  return 1 if (!defined $val1 && !defined $val2);
+
+  if ($type eq 'FLOAT' || $type eq 'INT') {
+    return ( $val1 == $val2 );
+  } elsif ($type eq 'STRING') {
+    return ( $val1 eq $val2 );
+  } elsif ($type eq 'LOGICAL') {
+    if (($val1 && $val2) || (!$val1 && !$val2)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } elsif ($type eq 'COMMENT') {
+    # if we get to here we have a defined value so we should
+    # check it even if COMMENT is meant to use COMMENT
+    return ($val1 eq $val2);
+
+  } elsif ($type eq 'HEADER') {
+    my @items1 = $val1->allitems;
+    my @items2 = $val2->allitems;
+
+    # count the items
+    return 0 if @items1 != @items2;
+
+    for my $i (0..$#items1) {
+      return 0 if ! $items1[$i]->equals( $items2[$i] );
+    }
+    return 1;
+
+  } elsif ($type eq 'UNDEF') {
+    # both are undef...
+    return 1;
+  } else {
+    croak "Unable to compare items of type '$type'\n";
+  }
+
+  # somehow we got to the end
+  return 0;
+}
+
 
 =begin __private
 
