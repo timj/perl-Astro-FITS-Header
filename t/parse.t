@@ -1,11 +1,11 @@
-# Astro::FITS::Header test harness
+# Astro::FITS::Header test harness -*-perl-*-
 
 # strict
 use strict;
 
 #load test
 use Test;
-BEGIN { plan tests => 162 };
+BEGIN { plan tests => 163 };
 
 # load modules
 use Astro::FITS::Header;
@@ -29,6 +29,10 @@ for my $i (0 .. $#raw) {
   $card->card( undef ); # clear cache
   ok( "$card", $raw[$i]);  
 }
+
+# See how many items we have of INT type
+my @integers = $header->itembytype( "INT" );
+ok( scalar(@integers), 46);
 
 # build a test card
 my $int_card = new Astro::FITS::Header::Item(
