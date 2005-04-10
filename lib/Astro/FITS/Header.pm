@@ -269,6 +269,34 @@ sub itembyname {
 
 }
 
+# I T E M   B Y   T Y P E  -------------------------------------------------
+
+=item B<itembytype>
+
+Returns an array of Header::Items for the requested type if called in
+list context, or the first matching Header::Item if called in scalar
+context. See C<Astro::FITS::Header::Item> for a list of allowed types.
+
+   @items = $header->itembytype( "COMMENT" );
+   @items = $header->itembytype( "HEADER" );
+   $item = $header->itembytype( "INT" );
+
+=cut
+
+sub itembytype {
+   my ( $self, $type ) = @_;
+
+   return () unless defined $type;
+
+   $type = uc($type);
+
+   # No optimised lookup so brute force it
+   my @items = grep { $_->type eq $type } @{ $self->{HEADER} };
+
+   return wantarray ?  @items : @items ? $items[0] : undef;
+
+}
+
 # I N D E X   --------------------------------------------------------------
 
 =item B<index>

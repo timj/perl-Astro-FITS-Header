@@ -1,5 +1,8 @@
 2005-04-10  Tim Jenness  <tjenness@cpan.org>
 
+	* Header.pm (itembytype): Add new method that will select items of
+	a specific type.
+	
 	* Header.pm (merge_primary): Refactor using the new equals()
 	method. Now correctly returns identical items with merge_unique
 	flag.
