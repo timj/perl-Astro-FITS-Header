@@ -658,21 +658,28 @@ objects containing all the header items that differ (including, by
 default, keys that are not present in all headers). Only the primary
 headers are merged, subheaders are ignored.
 
- ($same, @different) = $Hdr->merge_primary( $fits1, $fits2, ...);
- ($same, @different) = $Hdr->merge_primary( \%options, $fits1, $fits2, ...);
+ ($clone) = $headerr->merge_primary();
+ ($same, @different) = $header->merge_primary( $fits1, $fits2, ...);
+ ($same, @different) = $header->merge_primary( \%options, $fits1, $fits2 );
 
 @different can be empty if all headers match (but see the
 C<force_return_diffs> option) but if any headers are different there
 will always be the same number of headers in @different as supplied to
-the function (including the reference header). An empty list is
-returned if no headers are supplied.
+the function (including the reference header). A clone of the input header
+(stripped of any subheaders) is returned if no comparison headers are
+supplied.
+
+In scalar context, just returns the merged header.
+
+  $merged = $header->merge_primary( @hdrs );
 
 The options hash is itself optional. It contains the following keys:
 
- merge_unique - if a keyword is only present in one header, propogate
-                to the merged header rather than retaining it.
+ merge_unique - if an item is identical across multiple headers and only
+                exists in those headers, propogate to the merged header rather
+                than storing it in the difference headers.
 
- force_return_diffs - return an empty object per input header
+ force_return_diffs - return an empty difference object per input header
                       even if there are no diffs
 
 =cut
@@ -690,112 +697,108 @@ sub merge_primary {
   }
 
   # everything else is fits headers
+  # If we do not get any additional headers we still process the full header
+  # rather than shortcircuiting the logic. This is so that we can strip
+  # HEADER items without having to write duplicate logic. Clearly not
+  # very efficient but we do not really expect people to use this method
+  # to clone a FITS header....
   my @fits = @_;
-  return () unless @fits;
-  return $fits[0] unless @fits > 0;
 
-  # Convert all the headers into cards for easy manipulation.
-  # Include the reference object first.
-  my @cards = map { [ $_->cards ]} $self, @fits;
+  # Number of output diff arrays
+  # Include this object
+  my $nhdr = @fits + 1;
 
-  # Calculate the histogram of keyword usage. This is only used
-  # if merge_unique is true (since otherwise we only need to worry
-  # about item equality as a whole)
-  my %keyfreq;
-  if ($opt{merge_unique}) {
-    for my $h ($self, @fits) {
-      for my $i ($h->allitems) {
-	$keyfreq{$i->keyword}++;
+  # Go through all the items building up a hash indexed
+  # by KEYWORD pointing to an array of items with that keyword
+  # and an array of unique keywords in the original order they 
+  # appeared first. COMMENT and UNDEF items are stored in the 
+  # hash as complete cards.
+  # HEADER items are currently dropped on the floor.
+  my @order;
+  my %items;
+  my $hnum = 0;
+  for my $hdr ($self, @fits) {
+    for my $item ($hdr->allitems) {
+      my $key;
+      my $type = $item->type;
+      if ($type eq 'COMMENT' || $type eq 'UNDEF') {
+	$key = $item->card;
+      } elsif ($type eq 'HEADER') {
+	next;
+      } else {
+	$key = $item->keyword;
+      }
+
+      if (exists $items{$key}) {
+	# Store the item, but in a hash with key corresponding
+	# to the input header number
+	push( @{ $items{$key}}, { item => $item, hnum => $hnum } );
+      } else {
+	$items{$key} = [ { item => $item, hnum => $hnum } ];
+	push(@order, $key);
       }
     }
+    $hnum++;
   }
 
-  # Now we need to find an easy way of comparing the concatenated header
-  # with individual header. We do this by forming a hash for each header
-  # with the card as the keyword and the value as the original location
-  # of that keyword in the header. We store these hashes in an array
-  # in the same order as the original headers.
-  my @cardhash;
-  for my $f (@cards) {
-    # the card is the hash key and the value is the location in the
-    # original array
-    my $i = 0;
-    my %keys = map { $_, $i++ } @$f;
-    push(@cardhash, \%keys);
-  }
+  # create merged and difference arrays
+  my @merged;
+  my @difference = map { [] } (1..$nhdr);
 
-  # Now we need to generate an array of all the unique cards we
-  # have available to us in the order we were given them originally.
-  # We can not use a simple hash directly. We use "existence" to control
-  # whether or not to store the card
-  my %allcards;
-  my @unique;
-  # loop over each header (we could optimize by assuming the first fits header
-  # only has unique cards)
-  for my $h (@cards) {
-    # loop over individual cards
-    for my $c (@$h) {
-      if (!exists $allcards{$c}) {
-	$allcards{$c}++;
-	push(@unique, $c);
+  # Now loop over all of the unique keywords (taking care to
+  # spot comments)
+  for my $key (@order) {
+    my @items = @{$items{$key}};
+
+    # compare each Item with the first. This will work even if we only have
+    # one Item in the array.
+    # Note that $match == 1 to start with because it always matches itself
+    # but we do not bother doing the with-itself comparison.
+    my $match = 1;
+    for my $i (@items[1..$#items]) {
+      # Ask the Items to compare using the equals() method
+      if ($items[0]->{item}->equals( $i->{item} )) {
+	$match++;
       }
     }
-  }
 
-  # and loop over them all to get the merged header (we already can work
-  # out the coverage by looking at %allcards but we need to know where
-  # a card came from if it is only in one or two places)
-  my @merge;
-  for my $c (@unique) {
+    # if we matched all the items and are merging unique OR if we
+    # matched all the items and that was all the available headers
+    # we store in the merged array. Else we store in the differences
+    # array
+    if ($match == @items && ($match == $nhdr || $opt{merge_unique})) {
+      # Matched all the headers or merging matching unique headers
+      # only need to store one
+      push(@merged, $items[0]->{item});
 
-    # does the card exist?
-    my $exists = grep { exists $_->{$c} } @cardhash;
-
-    if ($exists == scalar(@cardhash) ||
-	($opt{merge_unique} && $exists == 1) ) {
-
-      # verify that this unique match is a unique key
-      # rather than just a unique value of a repeated key
-      # The merge facility really points to using the Item objects
-      # for equality checking rather than the cards.
-      if ($exists ==1) {
-	my $item = new Astro::FITS::Header::Item( Card => $c);
-	next unless $keyfreq{$item->keyword} == 1;
+    } else {
+      # Not enough of the items matched. Store to the relevant difference
+      # arrays.
+      for my $i (@items) {
+	push(@{ $difference[$i->{hnum}] }, $i->{item});
       }
 
-      # We have match across all inputs or a unique match
-      # so store it in the merged header
-      push(@merge, $c);
-
-      # and remove it from each of the input headers
-      for my $i (0..$#cards) {
-	# can not delete it yet (we do not want the count to change)
-	# so undef the value
-	# merge_unique==true does allow this to trigger without a
-	# corresponding lookup existing
-	my $index = (exists $cardhash[$i]->{$c} ? $cardhash[$i]->{$c} : undef);
-	next unless defined $index;
-	$cards[$i]->[$index] = undef;
-      }
     }
 
   }
 
-  # filter out the undef values
-  for my $c (@cards) {
-    @$c = grep { defined $_ } @$c;
-  }
-
-  # and clear @cards in the special case where none have any headers
+  # and clear @difference in the special case where none have any headers
   if (!$opt{force_return_diffs}) {
-    @cards = () unless grep { @$_ != 0 } @cards;
+    @difference = () unless grep { @$_ != 0 } @difference;
   }
 
-  # convert back to FITS object
-  my $same = $self->new( Cards => \@merge );
-  my @diff = map { $self->new( Cards => $_ ) } @cards;
+  # unshift @merged onto the front of @difference in preparation
+  # for returning it
+  unshift(@difference, \@merged );
 
-  return ($same, @diff);
+  # convert back to FITS object, making sure we stringify the Item
+  # objects so that we retain copies
+  for my $d (@difference) {
+    $d = $self->new( Cards => [ map { "$_" } @$d ]);
+  }
+
+  # remembering that the merged array is on the front
+  return (wantarray ? @difference : $difference[0]);
 }
 
 =item B<freeze>

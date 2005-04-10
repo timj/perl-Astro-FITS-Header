@@ -9,7 +9,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 32;
+use Test::More tests => 39;
 
 require_ok("Astro::FITS::Header");
 
@@ -28,12 +28,16 @@ while ($i <= $#all) {
   $i++;
 }
 
-# merge
+# merge in list and then in scalar context
 my ($merged, @different) = $fits[0]->merge_primary( @fits[1..$#fits]);
+my $scalar = $fits[0]->merge_primary( @fits[1..$#fits] );
 
-is($merged->sizeof, 19, "Number of cards in merged header");
+is($merged->sizeof, 21, "Number of cards in merged header");
 is(@different, 3, "Number of diff headers");
 is($merged->itembyname("RA")->value+0, 5, "RA is in merged header");
+
+is($scalar->sizeof, 21, "Number of cards in merged header");
+is($scalar->itembyname("RA")->value+0, 5, "RA is in merged header");
 
 
 ok($different[0]->itembyname("UNIQUE"), "UNIQUE was not merged");
@@ -56,18 +60,15 @@ for my $i (0..$#different) {
 
 #print "Merged: $merged\n";
 
-is($merged->sizeof, 20, "Number of cards in merged header");
+is($merged->sizeof, 23, "Number of cards in merged header");
 is(@different, 3, "Number of diff headers");
 is($merged->itembyname("RA")->value+0, 5, "RA is in merged header");
 ok($merged->itembyname("UNIQUE"), "UNIQUE was now merged");
 ok(!$merged->itembyname("DATE-OBS"), "DATE-OBS was not merged");
 
-# COMMON should really be merged since it is common to 2 of the 3
+# COMMON should be merged since it is common to 2 of the 3
 # but identical in those 2
-#ok($merged->itembyname("COMMON"), "COMMON was now merged");
-# For now remove it
-$different[0]->removebyname("COMMON");
-$different[1]->removebyname("COMMON");
+ok($merged->itembyname("COMMON"), "COMMON was now merged");
 
 
 for my $i (0..$#different) {
@@ -84,7 +85,18 @@ is(@diff3, 0, "Empty diff");
 ($m3, @diff3) = $merged->merge_primary( { force_return_diffs => 1}, $m2);
 is(@diff3, 2, "Forced non-Empty diff");
 
+# Merge itself in list and scalar context
+my ($m4) = $merged->merge_primary();
+is("$m4", "$merged", "Full header comparison");
+is($m4->sizeof, $merged->sizeof, "Get back what we started with");
+
+$m4 = $merged->merge_primary();
+is("$m4", "$merged", "Full header comparison");
+is($m4->sizeof, $merged->sizeof, "Get back what we started with");
+
+
 __END__
+         Block 1 description:
 DATE-OBS= '2005-05-01T12:00:00' / observation date
 RA      =                   5. / Right Ascension of observation
 DEC     =                   5. / Declination of observation
@@ -106,10 +118,12 @@ HIERARCH JIG_STEPX =     12.56 / The Jiggle step value in -X-direction on the sk
 HIERARCH JIG_STEPY =     12.56 / The Jiggle step value in -Y-direction on the sk
 NCYCLE  =                    4 / number of cycles
 NUMSAMP =                  256 / number of samples
+         Block 2 description:
 RUN     =                    1 / Run number
 UNIQUE  =                    1 / A unique header
 COMMON  =                    T / A somewhat common header
 =cut
+         Block 1 description:
 DATE-OBS= '2005-05-01T12:01:00' / observation date
 RA      =                   5. / Right Ascension of observation
 DEC     =                   5. / Declination of observation
@@ -131,9 +145,11 @@ HIERARCH JIG_STEPX =     12.56 / The Jiggle step value in -X-direction on the sk
 HIERARCH JIG_STEPY =     12.56 / The Jiggle step value in -Y-direction on the sk
 NCYCLE  =                    4 / number of cycles
 NUMSAMP =                  256 / number of samples
+         Block 2 description:
 RUN     =                    2 / Run number
 COMMON  =                    T / A somewhat common header
 =cut
+         Block 1 description:
 DATE-OBS= '2005-05-01T12:02:00' / observation date
 RA      =                   5. / Right Ascension of observation
 DEC     =                   5. / Declination of observation
@@ -154,5 +170,6 @@ MOVECODE=                    8 / Code for the SMU move algorithm
 HIERARCH JIG_STEPX =     12.56 / The Jiggle step value in -X-direction on the sk
 HIERARCH JIG_STEPY =     12.56 / The Jiggle step value in -Y-direction on the sk
 NCYCLE  =                    4 / number of cycles
+         Block 2 description:
 NUMSAMP =                  256 / number of samples
 RUN     =                    3 / Run number

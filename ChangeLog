@@ -1,3 +1,9 @@
+2005-04-10  Tim Jenness  <tjenness@cpan.org>
+
+	* Header.pm (merge_primary): Refactor using the new equals()
+	method. Now correctly returns identical items with merge_unique
+	flag.
+
 2005-04-08  Tim Jenness  <timj@jach.hawaii.edu>
 
 	* Item/Item.pm (equals): Add equals() method to allow comparison
