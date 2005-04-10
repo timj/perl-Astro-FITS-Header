@@ -177,12 +177,14 @@ the FITS card.
   $type = $item->type();
   $item->type( "INT" );
 
-Allowed types are "LOGICAL", "INT", "FLOAT", "STRING", "COMMENT"
-and "UNDEF".
+Allowed types are "LOGICAL", "INT", "FLOAT", "STRING", "COMMENT",
+"HEADER" and "UNDEF".
 
-A special type, "HEADER", is used to specify that this item refers
-to a subsidiary header (eg a header in an MEFITS file or a header
-in an NDF in an HDS container).
+The special type, "HEADER", is used to specify that this item refers to
+a subsidiary header (eg a header in an MEFITS file or a header in an
+NDF in an HDS container). See also the C<subhdrs> method in
+C<Astro::FITS::Header> for an alternative way of specifying a
+sub-header.
 
 The type is case-insensitive, but will always be returned up-cased.
 
