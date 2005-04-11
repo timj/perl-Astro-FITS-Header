@@ -2,20 +2,19 @@
 # Testing NDF read/write of fits headers
 
 use strict;
+use Test::More;
 
-use Test;
-BEGIN { plan tests => 193 };
-
-eval "use Astro::FITS::Header::NDF; use NDF;";
-if ($@) {
-  for (1..193) {
-    skip("Skip NDF module not available", 1);
+BEGIN {
+  eval "use NDF;";
+  if ($@) {
+    plan skip_all => "NDF module not available";
+    exit;
+  } else {
+    plan tests => 193;
   }
-  exit;
 }
 
-ok(1);
-
+require_ok( "Astro::FITS::Header::NDF" );
 
 my $file = "temp$$";
 END { unlink $file . ".sdf" if defined $file; };
@@ -54,7 +53,7 @@ my $hdr = new Astro::FITS::Header::NDF( Cards => \@cards );
 # Store them on disk
 $hdr->writehdr( File => $file );
 
-ok( -e $file .".sdf" );
+ok( -e $file .".sdf", "Does $file exist?" );
 
 # Read them back in
 my $hdr2 = new Astro::FITS::Header::NDF( File => $file );
@@ -63,7 +62,7 @@ my $hdr2 = new Astro::FITS::Header::NDF( File => $file );
 my @newcards = $hdr2->cards;
 
 for my $i (0..$#cards) {
-  ok($newcards[$i], $cards[$i]);
+  is($newcards[$i], $cards[$i], "Compare card $i");
 }
 
 exit;

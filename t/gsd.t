@@ -2,20 +2,21 @@
 # Testing GSD read of fits headers
 
 use strict;
-use File::Spec;
 
-use Test;
-BEGIN { plan tests => 3 };
+use Test::More;
 
-eval "use Astro::FITS::Header::GSD;";
-if ($@) {
-  for (1..3) {
-    skip("Skip GSD module not available", 1);
+BEGIN {
+  eval "use GSD;";
+  if ($@) {
+    plan skip_all => "GSD module not available";
+    exit;
+  } else {
+    plan tests => 3;
   }
-  exit;
 }
 
-ok(1);
+use File::Spec;
+require_ok( "Astro::FITS::Header::GSD" );
 
 # Read-only
 # Try to work out whether the file is in the t directory or the parent
@@ -29,4 +30,4 @@ ok( $hdr );
 
 # Get the telescope name
 my $item = $hdr->itembyname( 'C1TEL' );
-ok( $item->value, "JCMT");
+is( $item->value, "JCMT", "Check C1TEL");

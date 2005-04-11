@@ -4,17 +4,13 @@
 use strict;
 
 #load test
-use Test;
-BEGIN { plan tests => 163 };
+use Test::More tests => 164;
 
 # load modules
-use Astro::FITS::Header;
-use Astro::FITS::Header::Item;
+require_ok("Astro::FITS::Header");
+require_ok("Astro::FITS::Header::Item");
 
 # T E S T   H A R N E S S --------------------------------------------------
-
-# test the test system
-ok(1);
 
 # read header from DATA block
 my @raw = <DATA>;
@@ -27,12 +23,12 @@ my $header = new Astro::FITS::Header( Cards => \@raw );
 for my $i (0 .. $#raw) {
   my $card = $header->item($i);
   $card->card( undef ); # clear cache
-  ok( "$card", $raw[$i]);  
+  is( "$card", $raw[$i], "Compare card for keyword ". $card->keyword);
 }
 
 # See how many items we have of INT type
 my @integers = $header->itembytype( "INT" );
-ok( scalar(@integers), 46);
+is( scalar(@integers), 46, "Count number of INT keywords");
 
 # build a test card
 my $int_card = new Astro::FITS::Header::Item(
@@ -67,51 +63,52 @@ my $qcstr = $quote_card->card;
 my $qtstr1 = "STRSTR  = 'She said ''Foo!'' (\"really?\")'";
 my $qtstr2 = "/ It was 'foobar'.";
 
-ok(substr($qcstr,0,length($qtstr1)), $qtstr1);
-ok(substr($qcstr,index($qcstr,'/',length($qtstr1)),length($qtstr2)), $qtstr2);
+is(substr($qcstr,0,length($qtstr1)), $qtstr1,"Quote check 1");
+is(substr($qcstr,index($qcstr,'/',length($qtstr1)),length($qtstr2)), $qtstr2,
+  "Quote check 2");
 
 # insert	
 $header->insert(1, $int_card);
 
 # value
 my @test_value = $header->value('LIFE');
-ok($test_value[0], 42);
+is($test_value[0], 42, "Value of LIFE");
 
 # itembyname
 my @itembyname = $header->itembyname('LIFE');
-ok("$int_card","$itembyname[0]");
+is("$int_card","$itembyname[0]","Check LIFE card");
 
 # item
 my @item = $header->item(1);
-ok("$int_card","$itembyname[0]");
+is("$int_card","$itembyname[0]", "Check item 1 is int_card");
 
 # splice
 my @cards = $header->splice( 0, 6, $string_card);	
 my @comp = ( $raw[0], $int_card, $raw[1], $raw[2], $raw[3], $raw[4] );
 for my $i (0 .. $#cards) {
-  ok( "$cards[$i]", "$comp[$i]");   
+  is( "$cards[$i]", "$comp[$i]","Splice removal");
 }
 my $first = $header->item(0);
-ok( "$first", "$string_card");
+is( "$first", "$string_card", "Check item 0");
 $first = $header->splice(0,1);
-ok( "$first", "$string_card");
+is( "$first", "$string_card", "Check removed item 0");
 
 # item
 my $test_item = $header->item(1);
-ok( "$test_item", $raw[6] );
+is( "$test_item", $raw[6], "Check item 1" );
 
 # itembyname
 my @comments = $header->itembyname('COMMENT');
-ok( scalar(@comments), 4);
+is( scalar(@comments), 4, "Count number of comments");
 for my $j (0 .. $#comments) {
-  ok( "$comments[$j]", "$raw[$j+7]");   
+  is( "$comments[$j]", "$raw[$j+7]", "Compare comment $j");
 }
 
 # index
 my @index = $header->index('COMMENT');
 my @actual = (2,3,4,5);
 for my $k (0 .. $#index ) {
-  ok( $index[$k], $actual[$k] );
+  is( $index[$k], $actual[$k], "Compare comment position $k" );
 }
 
 # insert	
@@ -119,40 +116,40 @@ $header->insert(5, $string_card);
 
 # comment
 my @comment = $header->comment('STUFF');
-ok( "$comment[0]", "So long and thanks for all the fish");
+is( "$comment[0]", "So long and thanks for all the fish", "Check comment");
 
 # replacebyname
 my $replacebyname = $header->replacebyname('STUFF', $int_card);
-ok("$string_card","$replacebyname"); 
+is("$string_card","$replacebyname","Replaced STUFF by name");
 
 # replace
 my $replace = $header->replace(5, $another_card);
-ok("$int_card","$replace");
+is("$int_card","$replace", "Replacement by index");
 
 # value
 my @floating = $header->value('VALUE');
-ok($floating[0],34.5678);
+is($floating[0],34.5678, "Got first VALUE");
 
 # remove
 my $remove = $header->remove(5);
-ok("$another_card","$remove");
+is("$another_card","$remove","Removed by position");
 @floating = $header->value('VALUE');
-ok($floating[0],undef);
+is($floating[0],undef,"Got no VALUE");
 
 # insert	
 $header->insert(5, $string_card);
 
 # removebyname
 my $removebyname = $header->removebyname('STUFF');
-ok("$string_card","$removebyname");
+is("$string_card","$removebyname","Was STUFF removed");
 
 # check regular expressions
 @index = $header->index( qr/CLOCK\d/ );
 @actual = (53..59);
-ok( scalar @index, scalar @actual );
+is( scalar @index, scalar @actual, "Count expected number of CLOCK matches" );
 while( @index )
 {
-  ok( shift @index, shift @actual );
+  is( shift @index, shift @actual, "Compare CLOCK keyword location" );
 }
 
 

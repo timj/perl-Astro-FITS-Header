@@ -1,5 +1,7 @@
 2005-04-10  Tim Jenness  <tjenness@cpan.org>
 
+	* t/*.t: Upgrade all tests to Test::More 
+
 	* Header.pm (itembytype): Add new method that will select items of
 	a specific type.
 	

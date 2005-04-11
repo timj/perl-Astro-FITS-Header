@@ -7,23 +7,20 @@ use Test::More;
 BEGIN { 
  eval "use Starlink::AST;";
  if ($@) {
-   plan skip_all => "Skip Starlink::AST not available.";
+   plan skip_all => "Starlink::AST not available.";
    exit;
  } else {
-   plan tests => 49;
- }  
-};
+   plan tests => 51;
+ }
+}
 
 # load modules
-use Astro::FITS::Header;
-use Astro::FITS::Header::AST;
-use Astro::FITS::Header::Item;
+require_ok( "Astro::FITS::Header" );
+require_ok( "Astro::FITS::Header::AST" );
+require_ok( "Astro::FITS::Header::Item" );
 
 
 # T E S T   H A R N E S S --------------------------------------------------
-
-ok(1);
-
 
 # GET_WCS() in ASTRO::FITS::HEADER
 # --------------------------------

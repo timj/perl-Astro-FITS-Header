@@ -1,20 +1,16 @@
-# Astro::FITS::Header HIERARCH test harness
+# Astro::FITS::Header HIERARCH test harness -*-perl-*-
 
 # strict
 use strict;
 
 #load test
-use Test;
-BEGIN { plan tests => 377 };
+use Test::More tests => 378;
 
 # load modules
-use Astro::FITS::Header;
-use Astro::FITS::Header::Item;
+require_ok( "Astro::FITS::Header" );
+require_ok( "Astro::FITS::Header::Item" );
 
 # T E S T   H A R N E S S --------------------------------------------------
-
-# test the test system
-ok(1);
 
 # read header from DATA block
 my @raw = <DATA>;
@@ -26,16 +22,17 @@ my $header = new Astro::FITS::Header( Cards => \@raw );
 # test the header
 for my $i (0 .. $#raw) {
   my $card = $header->item($i);
-  
-  ok( "$card", $raw[$i]);  
+  is( "$card", $raw[$i], "Check item ".$card->keyword);
 }
 
 # test HIERARCH keywords
-ok( $header->value("HIERARCH.ESO.OBS.NAME"), 'Photom-std-S705D' );
+is( $header->value("HIERARCH.ESO.OBS.NAME"), 'Photom-std-S705D',
+    "HIERARCH.ESO.OBS.NAME" );
 
 # Test the card parsing
 my @cards = $header->allitems();
-ok( $cards[52]->keyword(), "HIERARCH.ESO.OBS.TPLNO" );
+is( $cards[52]->keyword(), "HIERARCH.ESO.OBS.TPLNO",
+  "HIERARCH.ESO.OBS.TPLNO");
 
 exit;
 

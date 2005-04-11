@@ -3,18 +3,20 @@
 
 use strict;
 
-use Test;
+use Test::More;
+
+BEGIN {
+  eval "use Astro::FITS::CFITSIO qw / :longnames /; use Astro::FITS::CFITSIO qw/ :constants /;";
+  if ($@) {
+    plan skip_all => "Astro::FITS::CFITSIO module not available";
+    exit;
+  } else {
+    plan tests => 41;
+  }
+}
+
 use File::Spec;
 use File::Copy;
-BEGIN { plan tests => 41 };
-
-eval "use Astro::FITS::Header::CFITSIO; use Astro::FITS::CFITSIO qw / :longnames /; use Astro::FITS::CFITSIO qw/ :constants /;";
-if ($@) {
-  for (1..41) {
-    skip("Skip Astro::FITS::CFITSIO module not available", 1);
-  }
-  exit;
-}
 
 # ----------------------------------------------------------------------------
 
@@ -29,15 +31,14 @@ END{ unlink File::Spec->catfile("t", "test.fit" )
 
 # ----------------------------------------------------------------------------
 
-# Test the test system
-ok(1);
+require_ok( "Astro::FITS::Header::CFITSIO" );
 
 # Read from the __DATA__ block
 my @cards = <DATA>;
 chomp(@cards);
 
 # Version test, need cfitsio library version > 2.1
-if ( fits_get_version(my $version) > 2.1 ) { ok(1); } else { ok(0); };
+ok( fits_get_version(my $version) > 2.1, "Check Astro::FITS::CFITSIO version number");
 
 # get the path to the test data file
 my $file = File::Spec->catfile("t", "test.fit");
@@ -58,7 +59,7 @@ my $compare = new Astro::FITS::Header::CFITSIO( File => $file );
 # test the header against the raw data
 for my $i (0 .. $#cards) {
   my @items = $compare->item($i);
-  ok( "$items[0]", $cards[$i]);  
+  is( "$items[0]", $cards[$i], "Compare item $i");
 }
 
 exit;
