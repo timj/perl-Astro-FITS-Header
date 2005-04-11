@@ -1,5 +1,9 @@
 2005-04-10  Tim Jenness  <tjenness@cpan.org>
 
+	* Item/Item.pm (parse_card): Make sure the card is cleaned up
+	before parsing it (pad to 80 characters and remove newlines). This
+	fixes some warnings with truncated cards.
+
 	* t/*.t: Upgrade all tests to Test::More 
 
 	* Header.pm (itembytype): Add new method that will select items of

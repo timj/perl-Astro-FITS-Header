@@ -383,6 +383,10 @@ sub parse_card {
   my $card = shift;
   my $equals_col = 8;
 
+  # Remove new line and pad card to 80 characters
+  chomp($card);
+#  $card = sprintf("%-80s", $card);
+
   # Value is only present if an = is found in position 9
   my ($value, $comment) = ('', '');
   my $keyword = uc(substr($card, 0, $equals_col));
@@ -411,9 +415,16 @@ sub parse_card {
     return("END", undef, undef);
   }
 
-  return () if length($card) == 0;
+  # This will be a blank line but will not trigger here if we
+  # are padding to 80 characters
+  if (length($card) == 0) {
+    $self->type( "UNDEF" );
+    return( "", undef, undef);
+  }
 
   # Check for comment or HISTORY
+  # If the card is not padded this may trigger a warning on the
+  # substr going out of bounds
   if ($keyword eq 'COMMENT' || $keyword eq 'HISTORY' ||
       (substr($card,8,2) ne "= " && $keyword !~ /^HIERARCH/)) {
 
