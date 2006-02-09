@@ -11,7 +11,7 @@ BEGIN {
     plan skip_all => "GSD module not available";
     exit;
   } else {
-    plan tests => 3;
+    plan tests => 4;
   }
 }
 
@@ -31,3 +31,4 @@ ok( $hdr );
 # Get the telescope name
 my $item = $hdr->itembyname( 'C1TEL' );
 is( $item->value, "JCMT", "Check C1TEL");
+is( $item->type, "STRING", "Check C1TEL type" );
