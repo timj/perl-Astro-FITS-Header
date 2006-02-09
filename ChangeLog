@@ -1,3 +1,8 @@
+2006-02-08  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
+
+	* GSD/GSD.pm: Astro::FITS::Header::Item objects created from GSD
+	files now have proper FITS types.
+
 2005-04-10  Tim Jenness  <tjenness@cpan.org>
 
 	* Item/Item.pm (parse_card): Make sure the card is cleaned up
