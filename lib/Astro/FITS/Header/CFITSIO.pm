@@ -158,19 +158,22 @@ sub configure {
      # read.  If there isn't one specified, then we should read each of the
      # extensions that exist in the file, if in fact there are any.
 
-     my $ext;
-     fits_parse_extnum($args{File},$ext,$status);
-     my @subfrms = ();
-     if ($ext == -99) {
+     if ( exists $args{File} )
+     {
+       my $ext;
+       fits_parse_extnum($args{File},$ext,$status);
+       my @subfrms = ();
+       if ($ext == -99) {
          my $nhdus;
          $ifits->get_num_hdus($nhdus,$status);
          foreach my $ihdu (1 .. $nhdus-1) {
-             my $subfr = sprintf("%s[%d]",$args{File},$ihdu);
-             my $sself = $self->new(File=>$subfr);
-             push @subfrms,$sself;
+	   my $subfr = sprintf("%s[%d]",$args{File},$ihdu);
+	   my $sself = $self->new(File=>$subfr);
+	   push @subfrms,$sself;
          }
+       }
+       $self->subhdrs(@subfrms);
      }
-     $self->subhdrs(@subfrms);
   }
  
   # clean up
