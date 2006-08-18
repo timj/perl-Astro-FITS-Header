@@ -22,12 +22,13 @@ package Astro::FITS::Header::CFITSIO;
 #  Authors:
 #    Alasdair Allan (aa@astro.ex.ac.uk)
 #    Jim Lewis (jrl@ast.cam.ac.uk)
+#    Diab Jerius
 
 #  Revision:
 #     $Id$
 
 #  Copyright:
-#     Copyright (C) 2001 Particle Physics and Astronomy Research Council. 
+#     Copyright (C) 2001-2006 Particle Physics and Astronomy Research Council. 
 #     All Rights Reserved.
 
 #-
@@ -279,7 +280,7 @@ Jim Lewis E<lt>jrl@ast.cam.ac.ukE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2002 Particle Physics and Astronomy Research Council.
+Copyright (C) 2001-2006 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify
