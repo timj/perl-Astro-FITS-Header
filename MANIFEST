@@ -1,18 +1,13 @@
-AST/AST.pm
-AST/Makefile.PL
-CFITSIO/CFITSIO.pm
-CFITSIO/Makefile.PL
+lib/Astro/FITS/Header/AST.pm
+lib/Astro/FITS/Header/CFITSIO.pm
 ChangeLog
 GPL
 Header.pm
-Item/Item.pm
-Item/Makefile.PL
+lib/Astro/FITS/Header/Item.pm
 Makefile.PL
 MANIFEST
-NDF/NDF.pm
-NDF/Makefile.PL
-GSD/GSD.pm
-GSD/Makefile.PL
+lib/Astro/FITS/Header/NDF.pm
+lib/Astro/FITS/Header/GSD.pm
 README
 t/ast.t
 t/cfitsio.fit
@@ -26,3 +21,4 @@ t/gsd.t
 t/subhdr.t
 t/merge.t
 TODO
+META.yml                                 Module meta-data (added by MakeMaker)
