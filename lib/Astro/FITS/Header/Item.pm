@@ -39,7 +39,7 @@ use overload (
 use vars qw/ $VERSION /;
 use Carp;
 
-'$Revision$ ' =~ /.*:\s(.*)\s\$/ && ($VERSION = $1);
+$VERSION = sprintf("%d.%03d", q$Revision$ =~ /(\d+)\.(\d+)/);
 
 =head1 METHODS
 

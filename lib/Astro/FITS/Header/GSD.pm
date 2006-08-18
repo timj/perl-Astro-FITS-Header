@@ -33,7 +33,7 @@ use base qw/ Astro::FITS::Header /;
 
 use vars qw/ $VERSION /;
 
-$VERSION = '0.01';
+$VERSION = sprintf("%d.%03d", q$Revision$ =~ /(\d+)\.(\d+)/);
 
 =head1 METHODS
 

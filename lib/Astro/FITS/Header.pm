@@ -60,7 +60,7 @@ use Carp;
 
 use Astro::FITS::Header::Item;
 
-'$Revision$ ' =~ /.*:\s(.*)\s\$/ && ($VERSION = $1);
+$VERSION = sprintf("%d.%03d", q$Revision$ =~ /(\d+)\.(\d+)/);
 
 # Operator overloads
 use overload '""' => "stringify",
