@@ -89,7 +89,6 @@ Due to misunderstandings on the CPAN versioning scheme all modules in this
 release have jumped to version >= 3.0 to force reindexing. Patch numbers are
 no longer included in the distribution.
 
-
 Authors
 -------
 The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of 
@@ -134,3 +133,30 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc., 59 Temple
 Place,Suite 330, Boston, MA  02111-1307, USA
+
+Major Changes
+------------
+
+For full details of changes see the ChangeLog
+
+V3.0
+
+ - Can now select items by type using the itembytype() method.
+
+ - Add equals() method.
+
+ - Add ability to merge two Header objects into one.
+
+ - Subheaders now supported by tie.
+
+ - Fix bug RT#4816 (Diab Jerius)
+
+ - change the distribution layout to be more in line with standard usage.
+
+V2.9.2:
+
+ - Fix tied interface to recognized proper FITS undef cards
+
+ - Fix bug in comment parsing (duplicate of RT #11722)
+
+ - Add optional support for Starlink::AST module 
