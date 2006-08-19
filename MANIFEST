@@ -2,7 +2,7 @@ lib/Astro/FITS/Header/AST.pm
 lib/Astro/FITS/Header/CFITSIO.pm
 ChangeLog
 GPL
-Header.pm
+lib/Astro/FITS/Header.pm
 lib/Astro/FITS/Header/Item.pm
 Makefile.PL
 MANIFEST
