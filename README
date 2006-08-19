@@ -82,6 +82,14 @@ If the Astro::FITS::CFITSIO, NDF or Starlink::AST modules are not
 installed 'make test' will detect this and skip the test harness 
 for the relevant modules with a warning.
 
+Note on Versioning
+---------------
+
+Due to misunderstandings on the CPAN versioning scheme all modules in this
+release have jumped to version >= 3.0 to force reindexing. Patch numbers are
+no longer included in the distribution.
+
+
 Authors
 -------
 The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of 

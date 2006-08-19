@@ -1,5 +1,11 @@
 2006-08-18  Tim Jenness  <timj@jach.hawaii.edu>
 
+        ---- CPAN Version 3.000 ----
+	
+        * All: Update CVS version extraction to use 3 decimal places and to zero-pad.
+	Also update reference versions to 3.0 so that CPAN will see that modules have
+	changed.
+	
 	* CFITSIO/CFITSIO.pm: Apply patch from Diab Jerius (RT #4816) to
 	test when $args{File} has not been specified.
 
