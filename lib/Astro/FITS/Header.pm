@@ -633,15 +633,20 @@ sub allitems {
 
 =item B<configure>
 
-Configures the object, takes an array of FITS header cards 
-or an array of Astro::FITS::Header::Item objects as input.
+Configures the object, takes an array of FITS header cards, 
+an array of Astro::FITS::Header::Item objects or a simple hash as input.
 If you feed in nothing at all, it uses a default array containing
 just the SIMPLE card required at the top of all FITS files.
 
   $header->configure( Cards => \@array );
   $header->configure( Items => \@array );
+  $header->configure( Hash => \%hash );
 
-Does nothing if the array is not supplied.
+Does nothing if the array is not supplied. If the hash scheme is used
+and the hash contains the special key of SUBHEADERS pointing to an
+array of hashes, these will be read as proper sub headers. All other
+references in the hash will be ignored. Note that the default key
+order will be retained in the object created via the hash.
 
 =cut
 
@@ -668,6 +673,28 @@ sub configure {
 	# We have an array of Astro::FITS::Header::Items
 	@{$self->{HEADER}} = @{ $args{Items} };
 	$self->_rebuild_lookup;
+    } elsif (exists $args{Hash} && defined $args{Hash} ) {
+        # we have a hash so convert to Item objects and store
+        # use a For loop instead of map since we want to
+        # skip some items
+        croak "Hash constructor requested but not given a hash reference"
+	  unless ref($args{Hash}) eq 'HASH';
+        my @items;
+	my @subheaders;
+	for my $k (keys %{$args{Hash}}) {
+	  if ($k eq 'SUBHEADERS' 
+	      && ref($args{Hash}->{$k}) eq 'ARRAY'
+	      && ref($args{Hash}->{$k}->[0]) eq 'HASH') {
+	    # special case
+	    @subheaders = map { $self->new( Hash => $_ ) } @{$args{Hash}->{$k}};
+	  } elsif (not ref($args{Hash}->{$k})) {
+	    push(@items, new Astro::FITS::Header::Item( Keyword => $k,
+							Value => $args{Hash}->{$k} ));
+	  }
+	}
+	@{$self->{HEADER}} = @items;
+	$self->_rebuild_lookup;
+        $self->subhdrs(@subheaders) if @subheaders;
     } elsif( !defined($self->{HEADER}) ||  !@{$self->{HEADER}} ) {
 	@{$self->{HEADER}} = (
 	      new Astro::FITS::Header::Item( Card=> "SIMPLE  =  T"),
@@ -1275,13 +1302,7 @@ sub STORE {
       @values = ($tied);
     } else {
       # Convert it to a hash
-      my @items = map { new Astro::FITS::Header::Item( Keyword => $_,
-                                                       Value => $value->{$_}
-                                                     ) } keys (%{$value});
-
-      # Create the Header object.
-      @values = (new Astro::FITS::Header( Cards => \@items ));
-
+      @values = ( Astro::FITS::Header->new( Hash => $value ) );
     }
 
   } elsif((ref $value eq 'ARRAY') || (length $value > 70) || $value =~ m/\n/s ) {
