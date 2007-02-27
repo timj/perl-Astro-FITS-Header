@@ -688,8 +688,16 @@ sub configure {
 	    # special case
 	    @subheaders = map { $self->new( Hash => $_ ) } @{$args{Hash}->{$k}};
 	  } elsif (not ref($args{Hash}->{$k})) {
-	    push(@items, new Astro::FITS::Header::Item( Keyword => $k,
-							Value => $args{Hash}->{$k} ));
+	    # if we have new lines in the value, we should duplicate the item
+	    # so split on new lines
+	    my $value = $args{Hash}->{$k};
+	    $value = '' unless defined $value;
+	    my @lines = split(/^/m,$value);
+	    chomp(@lines); # remove the newlines
+
+	    push(@items, map { new Astro::FITS::Header::Item( Keyword => $k,
+							      Value => $_ ) }
+		@lines);
 	  }
 	}
 	@{$self->{HEADER}} = @items;
@@ -776,7 +784,10 @@ sub merge_primary {
     for my $item ($hdr->allitems) {
       my $key;
       my $type = $item->type;
-      if ($type eq 'COMMENT' || $type eq 'UNDEF') {
+      if (!defined $type || $type eq 'BLANK') {
+	# blank line so skip it
+	next;
+      } elsif ($type eq 'COMMENT' || $type eq 'UNDEF') {
 	$key = $item->card;
       } elsif ($type eq 'HEADER') {
 	next;
@@ -1652,7 +1663,6 @@ sub _hdr_to_tie {
     tie %header, ref($hdr), $hdr;
     return \%header;
   }
-  print "UNDEF\n";
   return undef;
 }
 
