@@ -1,3 +1,11 @@
+2007-02-27  Tim Jenness  <tjenness@cpan.org>
+
+	* lib/Astro/FITS/Header.pm: Hash constructor converts values with
+	newlines into multiple items. BLANK lines are skipped when merging.
+	
+	* lib/Astro/FITS/Header/Item.pm: Add BLANK item support and fix
+	some warnings associated with undef comments.
+
 2007-02-22  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header.pm (configure): Add support for Hash constructor.
