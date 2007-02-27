@@ -1455,9 +1455,14 @@ sub EXISTS {
   if( !exists( ${$self->{LOOKUP}}{$keyword} ) ) {
     return undef;
   }
-  if(  exists( ${$self->{LOOKUP}}{$keyword} ) &&
-      ${$self->{HEADER}}[${$self->{LOOKUP}}{$keyword}[0]]->type eq 'COMMENT' ) {
-    return undef;
+
+  # if we are being asked for a keyword that is associated with a COMMENT or BLANK
+  # type we return FALSE for existence. An undef type means we have to assume a valid
+  # item with unknown type
+  if(  exists( ${$self->{LOOKUP}}{$keyword} ) ) {
+    my $item = ${$self->{HEADER}}[${$self->{LOOKUP}}{$keyword}[0]];
+    my $type = $item->type;
+    return undef if (defined $type && ($type eq 'COMMENT' || $type eq 'BLANK') );
   }
 
   return 1;
