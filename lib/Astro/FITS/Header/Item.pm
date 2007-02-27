@@ -319,8 +319,17 @@ sub configure {
       my $method = lc($key);
       $self->$method( $hash{$key}) if exists $hash{$key};
     }
-    # COMMENT, HISTORY, and blank cards are special
-    $self->type('COMMENT') if $self->keyword =~ /^(COMMENT|HISTORY|)$/;
+
+    # only set type if we have not been given a type
+    if (!$self->type) {
+      if (!$self->keyword && !$self->value) {
+	# completely blank
+	$self->type("BLANK");
+      } elsif (!$self->keyword || $self->keyword =~ /^(COMMENT|HISTORY)$/) {
+	# COMMENT, HISTORY, and blank cards are special
+	$self->type('COMMENT')
+      }
+    }
 
     # End cards are special, need only do a Keyword => 'END' to configure
     $self->type('END') if $self->keyword() eq 'END';
@@ -398,10 +407,10 @@ sub parse_card {
     $keyword = uc(substr($card, 0, $equals_col ));
   }
   # Remove leading and trailing spaces, and replace interior spaces
-  # between the keywords with a single 
+  # between the keywords with a single .
   $keyword =~ s/^\s+// if ( $card =~ /^\s+HIERARCH/ );
   $keyword =~ s/\s+$//;
-  $keyword =~ s/\s/./g;
+  $keyword =~ s/\s+/./g;
 
   # update object
   $self->keyword( $keyword );
@@ -418,10 +427,10 @@ sub parse_card {
   # This will be a blank line but will not trigger here if we
   # are padding to 80 characters
   if (length($card) == 0) {
-    $self->type( "UNDEF" );
-    return( "", undef, undef);
+    $self->type( "BLANK" );
+    return( undef, undef, undef);
   }
-
+  
   # Check for comment or HISTORY
   # If the card is not padded this may trigger a warning on the
   # substr going out of bounds
@@ -717,10 +726,12 @@ sub _stringify {
   if (defined $type && $type eq 'END' ) {
     $card = sprintf("%-10s%-70s", $card, "");
 
+  } elsif (defined $type && $type eq 'BLANK') {
+    $card = " " x 80;
   } elsif (defined $type && $type eq 'COMMENT') {
 
     # Comments are from character 9 - 80
-    $card = sprintf("%-8s%-72s", $card, $comment);
+    $card = sprintf("%-8s%-72s", $card, (defined $comment ? $comment : ''));
 
   } elsif (!defined $type && !defined $value && !defined $comment) {
 
