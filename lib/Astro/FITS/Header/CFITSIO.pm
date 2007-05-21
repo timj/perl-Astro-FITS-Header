@@ -70,7 +70,7 @@ use base qw/ Astro::FITS::Header /;
 use Astro::FITS::CFITSIO qw / :longnames :constants /;
 use Carp;
 
-$VERSION = sprintf("%d.%03d", q$Revision$ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d", q$Revision$ =~ /(\d+)/);
 
 # C O N S T R U C T O R ----------------------------------------------------
 

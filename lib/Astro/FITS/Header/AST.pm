@@ -36,7 +36,7 @@ use Carp;
 
 require Starlink::AST;
 
-$VERSION = sprintf("%d.%03d", q$Revision$ =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d", q$Revision$ =~ /(\d+)/);
 
 # C O N S T R U C T O R ----------------------------------------------------
 
