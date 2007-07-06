@@ -28,7 +28,8 @@ package Astro::FITS::Header;
 #     $Id$
 
 #  Copyright:
-#     Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
+#     Copyright (C) 2001-2006 Particle Physics and Astronomy Research Council.
+#     Copyright (C) 2007 Science and Technology Facilities Council.
 #     Portions copyright (C) 2002 Southwest Research Institute
 #     All Rights Reserved.
 
@@ -877,6 +878,53 @@ ths object on disk using Data::Dumper module.
 sub freeze {
   my $self = shift;
   return bless $self, 'Astro::FITS::Header';
+}
+
+=item B<append>
+
+Append or update a card.
+
+  $header->append( $card );
+
+This method can take either an Astro::FITS::Header::Item object, an
+Astro::FITS::Header object, or a reference to an array of
+Astro::FITS::Header::Item objects.
+
+In all cases, if the given Astro::FITS::Header::Item keyword exists in
+the header, then the value will be overwritten with the one passed to
+the method. Otherwise, the card will be appended to the end of the
+header.
+
+Nothing is returned.
+
+=cut
+
+sub append {
+  my $self = shift;
+  my $thing = shift;
+
+  my @cards;
+  if( UNIVERSAL::isa( $thing, "Astro::FITS::Header::Item" ) ) {
+    push @cards, $thing;
+  } elsif( UNIVERSAL::isa( $thing, "Astro::FITS::Header" ) ) {
+    @cards = $thing->allitems;
+  } elsif( ref( $thing ) eq 'ARRAY' ) {
+    @cards = @$thing;
+  }
+
+  foreach my $card ( @cards ) {
+    my @value = $self->value( $card->keyword );
+    if( defined( $value[0] ) ) {
+
+      # Update the given card.
+      $self->replacebyname( $card->keyword, $card )
+
+    } else {
+
+      push @{$self->{HEADER}}, $card;
+      $self->_rebuild_lookup;
+    }
+  }
 }
 
 # P R I V A T  E   M E T H O D S ------------------------------------------
