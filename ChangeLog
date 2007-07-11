@@ -1,3 +1,8 @@
+2007-07-11  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
+
+  * lib/Astro/FITS/Header.pm: Add append() method to add new or
+  overwrite existing headers.
+
 2007-02-27  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header.pm: Hash constructor converts values with
