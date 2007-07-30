@@ -913,15 +913,18 @@ sub append {
   }
 
   foreach my $card ( @cards ) {
-    my @value = $self->value( $card->keyword );
-    if( defined( $value[0] ) ) {
+    my $item = $self->itembyname( $card->keyword );
+    if( defined( $item ) ) {
 
       # Update the given card.
       $self->replacebyname( $card->keyword, $card )
 
     } else {
-
-      push @{$self->{HEADER}}, $card;
+      # Retrieve the index of the END card, and insert this card
+      # before that one, but only if the END header actually exists.
+      my $index = $self->index( 'END' );
+      $index = ( defined( $index ) ? $index : -1 );
+      $self->insert( $index, $card );
       $self->_rebuild_lookup;
     }
   }
