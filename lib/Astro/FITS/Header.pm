@@ -920,14 +920,20 @@ sub append {
       $self->replacebyname( $card->keyword, $card )
 
     } else {
+
+      # Don't append a SIMPLE header as that can lead to disaster and
+      # strife and gnashing of teeth (and violates the FITS standard).
+      next if ( uc( $card->keyword ) eq 'SIMPLE' );
+
       # Retrieve the index of the END card, and insert this card
       # before that one, but only if the END header actually exists.
       my $index = $self->index( 'END' );
       $index = ( defined( $index ) ? $index : -1 );
       $self->insert( $index, $card );
-      $self->_rebuild_lookup;
     }
   }
+
+  $self->_rebuild_lookup;
 }
 
 # P R I V A T  E   M E T H O D S ------------------------------------------
