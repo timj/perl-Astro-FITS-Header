@@ -1,3 +1,12 @@
+2007-07-30  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
+
+	* lib/Astro/FITS/Header.pm: Modifications to append() method: Do
+	not append SIMPLE card if requested to do so. Rebuild lookup table
+	after appending all cards, not after each card. If asked to append
+	a new header, do so before the END card, not after it, if the END
+	card exists. Fix bug when appending a card that exists in the
+	header but has an undefined value.
+
 2007-07-11  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
 
   * lib/Astro/FITS/Header.pm: Add append() method to add new or
