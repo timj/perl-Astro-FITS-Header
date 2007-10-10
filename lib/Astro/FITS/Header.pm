@@ -512,9 +512,11 @@ sub removebyname{
 
    # loop over the keywords
    # We use a real splice rather than the class splice for efficiency
-   # in order to prevent an index rebuild for each index
-   my @cards = map { splice @{$self->{HEADER}}, $_, 1; } @index;
-
+   # in order to prevent an index rebuild for each index. The ugly code
+   # is needed in case we have multiple indices returned, which can
+   # happen if we have a regular expression passed in as a keyword.
+   my $i = -1;
+   my @cards = map { $i++; splice @{$self->{HEADER}}, ( $_ + 1 ), 1; } @index;
    # force rebuild
    $self->_rebuild_lookup;
 
