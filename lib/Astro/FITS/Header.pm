@@ -509,6 +509,7 @@ sub removebyname{
 
    # grab the index array from lookup table
    my @index = $self->index($keyword);
+   use Data::Dumper;
 
    # loop over the keywords
    # We use a real splice rather than the class splice for efficiency
@@ -516,7 +517,8 @@ sub removebyname{
    # is needed in case we have multiple indices returned, which can
    # happen if we have a regular expression passed in as a keyword.
    my $i = -1;
-   my @cards = map { $i++; splice @{$self->{HEADER}}, ( $_ + $i ), 1; } @index;
+   my @cards = map { $i++; splice @{$self->{HEADER}}, ( $_ - $i ), 1; } sort @index;
+
    # force rebuild
    $self->_rebuild_lookup;
 
