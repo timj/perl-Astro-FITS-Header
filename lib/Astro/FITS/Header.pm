@@ -509,7 +509,6 @@ sub removebyname{
 
    # grab the index array from lookup table
    my @index = $self->index($keyword);
-   use Data::Dumper;
 
    # loop over the keywords
    # We use a real splice rather than the class splice for efficiency
