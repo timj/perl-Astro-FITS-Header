@@ -9,10 +9,10 @@ Astro::FITS::Header::AST - Manipulates FITS headers from an AST object
   use Astro::FITS::Header::AST;
 
   $header = new Astro::FITS::Header::AST( FrameSet => $wcsinfo );
-  $header = new Astro::FITS::Header::AST( Cards => \@cards );
+  $header = new Astro::FITS::Header::AST( FrameSet => $wcsinfo,
+                                          Encoding => 'FITS-IRAF' );
 
-  $header->writehdr( File => $file );
-  $header->writehdr( fitsID => $ifits );
+  $header = new Astro::FITS::Header::AST( Cards => \@cards );
 
 =head1 DESCRIPTION
 
@@ -53,9 +53,21 @@ $Id$
 Reads a FITS header from a Starlink::AST FrameSet object
 
   $header->configure( FrameSet => $wcsinfo );
+
+Base class initialisation also works:
+
   $header->configure( Cards => \@cards );
 
 Accepts a reference to an Starlink::AST FrameSet object.
+
+If a specific encoding is required, this can be specified using
+the Encoding argument. Default is FITS-WCS if no Encoding is given.
+Note that not all framesets can be encoded using FITS-WCS.
+
+  $header->configure( FrameSet => $wcsinfo, Encoding => "Native" );
+
+If Encoding is specified but undefined, the default will be decided
+by AST.
 
 =cut
 
@@ -79,7 +91,15 @@ sub configure {
   {
      my $fchan = new Starlink::AST::FitsChan( 
                                       sink => sub { push @cards, $_[0] } );
-     $fchan->Set( Encoding => "FITS-WCS" );
+     if (exists $args{Encoding}) {
+       if (defined $args{Encoding}) {
+         # use AST default if undef is supplied
+         $fchan->Set( Encoding => $args{Encoding} );
+       }
+     } else {
+       # Historical default
+       $fchan->Set( Encoding => "FITS-WCS" );
+     }
      $status = $fchan->Write( $wcsinfo );
   }
   return $self->SUPER::configure( Cards => \@cards );
@@ -102,9 +122,11 @@ C<Starlink::AST>, C<Astro::FITS::Header>
 =head1 AUTHORS
 
 Alasdair Allan E<lt>aa@astro.ex.ac.ukE<gt>,
+Tim Jenness E<lt>t.jenness@jach.hawaii.eduE<gt>
 
 =head1 COPYRIGHT
 
+Copyright (C) 2007 Science and Technology Facilities Council.
 Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
