@@ -298,7 +298,8 @@ Used to specify the comment associated with this FITS item.
 =item B<Type>
 
 Used to specify the variable type. See the C<type> method
-for more details.
+for more details. A type will be guessed if one is not supplied.
+The guess may well be wrong.
 
 =back
 
@@ -328,6 +329,9 @@ sub configure {
       } elsif (!$self->keyword || $self->keyword =~ /^(COMMENT|HISTORY)$/) {
 	# COMMENT, HISTORY, and blank cards are special
 	$self->type('COMMENT')
+      } else {
+        my $type = $self->guess_type( $self->value );
+        $self->type( $type ) if defined $type;
       }
     }
 
@@ -747,15 +751,7 @@ sub _stringify {
     # tell the difference between 'F' and F
     # an undefined value is typeless
     unless (defined $type) {
-      if (!defined $value) {
-	$type = "UNDEF";
-      } elsif ($value =~ /^\d+$/) {
-	$type = "INT";
-      } elsif ($value =~ /^(-?)(\d*)(\.?)(\d*)([EeDd][-\+]?\d+)?$/) {
-	$type = "FLOAT";
-      } else {
-	$type = "STRING";
-      }
+      $type = $self->guess_type( $value );
     }
 
     # Numbers behave identically whether they are float or int
@@ -832,6 +828,35 @@ sub _stringify {
 
 }
 
+=item B<guess_type>
+
+This class method can be used to guess the data type of a supplied value.
+It is private but can be used by other classes in the Astro::FITS::Header
+hierarchy.
+
+ $type = Astro::FITS::Header::Item->guess_type( $value );
+
+Can not distinguish a string F from a LOGICAL F so will always guess
+"string". Returns "string" if a type could not be determined.
+
+=cut
+
+sub guess_type {
+  my $self = shift;
+  my $value = shift;
+  my $type;
+  if (!defined $value) {
+    $type = "UNDEF";
+  } elsif ($value =~ /^\d+$/) {
+    $type = "INT";
+  } elsif ($value =~ /^(-?)(\d*)(\.?)(\d*)([EeDd][-\+]?\d+)?$/) {
+    $type = "FLOAT";
+  } else {
+    $type = "STRING";
+  }
+  return $type;
+}
+
 =end __private
 
 =back
@@ -842,7 +867,8 @@ C<Astro::FITS::Header>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2005 Particle Physics and Astronomy Research Council.
+Copyright (C) 2008 Science and Technology Facilities Council.
+Copyright (C) 2001-2007 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify

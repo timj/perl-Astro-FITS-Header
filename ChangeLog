@@ -1,3 +1,7 @@
+2008-01-24  Tim Jenness <tjenness@cpan.org>
+
+	* lib/Astro/FITS/Header/Item.pm (configure): Guess type if no type provided.
+
 2007-11-14  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header/AST.pm (configure): Allow the Encoding to be specified.
