@@ -67,6 +67,9 @@ explicitly (that is not ".sdf") that path is treated as an explicit path
 to an NDF. If an explicit path is specified no attempt is made to locate
 other NDFs in the HDS container.
 
+If the NDF can be opened successfully but there is no .MORE.FITS
+extension, an empty header is returned rather than throwing an error.
+
 =cut
 
 sub configure {
@@ -154,56 +157,66 @@ sub configure {
 
   if ($status == $good) {
 
-    # Find the FITS extension
-    ndf_xloc($indf, 'FITS', 'READ', my $xloc, $status);
+    # See if the extension exists
+    ndf_xstat( $indf, "FITS", my $there, $status);
 
-    if ($status == $good) {
+    if ($status == $good && $there) {
 
-      # Variables...
-      my (@dim, $ndim, $nfits, $maxdim);
-
-      # Get the dimensions of the FITS array
-      # Should only be one-dimensional
-      $maxdim = 7;
-      dat_shape($xloc, $maxdim, @dim, $ndim, $status);
+      # Find the FITS extension
+      ndf_xloc($indf, 'FITS', 'READ', my $xloc, $status);
 
       if ($status == $good) {
 
-        if ($ndim != 1) {
-          $status = &SAI__ERROR;
-          err_rep(' ',"$task: Dimensionality of FITS array should be 1 but is $ndim", $status);
+        # Variables...
+        my (@dim, $ndim, $nfits, $maxdim);
+
+        # Get the dimensions of the FITS array
+        # Should only be one-dimensional
+        $maxdim = 7;
+        dat_shape($xloc, $maxdim, @dim, $ndim, $status);
+
+        if ($status == $good) {
+
+          if ($ndim != 1) {
+            $status = &SAI__ERROR;
+            err_rep(' ',"$task: Dimensionality of FITS array should be 1 but is $ndim", $status);
+
+          }
 
         }
 
-      }
+        # Set the FITS array to empty
+        my @fits = ();   # Note that @fits only exists in this block
 
-      # Set the FITS array to empty
-      my @fits = ();   # Note that @fits only exists in this block
+        # Read the FITS extension
+        dat_get1c($xloc, $dim[0], @fits, $nfits, $status);
 
-      # Read the FITS extension
-      dat_get1c($xloc, $dim[0], @fits, $nfits, $status);
+        # Annul the locator
+        dat_annul($xloc, $status);
 
-      # Annul the locator
-      dat_annul($xloc, $status);
+        # Check status and read into hash
+        if ($status == $good) {
 
-      # Check status and read into hash
-      if ($status == $good) {
+          # Parse the FITS array
+          $self->SUPER::configure( Cards => \@fits );
 
-	# Parse the FITS array
-	$self->SUPER::configure( Cards => \@fits );
+        } else {
+
+          err_rep(' ',"$task: Error reading FITS array", $status);
+
+        }
 
       } else {
 
-        err_rep(' ',"$task: Error reading FITS array", $status);
-
+        # Add my own message to status
+        err_rep(' ', "$task: Error locating FITS extension",
+                $status);
       }
-
+    } elsif ($status != $good) {
+      err_rep(' ', "$task: Error determining presence of FITS extension",
+              $status);
     } else {
-
-      # Add my own message to status
-      err_rep(' ', "$task: Error locating FITS extension",
-             $status);
-
+      # simply is not there but file is okay
     }
 
     # Close the NDF identifier (if we opened it)

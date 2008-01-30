@@ -1,3 +1,9 @@
+2008-01-29  Tim Jenness  <tjenness@cpan.org>
+
+	* lib/Astro/FITS/Header/NDF.pm (configure): It is no longer an
+	error If the NDF is perfectly valid but there is no FITS
+	extension,
+
 2008-01-24  Tim Jenness <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header/Item.pm (configure): Guess type if no type provided.
