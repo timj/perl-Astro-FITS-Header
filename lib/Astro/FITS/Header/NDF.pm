@@ -37,6 +37,7 @@ Currently, subheader support is readonly.
 
 use strict;
 use Carp;
+use File::Spec;
 use NDF qw/ :ndf :dat :err :hds /;
 
 use base qw/ Astro::FITS::Header /;
@@ -104,6 +105,22 @@ sub configure {
     my $file = $args{File};
     $file =~ s/\.sdf$//;
 
+    # NDF currently (c.2008) has troubles with spaces in paths
+    # we work around this by changing to the directory before
+    # opening the file
+    my ($vol, $dir, $root) = File::Spec->splitpath( $file );
+    my $cwd;
+    if ($dir =~ /\s/) {
+      # only bother if there is a space
+      $cwd = File::Spec->rel2abs( File::Spec->curdir );
+      # if the chdir fails we will try to open the file
+      # with NDF anyway using the path. Otherwise we change the
+      # filename to be the root
+      if (chdir($dir)) {
+        $file = $root;
+      }
+    }
+      
     # Start NDF
     ndf_begin();
     $ndfstarted = 1;
@@ -143,6 +160,13 @@ sub configure {
 
 	# Open the NDF
 	ndf_find(&NDF::DAT__ROOT(), $ndffile, $indf, $status);
+
+  # reset the directory
+  if (defined $cwd) {
+    chdir($cwd) or carp "Could not return to current working directory";
+  }
+
+
       }
     }
 

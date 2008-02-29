@@ -1,3 +1,8 @@
+2008-02-28  Tim Jenness  <tjenness@cpan.org>
+
+	* lib/Astro/FITS/Header/NDF.pm (configure): Attempt to work around the fact that 
+	NDF can not read a file that includes a directory path with whitespace.
+
 2008-01-29  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header/NDF.pm (configure): It is no longer an
