@@ -141,30 +141,30 @@ sub configure {
 
       if ($status == $good) {
 
-	# If we have an NDF we can simply reopen it
-	# Additionally if we have no description of the component
-	# at all we assume NDF. This overcomes a bug in the acquisition
-	# for SCUBA where a blank type field is used.
-	my $ndffile;
-	if ($type =~ /NDF/i || $type !~ /\w/) {
-	  $ndffile = $file;
-	} else {
-	  # For now simply assume we can find a .HEADER
-	  # in future we could tweak this to default to first NDF
-	  # it finds if no .HEADER
-	  $ndffile = $file . ".HEADER";
-	}
+        # If we have an NDF we can simply reopen it
+        # Additionally if we have no description of the component
+        # at all we assume NDF. This overcomes a bug in the acquisition
+        # for SCUBA where a blank type field is used.
+        my $ndffile;
+        if ($type =~ /NDF/i || $type !~ /\w/) {
+          $ndffile = $file;
+        } else {
+          # For now simply assume we can find a .HEADER
+          # in future we could tweak this to default to first NDF
+          # it finds if no .HEADER
+          $ndffile = $file . ".HEADER";
+        }
 
-	# Close the HDS file
-	dat_annul( $hdsloc, $status);
+        # Close the HDS file
+        dat_annul( $hdsloc, $status);
 
-	# Open the NDF
-	ndf_find(&NDF::DAT__ROOT(), $ndffile, $indf, $status);
+        # Open the NDF
+        ndf_find(&NDF::DAT__ROOT(), $ndffile, $indf, $status);
 
-  # reset the directory
-  if (defined $cwd) {
-    chdir($cwd) or carp "Could not return to current working directory";
-  }
+        # reset the directory
+        if (defined $cwd) {
+          chdir($cwd) or carp "Could not return to current working directory";
+        }
 
 
       }
@@ -174,8 +174,8 @@ sub configure {
 
     $status = &NDF::SAI__ERROR;
     err_rep(' ',
-	    "$task: Argument hash does not contain ndfID, File or Cards",
-	   $status);
+            "$task: Argument hash does not contain ndfID, File or Cards",
+            $status);
 
   }
 
@@ -210,7 +210,7 @@ sub configure {
         }
 
         # Set the FITS array to empty
-        my @fits = ();   # Note that @fits only exists in this block
+        my @fits = ();     # Note that @fits only exists in this block
 
         # Read the FITS extension
         dat_get1c($xloc, $dim[0], @fits, $nfits, $status);
@@ -314,7 +314,7 @@ sub writehdr {
     $ndfstarted = 1;
 
     ndf_open(&NDF::DAT__ROOT(), $file, 'UPDATE', 'UNKNOWN',
-	     $ndfid, my $place, $status);
+             $ndfid, my $place, $status);
 
     # If status is bad, try assuming it is a HDS container
     # with UKIRT style .HEADER component
@@ -325,11 +325,11 @@ sub writehdr {
       my $useheader;
       err_mark();
       ndf_open(&NDF::DAT__ROOT(), $hdsfile, 'UPDATE', 'UNKNOWN',
-	       $ndfid, $place, $lstat);
+               $ndfid, $place, $lstat);
       if ($lstat != $good) {
-	err_annul( $lstat );
+        err_annul( $lstat );
       } else {
-	$useheader = 1;
+        $useheader = 1;
       }
       err_rlse();
 
