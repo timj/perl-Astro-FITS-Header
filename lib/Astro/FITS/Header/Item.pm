@@ -95,7 +95,8 @@ Make a copy of an Astro::FITS::Header::Item object.
 
 sub copy {
   my $self = shift;
-  return bless \%$self, ref( $self );
+  my %copy = %$self;
+  return bless \%copy, ref( $self );
 }
 
 =back
