@@ -864,7 +864,7 @@ sub merge_primary {
   # convert back to FITS object, making sure we stringify the Item
   # objects so that we retain copies
   for my $d (@difference) {
-    $d = $self->new( Cards => [ map { "$_" } @$d ]);
+    $d = $self->new( Cards => [ map { $_->copy } @$d ]);
   }
 
   # remembering that the merged array is on the front
