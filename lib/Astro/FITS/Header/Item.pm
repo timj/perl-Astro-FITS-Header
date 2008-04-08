@@ -85,6 +85,19 @@ sub new {
   return $item;
 }
 
+=item B<copy>
+
+Make a copy of an Astro::FITS::Header::Item object.
+
+  $newitem = $item->copy;
+
+=cut
+
+sub copy {
+  my $self = shift;
+  return bless \%$self, ref( $self );
+}
+
 =back
 
 =head2 Accessor Methods
