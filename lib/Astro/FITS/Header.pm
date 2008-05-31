@@ -560,9 +560,11 @@ sub splice {
 
    if (@list) {
      # all arguments supplied
+     my $n = 0;
      for my $i (@list) {
-       croak "Arguments to splice must be Astro::FITS::Header::Item objects"
+       croak "Argument $n to splice must be Astro::FITS::Header::Item objects"
          unless UNIVERSAL::isa($i, "Astro::FITS::Header::Item");	
+       $n++;
      }
      @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
 
@@ -861,10 +863,10 @@ sub merge_primary {
   # for returning it
   unshift(@difference, \@merged );
 
-  # convert back to FITS object, making sure we stringify the Item
-  # objects so that we retain copies
+  # convert back to FITS object, Construct using the Items directly
+  # - they will be copied without strinfication.
   for my $d (@difference) {
-    $d = $self->new( Cards => [ map { $_->copy } @$d ]);
+    $d = $self->new( Cards => $d );
   }
 
   # remembering that the merged array is on the front

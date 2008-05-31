@@ -297,6 +297,9 @@ If supplied, the value is assumed to be a standard 80 character
 FITS header card. This is sent to the C<parse_card> method directly.
 Takes priority over any other key.
 
+If it is an C<Astro::FITS::Header::Item> it will be copied rather
+than parsed.
+
 =item B<Keyword>
 
 Used to specify the keyword associated with this object.
@@ -326,7 +329,14 @@ sub configure {
   my %hash = @_;
 
   if (exists $hash{'Card'}) {
-    $self->parse_card( $hash{'Card'});
+    if (ref($hash{Card}) && $hash{Card}->isa("Astro::FITS::Header::Item")) {
+      # low level populate - can not use copy since we already have a copy
+      for my $k (keys %{$hash{Card}}) {
+        $self->{$k} = $hash{Card}->{$k};
+      }
+    } else {
+      $self->parse_card( $hash{'Card'});
+    }
   } else {
     # Loop over the allowed keys storing the values
     # in the object if they exist
