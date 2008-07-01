@@ -1344,7 +1344,7 @@ sub STORE {
   # Make sure that we do not stringify reference arguments by mistake
   # when looking from slashes
 
-  if ( !ref($value) && $keyword !~ m/(COMMENT)|(HISTORY)/ and 
+  if (defined $value && !ref($value) && $keyword !~ m/(COMMENT)|(HISTORY)/ and 
       $value =~ s:\s*(?<!\\)/\s*(.*)::         # Identify any '/' not preceded by '\'
       ) { 
     my $comment = $1;
@@ -1356,14 +1356,17 @@ sub STORE {
   }
 
   # unescape (unless we are blessed)
-  if (!ref($value)) {
+  if (defined $value && !ref($value)) {
     $value =~ s:\\\\:\\:g;
     $value =~ s:\\\/:\/:g;
   }
 
   # skip the shenanigans for the normal case
   # or if we have an Astro::FITS::Header
-  if (UNIVERSAL::isa($value, "Astro::FITS::Header")) {
+  if (!defined $value) {
+    @values = ($value);
+
+  } elsif (UNIVERSAL::isa($value, "Astro::FITS::Header")) {
     @values = ($value);
 
   } elsif (ref $value eq 'HASH') {
