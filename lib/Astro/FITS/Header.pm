@@ -98,10 +98,10 @@ sub new {
   # bless the header block into the class
   my $block = bless { HEADER => [],
                       LOOKUP  => {},
-		      LASTKEY => undef,
-		      TieRetRef => 0,
+                      LASTKEY => undef,
+                      TieRetRef => 0,
                       SUBHDRS => [],
-		    }, $class;
+                    }, $class;
 
   # Configure the object, even with no arguments since configure
   # still puts the minimum SIMPLE card in.
@@ -161,25 +161,25 @@ in the header using an C<Astro::FITS::Header::Item> of type 'HEADER'.
 =cut
 
 sub subhdrs {
-    my $self = shift;
+  my $self = shift;
 
-    if (@_) {
-        # verify the class
-        my $i;
-        for my $h (@_) {
-	  croak "Argument $i supplied to subhdrs method is not a Astro::FITS::Header object\n"
-	    unless UNIVERSAL::isa( $h, "Astro::FITS::Header" );
-          $i++;
-        }
+  if (@_) {
+    # verify the class
+    my $i;
+    for my $h (@_) {
+      croak "Argument $i supplied to subhdrs method is not a Astro::FITS::Header object\n"
+        unless UNIVERSAL::isa( $h, "Astro::FITS::Header" );
+      $i++;
+    }
 
-        # store them
-        @{$self->{SUBHDRS}} = @_;
-    }
-    if (wantarray()) {
-        return @{$self->{SUBHDRS}};
-    } else {
-        return $self->{SUBHDRS};
-    }
+    # store them
+    @{$self->{SUBHDRS}} = @_;
+  }
+  if (wantarray()) {
+    return @{$self->{SUBHDRS}};
+  } else {
+    return $self->{SUBHDRS};
+  }
 }
 
 =item B<item>
@@ -192,13 +192,13 @@ does not exist.
 =cut
 
 sub item {
-   my ( $self, $index ) = @_;
+  my ( $self, $index ) = @_;
 
-   return undef unless defined $index;
-   return undef unless exists ${$self->{HEADER}}[$index];
+  return undef unless defined $index;
+  return undef unless exists ${$self->{HEADER}}[$index];
 
-   # grab and return the Header::Item at $index
-   return ${$self->{HEADER}}[$index];
+  # grab and return the Header::Item at $index
+  return ${$self->{HEADER}}[$index];
 }
 
 
@@ -212,15 +212,15 @@ FITS Header.
 =cut
 
 sub get_wcs {
-   my $self = shift;
+  my $self = shift;
 
-   require Starlink::AST;
-   my $fchan = Starlink::AST::FitsChan->new();
-   for my $i ( $self->cards() ) {
-      $fchan->PutFits( $i, 0);
-   }
-   $fchan->Clear( "Card" );
-   return $fchan->Read();
+  require Starlink::AST;
+  my $fchan = Starlink::AST::FitsChan->new();
+  for my $i ( $self->cards() ) {
+    $fchan->PutFits( $i, 0);
+  }
+  $fchan->Clear( "Card" );
+  return $fchan->Read();
    
 }
 
@@ -236,13 +236,13 @@ Returns keyword referenced by index, C<undef> if it does not exist.
 =cut
 
 sub keyword {
-   my ( $self, $index ) = @_;
+  my ( $self, $index ) = @_;
 
-   return undef unless defined $index;
-   return undef unless exists ${$self->{HEADER}}[$index];
+  return undef unless defined $index;
+  return undef unless exists ${$self->{HEADER}}[$index];
 
-   # grab and return the keyword at $index
-   return ${$self->{HEADER}}[$index]->keyword();
+  # grab and return the keyword at $index
+  return ${$self->{HEADER}}[$index]->keyword();
 }
 
 # I T E M   B Y   N A M E  -------------------------------------------------
@@ -262,11 +262,11 @@ may be a regular expression created with the C<qr> operator.
 =cut
 
 sub itembyname {
-   my ( $self, $keyword ) = @_;
+  my ( $self, $keyword ) = @_;
 
-   my @items = @{$self->{HEADER}}[$self->index($keyword)];
+  my @items = @{$self->{HEADER}}[$self->index($keyword)];
 
-   return wantarray ?  @items : @items ? $items[0] : undef;
+  return wantarray ?  @items : @items ? $items[0] : undef;
 
 }
 
@@ -285,16 +285,16 @@ context. See C<Astro::FITS::Header::Item> for a list of allowed types.
 =cut
 
 sub itembytype {
-   my ( $self, $type ) = @_;
+  my ( $self, $type ) = @_;
 
-   return () unless defined $type;
+  return () unless defined $type;
 
-   $type = uc($type);
+  $type = uc($type);
 
-   # No optimised lookup so brute force it
-   my @items = grep { $_->type eq $type } @{ $self->{HEADER} };
+  # No optimised lookup so brute force it
+  my @items = grep { $_->type eq $type } @{ $self->{HEADER} };
 
-   return wantarray ?  @items : @items ? $items[0] : undef;
+  return wantarray ?  @items : @items ? $items[0] : undef;
 
 }
 
@@ -316,27 +316,24 @@ C<undef> if the keyword does not exist.
 =cut
 
 sub index {
-   my ( $self, $keyword ) = @_;
+  my ( $self, $keyword ) = @_;
    
-   # grab the index array from lookup table
-   my @index;
+  # grab the index array from lookup table
+  my @index;
 
-   if ( 'Regexp' eq ref $keyword )
-   {
-     push @index, @{$self->{LOOKUP}{$_}}
-       foreach grep { /$keyword/ && 
-			defined $self->{LOOKUP}{$_} } keys %{$self->{LOOKUP}};
-     @index = sort @index;
-   }
-   else
-   {
-     @index = @{${$self->{LOOKUP}}{$keyword}}
-       if ( exists ${$self->{LOOKUP}}{$keyword} && 
-	    defined ${$self->{LOOKUP}}{$keyword} );
-   }
+  if ( 'Regexp' eq ref $keyword ) {
+    push @index, @{$self->{LOOKUP}{$_}}
+      foreach grep { /$keyword/ && 
+                       defined $self->{LOOKUP}{$_} } keys %{$self->{LOOKUP}};
+    @index = sort @index;
+  } else {
+    @index = @{${$self->{LOOKUP}}{$keyword}}
+      if ( exists ${$self->{LOOKUP}}{$keyword} && 
+           defined ${$self->{LOOKUP}}{$keyword} );
+  }
    
-   # return the values array
-   return wantarray ? @index : @index ? $index[0] : undef;
+  # return the values array
+  return wantarray ? @index : @index ? $index[0] : undef;
 
 }
 
@@ -356,13 +353,13 @@ C<undef> if the keyword does not exist.
 =cut
 
 sub value {
-   my ( $self, $keyword ) = @_;
+  my ( $self, $keyword ) = @_;
 
-   # resolve the values from the index array from lookup table
-   my @values = map { ${$self->{HEADER}}[$_]->value() } $self->index($keyword);
+  # resolve the values from the index array from lookup table
+  my @values = map { ${$self->{HEADER}}[$_]->value() } $self->index($keyword);
 
-   # loop over the indices and grab the values
-   return wantarray ? @values : @values ? $values[0] : undef;
+  # loop over the indices and grab the values
+  return wantarray ? @values : @values ? $values[0] : undef;
 
 }
 
@@ -384,14 +381,14 @@ C<undef> if the keyword does not exist.
 =cut
 
 sub comment {
-   my ( $self, $keyword ) = @_;
+  my ( $self, $keyword ) = @_;
 
-   # resolve the comments from the index array from lookup table
-   my @comments =
-     map { ${$self->{HEADER}}[$_]->comment() } $self->index($keyword);
+  # resolve the comments from the index array from lookup table
+  my @comments =
+    map { ${$self->{HEADER}}[$_]->comment() } $self->index($keyword);
 
-   # loop over the indices and grab the comments
-   return wantarray ?  @comments : @comments ? $comments[0] : undef;
+  # loop over the indices and grab the comments
+  return wantarray ?  @comments : @comments ? $comments[0] : undef;
 }
 
 # I N S E R T -------------------------------------------------------------
@@ -411,13 +408,13 @@ The insert position can be negative.
 =cut
 
 sub insert{
-   my ($self, $index, $item) = @_;
+  my ($self, $index, $item) = @_;
 
-   # splice the new FITS header card into the array
-   # Splice automatically triggers a lookup table rebuild
-   $self->splice($index, 0, $item);
+  # splice the new FITS header card into the array
+  # Splice automatically triggers a lookup table rebuild
+  $self->splice($index, 0, $item);
 
-   return;
+  return;
 }
 
 
@@ -434,10 +431,10 @@ returns the replaced card.
 =cut
 
 sub replace{
-   my ($self, $index, $item) = @_;
-   # remove the specified item and replace with $item
-   # Splice triggers a rebuild so we do not have to
-   return $self->splice( $index, 1, $item);
+  my ($self, $index, $item) = @_;
+  # remove the specified item and replace with $item
+  # Splice triggers a rebuild so we do not have to
+  return $self->splice( $index, 1, $item);
 }
 
 # R E M O V E -------------------------------------------------------------
@@ -453,10 +450,10 @@ returns the removed card.
 =cut
 
 sub remove{
-   my ($self, $index) = @_;
-   # remove the  FITS header card from the array
-   # Splice always triggers a lookup table rebuild so we don't have to
-   return $self->splice( $index, 1);
+  my ($self, $index) = @_;
+  # remove the  FITS header card from the array
+  # Splice always triggers a lookup table rebuild so we don't have to
+  return $self->splice( $index, 1);
 }
 
 # R E P L A C E  B Y  N A M E ---------------------------------------------
@@ -473,21 +470,21 @@ created with the C<qr> operator.
 =cut
 
 sub replacebyname{
-   my ($self, $keyword, $item) = @_;
+  my ($self, $keyword, $item) = @_;
 
-   # grab the index array from lookup table
-   my @index = $self->index($keyword);
+  # grab the index array from lookup table
+  my @index = $self->index($keyword);
 
-   # loop over the keywords
-   # We use a real splice rather than the class splice for efficiency
-   # in order to prevent an index rebuild for each index
-   my @cards = map { splice @{$self->{HEADER}}, $_, 1, $item;} @index;
+  # loop over the keywords
+  # We use a real splice rather than the class splice for efficiency
+  # in order to prevent an index rebuild for each index
+  my @cards = map { splice @{$self->{HEADER}}, $_, 1, $item;} @index;
 
-   # force rebuild
-   $self->_rebuild_lookup;
+  # force rebuild
+  $self->_rebuild_lookup;
 
-   # return removed items
-   return wantarray ? @cards : $cards[scalar(@cards)-1];
+  # return removed items
+  return wantarray ? @cards : $cards[scalar(@cards)-1];
 
 }
 
@@ -505,24 +502,24 @@ created with the C<qr> operator.
 =cut
 
 sub removebyname{
-   my ($self, $keyword) = @_;
+  my ($self, $keyword) = @_;
 
-   # grab the index array from lookup table
-   my @index = $self->index($keyword);
+  # grab the index array from lookup table
+  my @index = $self->index($keyword);
 
-   # loop over the keywords
-   # We use a real splice rather than the class splice for efficiency
-   # in order to prevent an index rebuild for each index. The ugly code
-   # is needed in case we have multiple indices returned, which can
-   # happen if we have a regular expression passed in as a keyword.
-   my $i = -1;
-   my @cards = map { $i++; splice @{$self->{HEADER}}, ( $_ - $i ), 1; } sort @index;
+  # loop over the keywords
+  # We use a real splice rather than the class splice for efficiency
+  # in order to prevent an index rebuild for each index. The ugly code
+  # is needed in case we have multiple indices returned, which can
+  # happen if we have a regular expression passed in as a keyword.
+  my $i = -1;
+  my @cards = map { $i++; splice @{$self->{HEADER}}, ( $_ - $i ), 1; } sort @index;
 
-   # force rebuild
-   $self->_rebuild_lookup;
+  # force rebuild
+  $self->_rebuild_lookup;
 
-   # return removed items
-   return wantarray ? @cards : $cards[scalar(@cards)-1];
+  # return removed items
+  return wantarray ? @cards : $cards[scalar(@cards)-1];
 }
 
 # S P L I C E --------------------------------------------------------------
@@ -542,47 +539,47 @@ is negative, counts from the end of the FITS header.
 =cut
 
 sub splice {
-   my $self = shift;
-   my ($offset, $length, @list) = @_;
+  my $self = shift;
+  my ($offset, $length, @list) = @_;
 
-   # If the array is empty and we get a negative offset we
-   # must convert it to an offset of 0 to prevent a:
-   #   Modification of non-creatable array value attempted, subscript -1
-   # fatal error
-   # This can occur with a tied hash and the %{$tieref} = %new
-   # construct
-   if (defined $offset) {
-     $offset = 0 if (@{$self->{HEADER}} == 0 && $offset < 0);
-   }
+  # If the array is empty and we get a negative offset we
+  # must convert it to an offset of 0 to prevent a:
+  #   Modification of non-creatable array value attempted, subscript -1
+  # fatal error
+  # This can occur with a tied hash and the %{$tieref} = %new
+  # construct
+  if (defined $offset) {
+    $offset = 0 if (@{$self->{HEADER}} == 0 && $offset < 0);
+  }
 
-   # the removed cards
-   my @cards;
+  # the removed cards
+  my @cards;
 
-   if (@list) {
-     # all arguments supplied
-     my $n = 0;
-     for my $i (@list) {
-       croak "Argument $n to splice must be Astro::FITS::Header::Item objects"
-         unless UNIVERSAL::isa($i, "Astro::FITS::Header::Item");	
-       $n++;
-     }
-     @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
+  if (@list) {
+    # all arguments supplied
+    my $n = 0;
+    for my $i (@list) {
+      croak "Argument $n to splice must be Astro::FITS::Header::Item objects"
+        unless UNIVERSAL::isa($i, "Astro::FITS::Header::Item");	
+      $n++;
+    }
+    @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
 
-   } elsif (defined $length) {
-     # length and (presumably) offset
-     @cards = splice @{$self->{HEADER}}, $offset, $length;
+  } elsif (defined $length) {
+    # length and (presumably) offset
+    @cards = splice @{$self->{HEADER}}, $offset, $length;
 
-   } elsif (defined $offset) {
-     # offset only
-     @cards = splice @{$self->{HEADER}}, $offset;
-   } else {
-     # none
-     @cards = splice @{$self->{HEADER}};
-   }
+  } elsif (defined $offset) {
+    # offset only
+    @cards = splice @{$self->{HEADER}}, $offset;
+  } else {
+    # none
+    @cards = splice @{$self->{HEADER}};
+  }
 
-   # update the internal lookup table and return
-   $self->_rebuild_lookup();
-   return wantarray ? @cards : $cards[scalar(@cards)-1];
+  # update the internal lookup table and return
+  $self->_rebuild_lookup();
+  return wantarray ? @cards : $cards[scalar(@cards)-1];
 }
 
 # C A R D S --------------------------------------------------------------
@@ -625,8 +622,8 @@ Returns the header as an array of FITS::Header:Item objects.
 =cut
 
 sub allitems {
-   my $self = shift;
-   return map { $_ } @{$self->{HEADER}};
+  my $self = shift;
+  return map { $_ } @{$self->{HEADER}};
 }
 
 # C O N F I G U R E -------------------------------------------------------
@@ -657,65 +654,65 @@ order will be retained in the object created via the hash.
 =cut
 
 sub configure {
-    my $self = shift;
+  my $self = shift;
     
-    # grab the argument list
-    my %args = @_;
+  # grab the argument list
+  my %args = @_;
     
-    if (exists $args{Cards} && defined $args{Cards}) {
+  if (exists $args{Cards} && defined $args{Cards}) {
 	
-	# First translate each incoming card into a Item object
-	# Any existing cards are removed
-	@{$self->{HEADER}} = map {
+    # First translate each incoming card into a Item object
+    # Any existing cards are removed
+    @{$self->{HEADER}} = map {
 	    new Astro::FITS::Header::Item( Card => $_ );
-	} @{ $args{Cards} };
+    } @{ $args{Cards} };
 	
     # Now build the lookup table. There would be a slight efficiency
-	# gain to include this in a loop over the cards but prefer
-	# to reuse the method for this rather than repeating code
-	$self->_rebuild_lookup;
+    # gain to include this in a loop over the cards but prefer
+    # to reuse the method for this rather than repeating code
+    $self->_rebuild_lookup;
 	
-    } elsif (exists $args{Items} && defined $args{Items}){
-	# We have an array of Astro::FITS::Header::Items
-	@{$self->{HEADER}} = @{ $args{Items} };
-	$self->_rebuild_lookup;
-    } elsif (exists $args{Hash} && defined $args{Hash} ) {
-        # we have a hash so convert to Item objects and store
-        # use a For loop instead of map since we want to
-        # skip some items
-        croak "Hash constructor requested but not given a hash reference"
-	  unless ref($args{Hash}) eq 'HASH';
-        my @items;
-	my @subheaders;
-	for my $k (keys %{$args{Hash}}) {
-	  if ($k eq 'SUBHEADERS' 
-	      && ref($args{Hash}->{$k}) eq 'ARRAY'
-	      && ref($args{Hash}->{$k}->[0]) eq 'HASH') {
-	    # special case
-	    @subheaders = map { $self->new( Hash => $_ ) } @{$args{Hash}->{$k}};
-	  } elsif (not ref($args{Hash}->{$k})) {
-	    # if we have new lines in the value, we should duplicate the item
-	    # so split on new lines
-	    my $value = $args{Hash}->{$k};
-	    $value = '' unless defined $value;
-	    my @lines = split(/^/m,$value);
-	    chomp(@lines); # remove the newlines
+  } elsif (exists $args{Items} && defined $args{Items}) {
+    # We have an array of Astro::FITS::Header::Items
+    @{$self->{HEADER}} = @{ $args{Items} };
+    $self->_rebuild_lookup;
+  } elsif (exists $args{Hash} && defined $args{Hash} ) {
+    # we have a hash so convert to Item objects and store
+    # use a For loop instead of map since we want to
+    # skip some items
+    croak "Hash constructor requested but not given a hash reference"
+      unless ref($args{Hash}) eq 'HASH';
+    my @items;
+    my @subheaders;
+    for my $k (keys %{$args{Hash}}) {
+      if ($k eq 'SUBHEADERS' 
+          && ref($args{Hash}->{$k}) eq 'ARRAY'
+          && ref($args{Hash}->{$k}->[0]) eq 'HASH') {
+        # special case
+        @subheaders = map { $self->new( Hash => $_ ) } @{$args{Hash}->{$k}};
+      } elsif (not ref($args{Hash}->{$k})) {
+        # if we have new lines in the value, we should duplicate the item
+        # so split on new lines
+        my $value = $args{Hash}->{$k};
+        $value = '' unless defined $value;
+        my @lines = split(/^/m,$value);
+        chomp(@lines);          # remove the newlines
 
-	    push(@items, map { new Astro::FITS::Header::Item( Keyword => $k,
-							      Value => $_ ) }
-		@lines);
-	  }
-	}
-	@{$self->{HEADER}} = @items;
-	$self->_rebuild_lookup;
-        $self->subhdrs(@subheaders) if @subheaders;
-    } elsif( !defined($self->{HEADER}) ||  !@{$self->{HEADER}} ) {
-	@{$self->{HEADER}} = (
-	      new Astro::FITS::Header::Item( Card=> "SIMPLE  =  T"),
-	      new Astro::FITS::Header::Item( Card=> "END", Type=>"END" )
-			      );
-	$self->_rebuild_lookup; 
+        push(@items, map { new Astro::FITS::Header::Item( Keyword => $k,
+                                                          Value => $_ ) }
+             @lines);
+      }
     }
+    @{$self->{HEADER}} = @items;
+    $self->_rebuild_lookup;
+    $self->subhdrs(@subheaders) if @subheaders;
+  } elsif ( !defined($self->{HEADER}) ||  !@{$self->{HEADER}} ) {
+    @{$self->{HEADER}} = (
+                          new Astro::FITS::Header::Item( Card=> "SIMPLE  =  T"),
+                          new Astro::FITS::Header::Item( Card=> "END", Type=>"END" )
+                         );
+    $self->_rebuild_lookup; 
+  }
 }
 
 =item B<merge_primary>
@@ -758,8 +755,8 @@ sub merge_primary {
 
   # optional options handling
   my %opt = ( merge_unique => 0,
-	      force_return_diffs => 0,
-	    );
+              force_return_diffs => 0,
+            );
   if (ref($_[0]) eq 'HASH') {
     my $o = shift;
     %opt = ( %opt, %$o );
@@ -791,23 +788,23 @@ sub merge_primary {
       my $key;
       my $type = $item->type;
       if (!defined $type || $type eq 'BLANK') {
-	# blank line so skip it
-	next;
+        # blank line so skip it
+        next;
       } elsif ($type eq 'COMMENT' || $type eq 'UNDEF') {
-	$key = $item->card;
+        $key = $item->card;
       } elsif ($type eq 'HEADER') {
-	next;
+        next;
       } else {
-	$key = $item->keyword;
+        $key = $item->keyword;
       }
 
       if (exists $items{$key}) {
-	# Store the item, but in a hash with key corresponding
-	# to the input header number
-	push( @{ $items{$key}}, { item => $item, hnum => $hnum } );
+        # Store the item, but in a hash with key corresponding
+        # to the input header number
+        push( @{ $items{$key}}, { item => $item, hnum => $hnum } );
       } else {
-	$items{$key} = [ { item => $item, hnum => $hnum } ];
-	push(@order, $key);
+        $items{$key} = [ { item => $item, hnum => $hnum } ];
+        push(@order, $key);
       }
     }
     $hnum++;
@@ -830,7 +827,7 @@ sub merge_primary {
     for my $i (@items[1..$#items]) {
       # Ask the Items to compare using the equals() method
       if ($items[0]->{item}->equals( $i->{item} )) {
-	$match++;
+        $match++;
       }
     }
 
@@ -847,7 +844,7 @@ sub merge_primary {
       # Not enough of the items matched. Store to the relevant difference
       # arrays.
       for my $i (@items) {
-	push(@{ $difference[$i->{hnum}] }, $i->{item});
+        push(@{ $difference[$i->{hnum}] }, $i->{item});
       }
 
     }
@@ -909,17 +906,17 @@ sub append {
   my $thing = shift;
 
   my @cards;
-  if( UNIVERSAL::isa( $thing, "Astro::FITS::Header::Item" ) ) {
+  if ( UNIVERSAL::isa( $thing, "Astro::FITS::Header::Item" ) ) {
     push @cards, $thing;
-  } elsif( UNIVERSAL::isa( $thing, "Astro::FITS::Header" ) ) {
+  } elsif ( UNIVERSAL::isa( $thing, "Astro::FITS::Header" ) ) {
     @cards = $thing->allitems;
-  } elsif( ref( $thing ) eq 'ARRAY' ) {
+  } elsif ( ref( $thing ) eq 'ARRAY' ) {
     @cards = @$thing;
   }
 
   foreach my $card ( @cards ) {
     my $item = $self->itembyname( $card->keyword );
-    if( defined( $item ) ) {
+    if ( defined( $item ) ) {
 
       # Update the given card.
       $self->replacebyname( $card->keyword, $card )
@@ -980,29 +977,29 @@ to the indices of all header cards following the modifed card.
 =cut
 
 sub _rebuild_lookup {
-   my $self = shift;
+  my $self = shift;
    
-   # rebuild the lookup table
+  # rebuild the lookup table
 
-   # empty the hash 
-   $self->{LOOKUP} = { };
+  # empty the hash 
+  $self->{LOOKUP} = { };
 
-   # loop over the existing header array
-   for my $j (0 .. $#{$self->{HEADER}}) {
+  # loop over the existing header array
+  for my $j (0 .. $#{$self->{HEADER}}) {
 
-      # grab the keyword from each header item;
-      my $key = ${$self->{HEADER}}[$j]->keyword();
+    # grab the keyword from each header item;
+    my $key = ${$self->{HEADER}}[$j]->keyword();
             
-      # need to account to repeated keywords (e.g. COMMENT)
-      unless ( exists ${$self->{LOOKUP}}{$key} &&
-               defined ${$self->{LOOKUP}}{$key} ) {
-         # new keyword
-         ${$self->{LOOKUP}}{$key} = [ $j ];
-      } else {     
-         # keyword exists, push the current index into the array
-         push( @{${$self->{LOOKUP}}{$key}}, $j );
-      }   
-   }
+    # need to account to repeated keywords (e.g. COMMENT)
+    unless ( exists ${$self->{LOOKUP}}{$key} &&
+             defined ${$self->{LOOKUP}}{$key} ) {
+      # new keyword
+      ${$self->{LOOKUP}}{$key} = [ $j ];
+    } else {     
+      # keyword exists, push the current index into the array
+      push( @{${$self->{LOOKUP}}{$key}}, $j );
+    }   
+  }
 
 }
 
@@ -1185,9 +1182,9 @@ interface.
 
 # List of known comment-type fields
 %Astro::FITS::Header::COMMENT_FIELD = (
-  "COMMENT"=>1,
-  "HISTORY"=>1
-);
+                                       "COMMENT"=>1,
+                                       "HISTORY"=>1
+                                      );
 
 
 # constructor
@@ -1236,7 +1233,7 @@ sub FETCH {
   # if they're asking for $key_COMMENT.
   my $item;
   my $t_ok;
-  if( $wantcomment || $key =~ /^COMMENT$/ || $key =~ /^END$/) {
+  if ( $wantcomment || $key =~ /^COMMENT$/ || $key =~ /^END$/) {
     $item = ($self->itembyname($key))[0];
     $t_ok = (defined $item) && (defined $item->type);
     $wantvalue = 0 if ($t_ok && ($item->type eq 'COMMENT'));
@@ -1245,8 +1242,8 @@ sub FETCH {
   # The END card is a special case.  We always return " " for the value,
   # and undef for the comment.
   return ($wantvalue ? " " : undef)
-    if( ($t_ok && ($item->type eq 'END')) ||
-        ((defined $item) && ($key eq 'END')) );
+    if ( ($t_ok && ($item->type eq 'END')) ||
+         ((defined $item) && ($key eq 'END')) );
 
   # Retrieve all the values/comments. Note that we go through the entire
   # header for this in case of multiple matches
@@ -1307,9 +1304,9 @@ sub FETCH {
   # first element anyway.)
   my $out;
   if ($self->tiereturnsref && scalar(@out) > 1) {
-      $out = \@out;
+    $out = \@out;
   } else {
-      $out = $out[0];
+    $out = $out[0];
   }
   
   return $out;
@@ -1345,8 +1342,8 @@ sub STORE {
   # when looking from slashes
 
   if (defined $value && !ref($value) && $keyword !~ m/(COMMENT)|(HISTORY)/ and 
-      $value =~ s:\s*(?<!\\)/\s*(.*)::         # Identify any '/' not preceded by '\'
-      ) { 
+      $value =~ s:\s*(?<!\\)/\s*(.*):: # Identify any '/' not preceded by '\'
+     ) { 
     my $comment = $1;
 
     # Recurse to store the comment.  This is a direct (non-method) call to 
@@ -1381,7 +1378,7 @@ sub STORE {
       @values = ( Astro::FITS::Header->new( Hash => $value ) );
     }
 
-  } elsif((ref $value eq 'ARRAY') || (length $value > 70) || $value =~ m/\n/s ) {
+  } elsif ((ref $value eq 'ARRAY') || (length $value > 70) || $value =~ m/\n/s ) {
     my @val;
     # @val gets intermediate breakdowns, @values gets line-by-line breakdowns.
 
@@ -1392,7 +1389,7 @@ sub STORE {
     } elsif (ref $value) {
       croak "Can't put non-array ref values into a tied FITS header\n";
 
-    } elsif( $value =~ m/\n/s ) {
+    } elsif ( $value =~ m/\n/s ) {
       @val = split("\n",$value);
       chomp @val;
 
@@ -1403,13 +1400,13 @@ sub STORE {
     # Cut up really long items into multiline strings
     my($val);
     foreach $val(@val) {
-      while((length $val) > 70) {
-	push(@values,substr($val,0,69)."\\");
-	$val = substr($val,69);
+      while ((length $val) > 70) {
+        push(@values,substr($val,0,69)."\\");
+        $val = substr($val,69);
       }
       push(@values,$val);
     }
-  }   ## End of complicated case
+  }                             ## End of complicated case
   else {
 
 
@@ -1420,43 +1417,43 @@ sub STORE {
   # Upper case the relevant item name
   $keyword = uc($keyword);
   
-  if($keyword eq 'END') {
-      # Special case for END keyword
-      # (drops value on floor, makes sure there is one END at the end)
-      my @index = $self->index($keyword);
-      if( @index != 1   ||   $index[0] != $#{$self->allitems}) {
-	  my $i;
-	  while(defined($i = shift @index)) {
+  if ($keyword eq 'END') {
+    # Special case for END keyword
+    # (drops value on floor, makes sure there is one END at the end)
+    my @index = $self->index($keyword);
+    if ( @index != 1   ||   $index[0] != $#{$self->allitems}) {
+      my $i;
+      while (defined($i = shift @index)) {
 	      $self->remove($i);
-	  }
       }
-      unless( @index ) {
-	  my $endcard = new Astro::FITS::Header::Item(Keyword=>'END',
-						      Type=>'END', 
-						      Value=>1);
-	  $self->insert( scalar ($self->allitems) , $endcard );
-      }
-      return;
+    }
+    unless( @index ) {
+      my $endcard = new Astro::FITS::Header::Item(Keyword=>'END',
+                                                  Type=>'END', 
+                                                  Value=>1);
+      $self->insert( scalar ($self->allitems) , $endcard );
+    }
+    return;
       
   } 
   
-  if($keyword eq 'SIMPLE') {
-      # Special case for SIMPLE keyword
-      # (sets value correctly, makes sure there is one SIMPLE at the beginning)
-      my @index = $self->index($keyword);
-      if( @index != 1  ||  $index[0] != 0) {
-	  my $i;
-	  while(defined ($i=shift @index)) {
+  if ($keyword eq 'SIMPLE') {
+    # Special case for SIMPLE keyword
+    # (sets value correctly, makes sure there is one SIMPLE at the beginning)
+    my @index = $self->index($keyword);
+    if ( @index != 1  ||  $index[0] != 0) {
+      my $i;
+      while (defined ($i=shift @index)) {
 	      $self->remove($i);
-	  }
       }
-      unless( @index ) {
-	  my $simplecard = new Astro::FITS::Header::Item(Keyword=>'SIMPLE',
-							 Value=>$values[0],
-							 Type=>'LOGICAL');
-	  $self->insert(0, $simplecard);
-      }
-      return;
+    }
+    unless( @index ) {
+      my $simplecard = new Astro::FITS::Header::Item(Keyword=>'SIMPLE',
+                                                     Value=>$values[0],
+                                                     Type=>'LOGICAL');
+      $self->insert(0, $simplecard);
+    }
+    return;
   }
   
 
@@ -1470,7 +1467,7 @@ sub STORE {
   my @items = $self->itembyname($keyword);
 
   ## Remove extra items if necessary
-  if(scalar(@items) > scalar(@values)) {
+  if (scalar(@items) > scalar(@values)) {
     my(@indices) = $self->index($keyword);
     my($i);
     for $i (1..(scalar(@items) - scalar(@values))) {
@@ -1479,7 +1476,7 @@ sub STORE {
   }
 
   ## Allocate new items if necessary
-  while(scalar(@items) < scalar(@values)) {
+  while (scalar(@items) < scalar(@values)) {
 
     my $item = new Astro::FITS::Header::Item(Keyword=>$keyword,Value=>undef);
     # (No need to set type here; Item does it for us)
@@ -1491,7 +1488,7 @@ sub STORE {
   ## Set values or comments
   my($i); 
   for $i(0..$#values) {
-    if($Astro::FITS::Header::COMMENT_FIELD{$keyword}) {
+    if ($Astro::FITS::Header::COMMENT_FIELD{$keyword}) {
       $items[$i]->type('COMMENT');
       $items[$i]->comment($values[$i]);
     } elsif (! $havevalue) {
@@ -1517,14 +1514,14 @@ sub EXISTS {
     return ( scalar(@{$self->subhdrs}) > 0 ? 1 : 0);
   }
 
-  if( !exists( ${$self->{LOOKUP}}{$keyword} ) ) {
+  if ( !exists( ${$self->{LOOKUP}}{$keyword} ) ) {
     return undef;
   }
 
   # if we are being asked for a keyword that is associated with a COMMENT or BLANK
   # type we return FALSE for existence. An undef type means we have to assume a valid
   # item with unknown type
-  if(  exists( ${$self->{LOOKUP}}{$keyword} ) ) {
+  if (  exists( ${$self->{LOOKUP}}{$keyword} ) ) {
     my $item = ${$self->{HEADER}}[${$self->{LOOKUP}}{$keyword}[0]];
     my $type = $item->type;
     return undef if (defined $type && ($type eq 'COMMENT' || $type eq 'BLANK') );
