@@ -1561,27 +1561,38 @@ sub NEXTKEY {
 
   # abort if the number of keys we have served equals the number in the
   # header array. One wrinkle is that if we have SUBHDRS we want to go
-  # rount one more time
+  # round one more time
+  
   if ($self->{LASTKEY}+1 == scalar(@{$self->{HEADER}})) {
-    if (scalar(@{ $self->subhdrs}) && !$self->{SEENKEY}->{SUBHEADERS}) {
-      $self->{SEENKEY}->{SUBHEADERS} = 1;
-      return "SUBHEADERS";
-    }
-    return undef
+    return $self->_check_for_subhdr();
   }
 
-  # Skip later lines of multi-line cards...
+  # Skip later lines of multi-line cards since the tie interface
+  # will return all the lines for a single keyword request.
   my($a);
   do {
     $self->{LASTKEY} += 1;  
     $a = $self->{HEADER}->[$self->{LASTKEY}];
-    return undef unless defined $a;
+    # Got to end of header if we do not have $a
+    return $self->_check_for_subhdr() unless defined $a;
   } while ( $self->{SEENKEY}->{$a->keyword});
   $a = $a->keyword;
 
   $self->{SEENKEY}->{$a} = 1;
   return $a;
 }
+
+# called if we have run out of normal keys
+#  args: $self Returns: undef or "SUBHEADER"
+sub _check_for_subhdr {
+  my $self = shift;
+  if (scalar(@{ $self->subhdrs}) && !$self->{SEENKEY}->{SUBHEADERS}) {
+    $self->{SEENKEY}->{SUBHEADERS} = 1;
+    return "SUBHEADERS";
+  }
+  return undef;
+}
+
 
 # garbage collection
 # sub DESTROY { }
