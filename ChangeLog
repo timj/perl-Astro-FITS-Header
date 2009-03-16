@@ -1,3 +1,10 @@
+2009-03-16 Craig DeForest <deforest@boulder.swri.edu>
+
+	* Header.pm (tied interface): make sure that HISTORY cards are
+	treated as comments by default (formerly only COMMENT cards
+	were treated as comments; therefore the {HISTORY} field was
+	comming up blank, requiring {HISTORY_COMMENT} instead.)
+
 2008-08-01  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header.pm (tie): Fix tie for subheaders if the last item in the FITS

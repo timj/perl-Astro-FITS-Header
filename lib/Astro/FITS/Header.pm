@@ -1233,7 +1233,7 @@ sub FETCH {
   # if they're asking for $key_COMMENT.
   my $item;
   my $t_ok;
-  if ( $wantcomment || $key =~ /^COMMENT$/ || $key =~ /^END$/) {
+  if ( $wantcomment || $key =~ /^(COMMENT)|(HISTORY)$/ || $key =~ /^END$/) {
     $item = ($self->itembyname($key))[0];
     $t_ok = (defined $item) && (defined $item->type);
     $wantvalue = 0 if ($t_ok && ($item->type eq 'COMMENT'));
@@ -1341,7 +1341,7 @@ sub STORE {
   # Make sure that we do not stringify reference arguments by mistake
   # when looking from slashes
 
-  if (defined $value && !ref($value) && $keyword !~ m/(COMMENT)|(HISTORY)/ and 
+  if (defined $value && !ref($value) && $keyword !~ m/^(COMMENT)|(HISTORY)$/ and 
       $value =~ s:\s*(?<!\\)/\s*(.*):: # Identify any '/' not preceded by '\'
      ) { 
     my $comment = $1;
