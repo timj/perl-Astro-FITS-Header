@@ -1,3 +1,17 @@
+2008-08-01  Tim Jenness  <tjenness@cpan.org>
+
+	* lib/Astro/FITS/Header.pm (tie): Fix tie for subheaders if the last item in the FITS
+	header is a comment.
+
+2008-07-01  Tim Jenness  <tjenness@cpan.org>
+
+	* lib/Astro/FITS/Header.pm (tie): Fix warnings when storing UNDEF value through tie.
+
+2008-04-07  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
+
+	* lib/Astro/FITS/Header/Item.pm (copy): Add a copy constructor. This is more reliable
+	than stringifying the header item and then using it in a Item constructor.
+
 2008-02-28  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header/NDF.pm (configure): Attempt to work around the fact that 
@@ -16,6 +30,11 @@
 2007-11-14  Tim Jenness  <tjenness@cpan.org>
 
 	* lib/Astro/FITS/Header/AST.pm (configure): Allow the Encoding to be specified.
+
+2007-10-10  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
+
+	* lib/Astro/FITS/Header.pm (removebyname): Fix card removal when more than
+	one card matches the given regular expression.
 
 2007-07-30  Brad Cavanagh <b.cavanagh@jach.hawaii.edu>
 
