@@ -61,7 +61,7 @@ use Carp;
 
 use Astro::FITS::Header::Item;
 
-$VERSION = sprintf("%d", q$Revision$ =~ /(\d+)/);
+$VERSION = 3.01;
 
 # Operator overloads
 use overload '""' => "stringify",
