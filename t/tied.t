@@ -5,7 +5,7 @@
 use strict;
 
 #load test
-use Test::More tests => 293;
+use Test::More tests => 294;
 
 # load modules
 use Astro::FITS::Header;
@@ -220,6 +220,15 @@ is($href->{NUM_COMMENT},'test', "Test comment from auto-parse");
 $href->{SLASHSTR} = "foo\\/bar / value is 'foo/bar'";
 is($href->{SLASHSTR},'foo/bar', "Test value from complex auto-parse");
 is($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'', "Test comment from complex auto-parse");
+
+# test HISTORY handling
+$keywords{HISTORY} = "foo";
+$keywords{HISTORY} .= "bar";
+ok($keywords{HISTORY} eq <<FOO
+foo
+bar
+FOO
+    );
 
 # principal of least surprise.... you should get back what you put in!
 #$href->{REVERSE} = "foo / bar";
