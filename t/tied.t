@@ -214,12 +214,12 @@ is(ref $value2, "ARRAY");
 
 # Test comment parsing in keyword setting
 $href->{NUM} = "3 / test";
-is($href->{NUM},3);
-is($href->{NUM_COMMENT},'test');
+is($href->{NUM},3, "Test value from auto-parse");
+is($href->{NUM_COMMENT},'test', "Test comment from auto-parse");
 
 $href->{SLASHSTR} = "foo\\/bar / value is 'foo/bar'";
-is($href->{SLASHSTR},'foo/bar');
-is($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'');
+is($href->{SLASHSTR},'foo/bar', "Test value from complex auto-parse");
+is($href->{SLASHSTR_COMMENT},'value is \'foo/bar\'', "Test comment from complex auto-parse");
 
 # principal of least surprise.... you should get back what you put in!
 #$href->{REVERSE} = "foo / bar";
