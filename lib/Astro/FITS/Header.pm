@@ -1341,7 +1341,7 @@ sub STORE {
   # Make sure that we do not stringify reference arguments by mistake
   # when looking from slashes
 
-  if (defined $value && !ref($value) && $keyword !~ m/(COMMENT$)|(^HISTORY$)/ and
+  if (defined $value && !ref($value) && $keyword !~ m/(_COMMENT$)|(^(COMMENT|HISTORY)$)/ and
       $value =~ s:\s*(?<!\\)/\s*(.*):: # Identify any '/' not preceded by '\'
      ) { 
     my $comment = $1;
