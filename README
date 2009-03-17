@@ -139,6 +139,23 @@ Major Changes
 
 For full details of changes see the ChangeLog
 
+V3.01
+
+  - New append() method to append a header or items to an existing
+    header, overwriting duplicates.
+
+  - A header can now be constructed from a simple perl hash
+
+  - Item objects now have a copy constructor.
+
+  - When importing an AST frameset a specific encoding can be
+    specified.
+
+  - The Item constructor can now guess the header type.
+
+  - Fixes in item removal, tied interface for history and subheaders
+    and NDF opening when a directory has a space.
+
 V3.0
 
  - Can now select items by type using the itembytype() method.

@@ -891,7 +891,7 @@ C<Astro::FITS::Header>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008 Science and Technology Facilities Council.
+Copyright (C) 2008-2009 Science and Technology Facilities Council.
 Copyright (C) 2001-2007 Particle Physics and Astronomy Research Council.
 All Rights Reserved.
 

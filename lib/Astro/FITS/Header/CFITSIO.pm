@@ -28,6 +28,7 @@ package Astro::FITS::Header::CFITSIO;
 #     $Id$
 
 #  Copyright:
+#     Copyright (C) 2007-2009 Science & Technology Facilities Council.
 #     Copyright (C) 2001-2006 Particle Physics and Astronomy Research Council. 
 #     All Rights Reserved.
 

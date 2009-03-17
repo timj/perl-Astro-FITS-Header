@@ -29,7 +29,7 @@ package Astro::FITS::Header;
 
 #  Copyright:
 #     Copyright (C) 2001-2006 Particle Physics and Astronomy Research Council.
-#     Copyright (C) 2007 Science and Technology Facilities Council.
+#     Copyright (C) 2007-2009 Science and Technology Facilities Council.
 #     Portions copyright (C) 2002 Southwest Research Institute
 #     All Rights Reserved.
 

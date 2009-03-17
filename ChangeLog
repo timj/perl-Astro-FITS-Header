@@ -1,3 +1,7 @@
+2009-03-16  Tim Jenness  <tjenness@cpan.org>
+
+	---- CPAN Version 3.01 -----
+
 2009-03-16 Craig DeForest <deforest@boulder.swri.edu>
 
 	* Header.pm (tied interface): make sure that HISTORY cards are
