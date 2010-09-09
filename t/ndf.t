@@ -10,7 +10,7 @@ BEGIN {
     plan skip_all => "NDF module not available";
     exit;
   } else {
-    plan tests => 193;
+    plan tests => 385;
   }
 }
 
@@ -64,6 +64,30 @@ my @newcards = $hdr2->cards;
 for my $i (0..$#cards) {
   is($newcards[$i], $cards[$i], "Compare card $i");
 }
+
+# Create an error condition
+my $hdr3;
+eval {
+  $hdr3 = Astro::FITS::Header::NDF->new( File => "NotThere.sdf" );
+};
+ok( !defined $hdr3, "Deliberate error" );
+
+# Now read the header using an NDF identifier
+$status = $good;
+err_begin( $status );
+ndf_begin();
+ndf_find( &NDF::DAT__ROOT(), $file, $ndfid, $status);
+my $hdr4 = Astro::FITS::Header::NDF->new( ndfID => $ndfid );
+
+# Now compare with the original
+@newcards = $hdr2->cards;
+
+for my $i (0..$#cards) {
+  is($newcards[$i], $cards[$i], "Compare card $i");
+}
+
+ndf_end($status );
+err_end( $status );
 
 exit;
 
