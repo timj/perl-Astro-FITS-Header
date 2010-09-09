@@ -38,7 +38,7 @@ Currently, subheader support is readonly.
 use strict;
 use Carp;
 use File::Spec;
-use NDF qw/ :ndf :dat :err :hds /;
+use NDF qw/ :ndf :dat :err :hds :msg /;
 
 use base qw/ Astro::FITS::Header /;
 
@@ -95,14 +95,20 @@ sub configure {
 
   # did we start NDF
   my $ndfstarted;
+  my $FileName = "";
 
   # Read the args hash
   if (exists $args{ndfID}) {
     $indf = $args{ndfID};
 
+    # Need to work out the file name
+    ndf_msg( "NDF", $indf );
+    msg_load( " ", "^NDF", $FileName, my $len, $status );
+
   } elsif (exists $args{File}) {
     # Remove trailing .sdf
     my $file = $args{File};
+    $FileName = $file;
     $file =~ s/\.sdf$//;
 
     # NDF currently (c.2008) has troubles with spaces in paths
@@ -153,6 +159,7 @@ sub configure {
           # in future we could tweak this to default to first NDF
           # it finds if no .HEADER
           $ndffile = $file . ".HEADER";
+          $FileName .= ".HEADER";
         }
 
         # Close the HDS file
@@ -259,7 +266,7 @@ sub configure {
     } until ( $oplen == 1 );
     err_annul($status);
     err_end( $status );
-    croak "Error during header read from NDF:\n" . join "\n", @errs;
+    croak "Error during header read from NDF $FileName:\n" . join "\n", @errs;
   }
   err_end($status);
 
