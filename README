@@ -1,10 +1,10 @@
 Astro::FITS::Header module
---------------------------  
+--------------------------
 
 What is it?
 -----------
 Astro::FITS::Header and associated sub-classes are tools for reading,
-modifying and then writing out FITS standard header blocks to FITS, NDF 
+modifying and then writing out FITS standard header blocks to FITS, NDF
 and GSD files. The module now fully supports ESO HIERARCH header keywords.
 Support for instantiating Astro::FITS:Header objects from Starlink::AST
 FrameSet objects is also supported.
@@ -14,8 +14,8 @@ Full documentation is included in the POD attached to the modules.
 Tied Interface
 --------------
 This is a warning for those of you using the tied interface from previous
-versions of the module. The interface now acts very differently, theoretically 
-the changes shouldn't break existing code, but it has diverged sufficiently 
+versions of the module. The interface now acts very differently, theoretically
+the changes shouldn't break existing code, but it has diverged sufficiently
 far from the original that I'm no longer convinced that it will work in all
 cases. Be warned!
 
@@ -54,32 +54,32 @@ Project in general see http://www.starlink.ac.uk/
 Provides
 --------
 The package provides the following classes
-	
+
    Astro::FITS::Header
    Astro::FITS::Header::Item
    Astro::FITS::Header::NDF
    Astro::FITS::Header::CFITSIO
    Astro::FITS::Header::GSD
    Astro::FITS::Header::AST
-   
-which all include POD format documentation. 
+
+which all include POD format documentation.
 
 Where can I get it?
 -------------------
 The package is availabe from CPAN <http://www.cpan.org/> and from
-http://www.astro.ex.ac.uk/people/aa/pages/computing/fitsheader.html  
+http://www.astro.ex.ac.uk/people/aa/pages/computing/fitsheader.html
 
 Installation
 ------------
 Installation is automated using the ExtUtils::MakeMaker library
 
-     % perl Makefile.PL
-     % make
-     % make test
-     % make install
+     % perl Build.PL
+     % ./Build
+     % ./Build test
+     % ./Build install
 
-If the Astro::FITS::CFITSIO, NDF or Starlink::AST modules are not 
-installed 'make test' will detect this and skip the test harness 
+If the Astro::FITS::CFITSIO, NDF or Starlink::AST modules are not
+installed 'make test' will detect this and skip the test harness
 for the relevant modules with a warning.
 
 Note on Versioning
@@ -91,17 +91,17 @@ no longer included in the distribution.
 
 Authors
 -------
-The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of 
-the University of Exeter Astrophysics Group (http://www.astro.ex.ac.uk/) as 
-part of his work for the Starlink Project (http://www.starlink.ac.uk/), and 
-Tim Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC) 
+The module was originally written by Alasdair Allan <aa@astro.ex.ac.uk>, of
+the University of Exeter Astrophysics Group (http://www.astro.ex.ac.uk/) as
+part of his work for the Starlink Project (http://www.starlink.ac.uk/), and
+Tim Jenness <timj@jach.hawaii.edu> of the Joint Astronomy Center (JAC)
 (http://www.jach.hawaii.edu/) in Hawaii.
 
 This version of the module includes patches supplied by Diab Jerius
 <dj@head-cfa.harvard.edu>, of the Harvard-Smithsonian Center for Astrophysics,
-and by Jim Lewis <jrl@ast.cam.ac.uk>, of the Cambridge Astronomy Survey Unit 
+and by Jim Lewis <jrl@ast.cam.ac.uk>, of the Cambridge Astronomy Survey Unit
 at the Institute of Astronomy, to allow access to Multi-Extension FITS files.
- 
+
 The tied interface was updated for version 2.x by Craig DeForest
 <deforest@boulder.swri.edu> of the Department of Space Studies, Southwest
 Research Institute and Tim Jenness <timj@jach.hawaii.edu> of the Joint
@@ -117,7 +117,7 @@ For full details of who did what, and when, see the ChangeLog.
 Maintainer
 ----------
 The package is currently maintained by Alasdair Allan <aa@astro.ex.ac.uk>,
-please direct comments and patches to him in the first instance. 
+please direct comments and patches to him in the first instance.
 
 License
 -------
@@ -138,6 +138,10 @@ Major Changes
 ------------
 
 For full details of changes see the ChangeLog
+
+V3.02
+
+  - Use Module::Build
 
 V3.01
 
@@ -176,4 +180,4 @@ V2.9.2:
 
  - Fix bug in comment parsing (duplicate of RT #11722)
 
- - Add optional support for Starlink::AST module 
+ - Add optional support for Starlink::AST module
