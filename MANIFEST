@@ -4,7 +4,7 @@ ChangeLog
 GPL
 lib/Astro/FITS/Header.pm
 lib/Astro/FITS/Header/Item.pm
-Makefile.PL
+Build.PL
 MANIFEST
 lib/Astro/FITS/Header/NDF.pm
 lib/Astro/FITS/Header/GSD.pm
@@ -21,4 +21,4 @@ t/gsd.t
 t/subhdr.t
 t/merge.t
 TODO
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml
