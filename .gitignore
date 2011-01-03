@@ -5,3 +5,4 @@ Build
 _build
 MYMETA.yml
 *.tar.gz
+Astro-FITS-Header-*
