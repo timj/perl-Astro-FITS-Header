@@ -2,41 +2,6 @@ package Astro::FITS::Header;
 
 # ---------------------------------------------------------------------------
 
-#+
-#  Name:
-#    Astro::FITS::Header
-
-#  Purposes:
-#    Implements a FITS Header Block
-
-#  Language:
-#    Perl object
-
-#  Description:
-#    This module wraps a FITS header block as a perl object as a hash
-#    containing an array of FITS::Header::Items and a lookup hash for
-#    the keywords.  May be tied to a single hash for convenience.
-
-#  Authors:
-#    Alasdair Allan (aa@astro.ex.ac.uk)
-#    Tim Jenness (t.jenness@jach.hawaii.edu)
-#    Craig DeForest (deforest@boulder.swri.edu)
-#    Jim Lewis (jrl@ast.cam.ac.uk)
-#    Brad Cavanagh (b.cavanagh@jach.hawaii.edu)
-
-#  Revision:
-#     $Id$
-
-#  Copyright:
-#     Copyright (C) 2001-2006 Particle Physics and Astronomy Research Council.
-#     Copyright (C) 2007-2009 Science and Technology Facilities Council.
-#     Portions copyright (C) 2002 Southwest Research Institute
-#     All Rights Reserved.
-
-#-
-
-# ---------------------------------------------------------------------------
-
 =head1 NAME
 
 Astro::FITS::Header - Object Orientated interface to FITS HDUs
@@ -69,10 +34,6 @@ use overload '""' => "stringify",
 
 # C O N S T R U C T O R ----------------------------------------------------
 
-=head1 REVISION
-
-$Id$
-
 =head1 METHODS
 
 =head2 Constructor
@@ -81,11 +42,11 @@ $Id$
 
 =item B<new>
 
-Create a new instance from an array of FITS header cards. 
+Create a new instance from an array of FITS header cards.
 
   $item = new Astro::FITS::Header( Cards => \@header );
 
-returns a reference to a Header object.  If you pass in no cards, 
+returns a reference to a Header object.  If you pass in no cards,
 you get the (required) first SIMPLE card for free.
 
 
@@ -122,7 +83,7 @@ sub new {
 =item B<tiereturnsref>
 
 Indicates whether the tied object should return multiple values
-as a single string joined by newline characters (false) or 
+as a single string joined by newline characters (false) or
 it should return a reference to an array containing all the values.
 
 Only affects the tied interface.
@@ -205,7 +166,7 @@ sub item {
 =item B<get_wcs>
 
 Returns a Starlink::AST FrameSet object representing the WCS of the
-FITS Header. 
+FITS Header.
 
    $ast = $header->get_wcs();
 
@@ -221,7 +182,7 @@ sub get_wcs {
   }
   $fchan->Clear( "Card" );
   return $fchan->Read();
-   
+
 }
 
 
@@ -317,21 +278,21 @@ C<undef> if the keyword does not exist.
 
 sub index {
   my ( $self, $keyword ) = @_;
-   
+
   # grab the index array from lookup table
   my @index;
 
   if ( 'Regexp' eq ref $keyword ) {
     push @index, @{$self->{LOOKUP}{$_}}
-      foreach grep { /$keyword/ && 
+      foreach grep { /$keyword/ &&
                        defined $self->{LOOKUP}{$_} } keys %{$self->{LOOKUP}};
     @index = sort @index;
   } else {
     @index = @{${$self->{LOOKUP}}{$keyword}}
-      if ( exists ${$self->{LOOKUP}}{$keyword} && 
+      if ( exists ${$self->{LOOKUP}}{$keyword} &&
            defined ${$self->{LOOKUP}}{$keyword} );
   }
-   
+
   # return the values array
   return wantarray ? @index : @index ? $index[0] : undef;
 
@@ -399,7 +360,7 @@ Inserts a FITS header card object at position $index
 
    $header->insert($index, $item);
 
-the object $item is not copied, multiple inserts of the same object mean 
+the object $item is not copied, multiple inserts of the same object mean
 that future modifications to the one instance of the inserted object will
 modify all inserted copies.
 
@@ -533,7 +494,7 @@ Implements a standard splice operation for FITS headers
 
 Removes the FITS header cards from the header designated by $offset and
 $length, and replaces them with @list (if specified) which must be an
-array of FITS::Header::Item objects. Returns the cards removed. If offset 
+array of FITS::Header::Item objects. Returns the cards removed. If offset
 is negative, counts from the end of the FITS header.
 
 =cut
@@ -560,7 +521,7 @@ sub splice {
     my $n = 0;
     for my $i (@list) {
       croak "Argument $n to splice must be Astro::FITS::Header::Item objects"
-        unless UNIVERSAL::isa($i, "Astro::FITS::Header::Item");	
+        unless UNIVERSAL::isa($i, "Astro::FITS::Header::Item");
       $n++;
     }
     @cards = splice @{$self->{HEADER}}, $offset, $length, @list;
@@ -636,7 +597,7 @@ sub allitems {
 
 =item B<configure>
 
-Configures the object, takes an array of FITS header cards, 
+Configures the object, takes an array of FITS header cards,
 an array of Astro::FITS::Header::Item objects or a simple hash as input.
 If you feed in nothing at all, it uses a default array containing
 just the SIMPLE card required at the top of all FITS files.
@@ -655,23 +616,23 @@ order will be retained in the object created via the hash.
 
 sub configure {
   my $self = shift;
-    
+
   # grab the argument list
   my %args = @_;
-    
+
   if (exists $args{Cards} && defined $args{Cards}) {
-	
+
     # First translate each incoming card into a Item object
     # Any existing cards are removed
     @{$self->{HEADER}} = map {
 	    new Astro::FITS::Header::Item( Card => $_ );
     } @{ $args{Cards} };
-	
+
     # Now build the lookup table. There would be a slight efficiency
     # gain to include this in a loop over the cards but prefer
     # to reuse the method for this rather than repeating code
     $self->_rebuild_lookup;
-	
+
   } elsif (exists $args{Items} && defined $args{Items}) {
     # We have an array of Astro::FITS::Header::Items
     @{$self->{HEADER}} = @{ $args{Items} };
@@ -685,7 +646,7 @@ sub configure {
     my @items;
     my @subheaders;
     for my $k (keys %{$args{Hash}}) {
-      if ($k eq 'SUBHEADERS' 
+      if ($k eq 'SUBHEADERS'
           && ref($args{Hash}->{$k}) eq 'ARRAY'
           && ref($args{Hash}->{$k}->[0]) eq 'HASH') {
         # special case
@@ -711,7 +672,7 @@ sub configure {
                           new Astro::FITS::Header::Item( Card=> "SIMPLE  =  T"),
                           new Astro::FITS::Header::Item( Card=> "END", Type=>"END" )
                          );
-    $self->_rebuild_lookup; 
+    $self->_rebuild_lookup;
   }
 }
 
@@ -776,8 +737,8 @@ sub merge_primary {
 
   # Go through all the items building up a hash indexed
   # by KEYWORD pointing to an array of items with that keyword
-  # and an array of unique keywords in the original order they 
-  # appeared first. COMMENT and UNDEF items are stored in the 
+  # and an array of unique keywords in the original order they
+  # appeared first. COMMENT and UNDEF items are stored in the
   # hash as complete cards.
   # HEADER items are currently dropped on the floor.
   my @order;
@@ -978,10 +939,10 @@ to the indices of all header cards following the modifed card.
 
 sub _rebuild_lookup {
   my $self = shift;
-   
+
   # rebuild the lookup table
 
-  # empty the hash 
+  # empty the hash
   $self->{LOOKUP} = { };
 
   # loop over the existing header array
@@ -989,16 +950,16 @@ sub _rebuild_lookup {
 
     # grab the keyword from each header item;
     my $key = ${$self->{HEADER}}[$j]->keyword();
-            
+
     # need to account to repeated keywords (e.g. COMMENT)
     unless ( exists ${$self->{LOOKUP}}{$key} &&
              defined ${$self->{LOOKUP}}{$key} ) {
       # new keyword
       ${$self->{LOOKUP}}{$key} = [ $j ];
-    } else {     
+    } else {
       # keyword exists, push the current index into the array
       push( @{${$self->{LOOKUP}}{$key}}, $j );
-    }   
+    }
   }
 
 }
@@ -1009,12 +970,12 @@ sub _rebuild_lookup {
 
 =head1 TIED INTERFACE
 
-The C<FITS::Header> object can also be tied to a hash: 
+The C<FITS::Header> object can also be tied to a hash:
 
    use Astro::FITS::Header;
 
    $header = new Astro::FITS::Header( Cards => \@array );
-   tie %hash, "Astro::FITS::Header", $header   
+   tie %hash, "Astro::FITS::Header", $header
 
    $value = $hash{$keyword};
    $hash{$keyword} = $value;
@@ -1042,7 +1003,7 @@ can be modified in the same way:
 
   $hdr{CRPIX1_COMMENT} = "An axis";
 
-You can also modify the comment by slash-delimiting it when setting the 
+You can also modify the comment by slash-delimiting it when setting the
 associated keyword:
 
   $hdr{CRPIX1} = "34 / Set this field manually";
@@ -1101,7 +1062,7 @@ first newline.  So:
   $hash{CDELT1} = [3,4,5];
   print $hash{CDELT1} + 99,"\n$hash{CDELT1}";
 
-prints "102\n3\n4\n5", and then 
+prints "102\n3\n4\n5", and then
 
   $hash{CDELT1}++;
   print $hash{CDELT1};
@@ -1138,7 +1099,7 @@ force string evaluation, feed in a trivial array ref:
   $hash{NUMSTR} = ["123"]; # generates a STRING card containing "123".
   $hash{NUMSTR} = [123];   # generates a STRING card containing "123".
 
-  $hash{ALPHA} = "T";      # generates a LOGICAL card containing T. 
+  $hash{ALPHA} = "T";      # generates a LOGICAL card containing T.
   $hash{ALPHA} = ["T"];    # generates a STRING card containing "T".
 
 Calls to keys() or each() will, by default, return the keywords in the order
@@ -1204,7 +1165,7 @@ sub TIEHASH {
 }
 
 # fetch key and value pair
-# MUST return undef if the key is missing else autovivification of 
+# MUST return undef if the key is missing else autovivification of
 # sub header will fail
 
 sub FETCH {
@@ -1273,7 +1234,7 @@ sub FETCH {
       # Multi values so join [protecting warnings from undef]
       @out = ( join("\n", map { defined $_ ? $_ : '' } @values) );
 
-      # This is a hangover from the STORE (where we add a \ continuation 
+      # This is a hangover from the STORE (where we add a \ continuation
       # character to multiline strings)
       $out[0] =~ s/\\\n//gs if (defined($out[0]));
     }
@@ -1308,7 +1269,7 @@ sub FETCH {
   } else {
     $out = $out[0];
   }
-  
+
   return $out;
 }
 
@@ -1320,7 +1281,7 @@ sub FETCH {
 #
 #    * Multiline strings get broken up and put in as multiple cards.
 #
-#    * Extra-long strings get broken up and put in as multiple cards, with 
+#    * Extra-long strings get broken up and put in as multiple cards, with
 #      an extra backslash at the end so that they transparently get put back
 #      together upon retrieval.
 #
@@ -1329,8 +1290,8 @@ sub STORE {
   my ($self, $keyword, $value) = @_;
   my @values;
 
-  # Recognize slash-delimited comments in value keywords.  This is done 
-  # cheesily via recursion -- would be more efficient, but less readable, 
+  # Recognize slash-delimited comments in value keywords.  This is done
+  # cheesily via recursion -- would be more efficient, but less readable,
   # to propagate the comment through the code...
 
   # I think this is fundamentally flawed. If I store a string "foo/bar"
@@ -1343,10 +1304,10 @@ sub STORE {
 
   if (defined $value && !ref($value) && $keyword !~ m/(_COMMENT$)|(^(COMMENT|HISTORY)$)/ and
       $value =~ s:\s*(?<!\\)/\s*(.*):: # Identify any '/' not preceded by '\'
-     ) { 
+     ) {
     my $comment = $1;
 
-    # Recurse to store the comment.  This is a direct (non-method) call to 
+    # Recurse to store the comment.  This is a direct (non-method) call to
     # keep this method monolithic.  --CED 27-Jun-2003
     STORE($self,$keyword."_COMMENT",$comment);
 
@@ -1416,7 +1377,7 @@ sub STORE {
 
   # Upper case the relevant item name
   $keyword = uc($keyword);
-  
+
   if ($keyword eq 'END') {
     # Special case for END keyword
     # (drops value on floor, makes sure there is one END at the end)
@@ -1429,14 +1390,14 @@ sub STORE {
     }
     unless( @index ) {
       my $endcard = new Astro::FITS::Header::Item(Keyword=>'END',
-                                                  Type=>'END', 
+                                                  Type=>'END',
                                                   Value=>1);
       $self->insert( scalar ($self->allitems) , $endcard );
     }
     return;
-      
-  } 
-  
+
+  }
+
   if ($keyword eq 'SIMPLE') {
     # Special case for SIMPLE keyword
     # (sets value correctly, makes sure there is one SIMPLE at the beginning)
@@ -1455,7 +1416,7 @@ sub STORE {
     }
     return;
   }
-  
+
 
   # Recognise _COMMENT
   my $havevalue = 1;
@@ -1486,7 +1447,7 @@ sub STORE {
   }
 
   ## Set values or comments
-  my($i); 
+  my($i);
   for $i(0..$#values) {
     if ($Astro::FITS::Header::COMMENT_FIELD{$keyword}) {
       $items[$i]->type('COMMENT');
@@ -1539,7 +1500,7 @@ sub DELETE {
 
 # empties the hash
 sub CLEAR {
-  my $self = shift; 
+  my $self = shift;
   $self->{HEADER} = [ ];
   $self->{LOOKUP} = { };
   $self->{LASTKEY} = undef;
@@ -1557,12 +1518,12 @@ sub FIRSTKEY {
 
 # implements keys() and each()
 sub NEXTKEY {
-  my ($self, $keyword) = @_; 
+  my ($self, $keyword) = @_;
 
   # abort if the number of keys we have served equals the number in the
   # header array. One wrinkle is that if we have SUBHDRS we want to go
   # round one more time
-  
+
   if ($self->{LASTKEY}+1 == scalar(@{$self->{HEADER}})) {
     return $self->_check_for_subhdr();
   }
@@ -1571,7 +1532,7 @@ sub NEXTKEY {
   # will return all the lines for a single keyword request.
   my($a);
   do {
-    $self->{LASTKEY} += 1;  
+    $self->{LASTKEY} += 1;
     $a = $self->{HEADER}->[$self->{LASTKEY}];
     # Got to end of header if we do not have $a
     return $self->_check_for_subhdr() unless defined $a;
@@ -1743,7 +1704,7 @@ sub UNSHIFT {
 
 # internal mappings
 
-# Given an Astro::FITS::Header object, return the thing that 
+# Given an Astro::FITS::Header object, return the thing that
 # should be returned to the user of the tie
 sub _hdr_to_tie {
   my $self = shift;

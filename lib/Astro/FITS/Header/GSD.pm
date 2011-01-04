@@ -128,7 +128,7 @@ sub configure {
 
   }
 
-  # Configure the object 
+  # Configure the object
   $self->SUPER::configure( Items => \@cards );
 
   return;

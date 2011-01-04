@@ -81,7 +81,7 @@ sub configure {
   my ($indf, $started);
   my $task = ref($self);
 
-  return $self->SUPER::configure(%args) 
+  return $self->SUPER::configure(%args)
     if exists $args{Cards} or exists $args{Items};
 
   # Store the definition of good locally
@@ -126,7 +126,7 @@ sub configure {
         $file = $root;
       }
     }
-      
+
     # Start NDF
     ndf_begin();
     $ndfstarted = 1;

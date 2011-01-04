@@ -16,10 +16,10 @@ Astro::FITS::Header::AST - Manipulates FITS headers from an AST object
 
 =head1 DESCRIPTION
 
-This module makes use of the L<Starlink::AST|Starlink::AST> module to read 
+This module makes use of the L<Starlink::AST|Starlink::AST> module to read
 the FITS HDU from an AST FrameSet object.
 
-It stores information about a FITS header block in an object. Takes an hash 
+It stores information about a FITS header block in an object. Takes an hash
 as an arguement, with an array reference pointing to an Starlink::AST
 FramSet object.
 
@@ -78,7 +78,7 @@ sub configure {
   # initialise the inherited status to OK.
   my $status = 0;
 
-  return $self->SUPER::configure(%args) 
+  return $self->SUPER::configure(%args)
     if exists $args{Cards} or exists $args{Items};
 
   # read the args hash
@@ -89,7 +89,7 @@ sub configure {
   my $wcsinfo = $args{FrameSet};
   my @cards;
   {
-     my $fchan = new Starlink::AST::FitsChan( 
+     my $fchan = new Starlink::AST::FitsChan(
                                       sink => sub { push @cards, $_[0] } );
      if (exists $args{Encoding}) {
        if (defined $args{Encoding}) {
