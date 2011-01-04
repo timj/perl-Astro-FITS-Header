@@ -26,7 +26,7 @@ use Carp;
 
 use Astro::FITS::Header::Item;
 
-$VERSION = 3.01;
+$VERSION = 3.03;
 
 # Operator overloads
 use overload '""' => "stringify",

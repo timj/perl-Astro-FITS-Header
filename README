@@ -139,6 +139,11 @@ Major Changes
 
 For full details of changes see the ChangeLog
 
+V3.03
+
+  - Ensure that GPL is used throughout package rather than a mix of Perl licence
+    and GPL. Fixes RT #61875
+
 V3.02
 
   - Use Module::Build
