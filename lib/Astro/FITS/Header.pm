@@ -1641,6 +1641,9 @@ use warnings;
 use strict;
 use Carp;
 
+our $VERSION;
+$VERSION = '3.01';
+
 # Class wrapper for subhdrs tie. Not (yet) a public interface
 # we simply need a class that we can tie the subhdrs array to.
 
