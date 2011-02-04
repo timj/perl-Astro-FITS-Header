@@ -567,7 +567,8 @@ sub parse_card {
 
     } elsif ($pos != -1) {
       # Found value and comment
-      $value = substr($rest, 0, $pos-1);
+      $value = substr($rest, 0, $pos);
+      $value =~ s/\s+$//; # remove any gap to the comment
 
       # Check for case where / is last character
       if (length($rest) > ($pos + 1)) {

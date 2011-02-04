@@ -4,7 +4,7 @@
 use strict;
 
 #load test
-use Test::More tests => 164;
+use Test::More tests => 165;
 
 # load modules
 require_ok("Astro::FITS::Header");
@@ -151,6 +151,11 @@ while( @index )
 {
   is( shift @index, shift @actual, "Compare CLOCK keyword location" );
 }
+
+# Check a card that has caused trouble in the past.
+my $dut = Astro::FITS::Header::Item->new( Card => 'DUT1    =  -1.83507724076233E-6/ [d] UT1-UTC correction                         ' );
+my $value = $dut->value;
+ok( $value < 0 && $value > -2.0E-6, "Check range of DUT1 ('$value')");
 
 
 exit;
