@@ -377,6 +377,13 @@ sub writehdr {
     dat_annul($fitsloc, $status);
   }
 
+  # Write HISTORY information
+  my @text =("Astro::FITS::Header::NDF - write FITS header to file ^FILE",);
+  ndf_msg( "FILE", $ndfid );
+  ndf_hput("NORMAL", '', 0, scalar(@text), @text, 1, 1,1, $ndfid, $status );
+
+  ndf_annul( $ndfid, $status );
+
   # Shutdown
   ndf_end($status) if $ndfstarted;
 
