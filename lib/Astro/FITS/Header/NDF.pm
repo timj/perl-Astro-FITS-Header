@@ -44,7 +44,7 @@ use base qw/ Astro::FITS::Header /;
 
 use vars qw/ $VERSION /;
 
-$VERSION = 3.01;
+$VERSION = 3.02;
 
 =head1 METHODS
 

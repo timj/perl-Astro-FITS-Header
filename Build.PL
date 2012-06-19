@@ -16,7 +16,7 @@ my $build = Module::Build->new
                    'Craig DeForest <deforest@boulder.swri.edu>',
                    'Jim Lewis <jrl@ast.cam.ac.uk>',
                   ],
-   dist_version => '3.03',
+   dist_version => '3.04',
    meta_merge => {
                resources =>  {
                               repository => "git://github.com/timj/perl-Astro-FITS-Header.git",
@@ -30,6 +30,9 @@ my $build = Module::Build->new
    build_requires => {
                       'Test::More' => 0,
                      },
+   configure_requires => {
+                          "Module::Build" => 0.30,
+                         },
   );
 
 $build->create_build_script;

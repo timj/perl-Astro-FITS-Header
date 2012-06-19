@@ -112,12 +112,13 @@ interface when dealing with blank cards were supplied by Brad Cavangh
 Modifications to parse ESO HIERARCH keywords, read-only, were added by
 Malcolm Currie <mjc@star.rl.ac.uk> of the Rutherford Appleton Laboratory.
 
-For full details of who did what, and when, see the ChangeLog.
-
 Maintainer
 ----------
-The package is currently maintained by Alasdair Allan <aa@astro.ex.ac.uk>,
-please direct comments and patches to him in the first instance.
+The package is currently maintained by Tim Jenness <tjenness@cpan.org>.
+Please use CPAN RT for bug reports and github pull requests for patches.
+The source code repository is at
+
+  git://github.com/timj/perl-Astro-FITS-Header.git
 
 License
 -------
@@ -137,7 +138,15 @@ Place,Suite 330, Boston, MA  02111-1307, USA
 Major Changes
 ------------
 
-For full details of changes see the ChangeLog
+For full details of changes see the source code repository.
+
+V3.04
+
+  - Numeric cards with no space before the comment are now parsed correctly.
+
+  - A HISTORY item is now written to NDF files when the header is updated.
+
+  - The ChangeLog has been removed from this release.
 
 V3.03
 
