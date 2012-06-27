@@ -13,7 +13,7 @@ Astro::FITS::Header - Object Orientated interface to FITS HDUs
 =head1 DESCRIPTION
 
 Stores information about a FITS header block in an object. Takes an hash
-with an array reference as an arguement. The array should contain a list
+with an array reference as an argument. The array should contain a list
 of FITS header cards as input.
 
 =cut

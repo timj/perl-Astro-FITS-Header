@@ -23,7 +23,7 @@ This module makes use of the L<CFITSIO|CFITSIO> module to read and write
 directly to a FITS HDU.
 
 It stores information about a FITS header block in an object. Takes an
-hash as an arguement, with either an array reference pointing to an
+hash as an argument, with either an array reference pointing to an
 array of FITS header cards, or a filename, or (alternatively) and FITS
 identifier.
 

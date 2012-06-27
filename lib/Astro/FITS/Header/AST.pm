@@ -20,7 +20,7 @@ This module makes use of the L<Starlink::AST|Starlink::AST> module to read
 the FITS HDU from an AST FrameSet object.
 
 It stores information about a FITS header block in an object. Takes an hash
-as an arguement, with an array reference pointing to an Starlink::AST
+as an argument, with an array reference pointing to an Starlink::AST
 FramSet object.
 
 =cut
