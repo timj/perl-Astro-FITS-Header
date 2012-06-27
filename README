@@ -140,6 +140,10 @@ Major Changes
 
 For full details of changes see the source code repository.
 
+V3.05
+
+  - Spelling fixes from debian (RT #78071)
+
 V3.04
 
   - Numeric cards with no space before the comment are now parsed correctly.
