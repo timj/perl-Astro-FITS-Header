@@ -8,6 +8,7 @@ MANIFEST
 lib/Astro/FITS/Header/NDF.pm
 lib/Astro/FITS/Header/GSD.pm
 README
+t/1_compile.t
 t/ast.t
 t/cfitsio.fit
 t/cfitsio.t
