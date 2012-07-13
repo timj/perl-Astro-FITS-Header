@@ -26,7 +26,7 @@ use Carp;
 
 use Astro::FITS::Header::Item;
 
-$VERSION = 3.03;
+$VERSION = 3.04;
 
 # Operator overloads
 use overload '""' => "stringify",
@@ -738,7 +738,7 @@ sub merge_primary {
   # Go through all the items building up a hash indexed
   # by KEYWORD pointing to an array of items with that keyword
   # and an array of unique keywords in the original order they
-  # appeared first. COMMENT and UNDEF items are stored in the
+  # appeared first. COMMENT items are stored in the
   # hash as complete cards.
   # HEADER items are currently dropped on the floor.
   my @order;
@@ -751,7 +751,7 @@ sub merge_primary {
       if (!defined $type || $type eq 'BLANK') {
         # blank line so skip it
         next;
-      } elsif ($type eq 'COMMENT' || $type eq 'UNDEF') {
+      } elsif ($type eq 'COMMENT') {
         $key = $item->card;
       } elsif ($type eq 'HEADER') {
         next;
