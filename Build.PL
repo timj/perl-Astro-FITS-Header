@@ -16,7 +16,7 @@ my $build = Module::Build->new
                    'Craig DeForest <deforest@boulder.swri.edu>',
                    'Jim Lewis <jrl@ast.cam.ac.uk>',
                   ],
-   dist_version => '3.05',
+   dist_version => '3.06',
    meta_merge => {
                resources =>  {
                               repository => "git://github.com/timj/perl-Astro-FITS-Header.git",

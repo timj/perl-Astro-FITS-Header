@@ -140,6 +140,11 @@ Major Changes
 
 For full details of changes see the source code repository.
 
+V3.06
+
+  - Minor fix to header merging to properly treat an undef card
+    as an undef values rather than as a comment card.
+
 V3.05
 
   - Spelling fixes from debian (RT #78071)
