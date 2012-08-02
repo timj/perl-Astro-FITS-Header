@@ -140,6 +140,11 @@ Major Changes
 
 For full details of changes see the source code repository.
 
+V3.07
+
+  - Respect ReadOnly flag when opening FITS extensions.
+    Fixes RT #78746 from Diab Jerius.
+
 V3.06
 
   - Minor fix to header merging to properly treat an undef card
