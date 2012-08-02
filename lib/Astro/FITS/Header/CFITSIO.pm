@@ -139,7 +139,7 @@ sub configure {
          $ifits->get_num_hdus($nhdus,$status);
          foreach my $ihdu (1 .. $nhdus-1) {
 	   my $subfr = sprintf("%s[%d]",$args{File},$ihdu);
-	   my $sself = $self->new(File=>$subfr);
+	   my $sself = $self->new(File=>$subfr, ReadOnly => $args{ReadOnly});
 	   push @subfrms,$sself;
          }
        }
