@@ -1,8 +1,6 @@
 Makefile
 blib
 pm_to_blib
-Build
-_build
 MYMETA.yml
 *.tar.gz
 Astro-FITS-Header-*

@@ -1,4 +1,3 @@
-Build.PL
 Changes
 GPL
 lib/Astro/FITS/Header.pm
@@ -7,9 +6,8 @@ lib/Astro/FITS/Header/CFITSIO.pm
 lib/Astro/FITS/Header/GSD.pm
 lib/Astro/FITS/Header/Item.pm
 lib/Astro/FITS/Header/NDF.pm
-MANIFEST
-META.json
-META.yml
+Makefile.PL
+MANIFEST			This list of files
 README
 t/1_compile.t
 t/ast.t
