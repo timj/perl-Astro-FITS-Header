@@ -1505,6 +1505,7 @@ sub CLEAR {
   $self->{LOOKUP} = { };
   $self->{LASTKEY} = undef;
   $self->{SEENKEY} = undef;
+  $self->{SUBHDRS} = [ ];
 }
 
 # implements keys() and each()
