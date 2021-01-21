@@ -1512,7 +1512,7 @@ sub FIRSTKEY {
   my $self = shift;
   $self->{LASTKEY} = 0;
   $self->{SEENKEY} = {};
-  return undef unless @{$self->{HEADER}};
+  return $self->_check_for_subhdr() unless @{$self->{HEADER}};
   return ${$self->{HEADER}}[0]->keyword();
 }
 
