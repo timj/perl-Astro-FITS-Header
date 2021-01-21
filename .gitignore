@@ -6,3 +6,5 @@ _build
 MYMETA.yml
 *.tar.gz
 Astro-FITS-Header-*
+*~
+.*.swp
