@@ -26,7 +26,7 @@ use Carp;
 
 use Astro::FITS::Header::Item;
 
-$VERSION = 3.04;
+$VERSION = 3.08;
 
 # Operator overloads
 use overload '""' => "stringify",
@@ -1604,7 +1604,7 @@ use strict;
 use Carp;
 
 our $VERSION;
-$VERSION = '3.01';
+$VERSION = '3.08';
 
 # Class wrapper for subhdrs tie. Not (yet) a public interface
 # we simply need a class that we can tie the subhdrs array to.
