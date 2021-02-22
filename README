@@ -37,7 +37,7 @@ build the CFITSIO subroutine library on RedHat Linux 7.x you need to
 use version 2.202 or above, however the module requires v2.400 at least
 to work with the Astro::FITS::CFITSIO module.
 
-For more information on CFITSIO, see http://heasarc.gsfc.nasa.gov/fitsio/
+For more information on CFITSIO, see https://heasarc.gsfc.nasa.gov/fitsio/
 
 To work with NDF, HDS and GSD files, the Astro::FITS::Header module
 requires Tim Jenness' <t.jenness@jach.hawaii.edu> NDF (version 1.42 or
@@ -49,7 +49,7 @@ this module (should) be available from CPAN or by contacting the authors
 of this package.
 
 For more information on the Starlink Software Collection and the Starlink
-Project in general see http://www.starlink.ac.uk/
+Project in general see https://www.starlink.ac.uk/
 
 Provides
 --------
@@ -66,8 +66,7 @@ which all include POD format documentation.
 
 Where can I get it?
 -------------------
-The package is available from CPAN <http://www.cpan.org/> and from
-http://www.astro.ex.ac.uk/people/aa/pages/computing/fitsheader.html
+The package is available from CPAN <https://www.cpan.org/>
 
 Installation
 ------------
