@@ -172,7 +172,7 @@ Write a FITS header to a FITS file
 Its accepts a FITS identifier or a filename. If both fitsID and File keys
 exist, fitsID key takes priority.
 
-Returns undef on error, true if the header was written successfully.
+Throws an exception (croaks) on error.
 
 =cut
 
