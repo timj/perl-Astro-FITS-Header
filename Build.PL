@@ -23,7 +23,7 @@ my $build = Module::Build->new
                },
                resources =>  {
                               repository => {
-                                  url => 'git://github.com/timj/perl-Astro-FITS-Header.git',
+                                  url => 'https://github.com/timj/perl-Astro-FITS-Header.git',
                                   web => 'https://github.com/timj/perl-Astro-FITS-Header/',
                                   type => 'git',
                               },
