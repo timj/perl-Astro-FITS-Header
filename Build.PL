@@ -16,7 +16,7 @@ my $build = Module::Build->new
                    'Craig DeForest <deforest@boulder.swri.edu>',
                    'Jim Lewis <jrl@ast.cam.ac.uk>',
                   ],
-   dist_version => '3.08',
+   dist_version => '3.09',
    meta_merge => {
                'meta-spec' => {
                    version => 2,
