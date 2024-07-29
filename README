@@ -70,7 +70,7 @@ The package is available from CPAN <https://www.cpan.org/>
 
 Installation
 ------------
-Installation is automated using the ExtUtils::MakeMaker library
+Installation is automated using the Module::Build library
 
      % perl Build.PL
      % ./Build
@@ -78,7 +78,7 @@ Installation is automated using the ExtUtils::MakeMaker library
      % ./Build install
 
 If the Astro::FITS::CFITSIO, NDF or Starlink::AST modules are not
-installed 'make test' will detect this and skip the test harness
+installed './Build test' will detect this and skip the test harness
 for the relevant modules with a warning.
 
 Note on Versioning
