@@ -562,7 +562,7 @@ sub parse_card {
 
       # No value at all
       $value  = undef;
-      $comment = substr($rest, $pos+2);
+      $comment = substr($rest, $pos+1);
       $self->type("UNDEF");
 
     } elsif ($pos != -1) {
@@ -572,7 +572,7 @@ sub parse_card {
 
       # Check for case where / is last character
       if (length($rest) > ($pos + 1)) {
-        $comment = substr($rest, $pos+2);
+        $comment = substr($rest, $pos+1);
         $comment =~ s/\s+$//;
       } else {
         $comment = undef;

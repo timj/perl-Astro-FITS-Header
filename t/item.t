@@ -3,7 +3,7 @@
 # strict
 use strict;
 
-use Test::More tests => 92;
+use Test::More tests => 94;
 
 # load test modules
 require_ok( "Astro::FITS::Header::Item");
@@ -136,7 +136,25 @@ my $c = "LNGSTR  = 'a very long string that is long' /Long string               
 my $i = new Astro::FITS::Header::Item( Card => $c);
 is("$i", $c, "test cache");
 
+# test that comments with no whitespace between the '/' and the
+# comment are parsed correctly.  The above code compares the raw card
+# to a reconstructed card, which will fail in this case because the
+# reconstructed card always has a whitespace between '/' and the
+# comment.  Go our own way....
 
+{
+    # test branch where value is not a string
+    my $c = q{CUDDLE  =                    T /C};
+    my $item = new Astro::FITS::Header::Item( Card => $c);
+    ok( $item->comment eq 'C', 'value, cuddled comment' );
+}
+
+{
+    # test branch where there is no value
+    my $c = q{CUDDLE  = /C};
+    my $item = new Astro::FITS::Header::Item( Card => $c);
+    ok( $item->comment eq 'C', 'no value, cuddled comment' );
+}
 
 #keyword
 #value
