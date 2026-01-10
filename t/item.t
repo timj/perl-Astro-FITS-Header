@@ -3,7 +3,7 @@
 # strict
 use strict;
 
-use Test::More tests => 94;
+use Test::More tests => 102;
 
 # load test modules
 require_ok( "Astro::FITS::Header::Item");
@@ -142,18 +142,30 @@ is("$i", $c, "test cache");
 # reconstructed card always has a whitespace between '/' and the
 # comment.  Go our own way....
 
-{
-    # test branch where value is not a string
-    my $c = q{CUDDLE  =                    T /C};
-    my $item = new Astro::FITS::Header::Item( Card => $c);
-    ok( $item->comment eq 'C', 'value, cuddled comment' );
+$i = Astro::FITS::Header::Item->new(
+    Card => 'NOSPACE =                    T /C');
+is($i->comment, 'C', 'value, no-space comment');
+
+$i = Astro::FITS::Header::Item->new(
+    Card => 'NOSPACE = /C');
+is($i->comment, 'C', 'no value, no-space comment');
+
+foreach my $card (
+        'NOSPACE = \'value\'/WORD/WORD/WORD',
+        'NOSPACE = \'value\'/ WORD/WORD/WORD',
+        'NOSPACE = \'value\' /WORD/WORD/WORD',
+        'NOSPACE = \'value\' / WORD/WORD/WORD') {
+    $i = Astro::FITS::Header::Item->new(Card => $card);
+    is($i->comment, 'WORD/WORD/WORD', 'non-null string, no-space comment');
 }
 
-{
-    # test branch where there is no value
-    my $c = q{CUDDLE  = /C};
-    my $item = new Astro::FITS::Header::Item( Card => $c);
-    ok( $item->comment eq 'C', 'no value, cuddled comment' );
+foreach my $card (
+        'NOSPACE = \'\'/WORD/WORD/WORD',
+        'NOSPACE = \'\'/ WORD/WORD/WORD',
+        'NOSPACE = \'\' /WORD/WORD/WORD',
+        'NOSPACE = \'\' / WORD/WORD/WORD') {
+    $i = Astro::FITS::Header::Item->new(Card => $card);
+    is($i->comment, 'WORD/WORD/WORD', 'null string, no-space comment');
 }
 
 #keyword
