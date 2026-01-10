@@ -498,7 +498,7 @@ sub parse_card {
     if (substr($rest,1,1) eq "'") {
       $value = '';
       $comment = substr($rest,2);
-      $comment =~ s/^\s+\///;  # Delete everything before the first slash
+      $comment =~ s/^\s*\///;  # Delete everything before the first slash
 
     } else {
       # '' needs to be treated as an escaped ' when inside the string
@@ -541,8 +541,7 @@ sub parse_card {
 
 	# Comment
 	$comment = substr($rest,$pos+1); # Extract post string
-	$comment =~ s/^\s+\///;  # Delete everything before the first slash
-	$comment =~ s/\///;  # In case there was no space before the slash
+	$comment =~ s/^\s*\///;  # Delete everything before the first slash
 
       } else {
 	# Never found the end so include all of it
@@ -562,7 +561,7 @@ sub parse_card {
 
       # No value at all
       $value  = undef;
-      $comment = substr($rest, $pos+2);
+      $comment = substr($rest, $pos+1);
       $self->type("UNDEF");
 
     } elsif ($pos != -1) {
@@ -572,8 +571,7 @@ sub parse_card {
 
       # Check for case where / is last character
       if (length($rest) > ($pos + 1)) {
-        $comment = substr($rest, $pos+2);
-        $comment =~ s/\s+$//;
+        $comment = substr($rest, $pos+1);
       } else {
         $comment = undef;
       }

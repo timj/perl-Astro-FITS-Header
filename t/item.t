@@ -3,7 +3,7 @@
 # strict
 use strict;
 
-use Test::More tests => 92;
+use Test::More tests => 102;
 
 # load test modules
 require_ok( "Astro::FITS::Header::Item");
@@ -136,7 +136,37 @@ my $c = "LNGSTR  = 'a very long string that is long' /Long string               
 my $i = new Astro::FITS::Header::Item( Card => $c);
 is("$i", $c, "test cache");
 
+# test that comments with no whitespace between the '/' and the
+# comment are parsed correctly.  The above code compares the raw card
+# to a reconstructed card, which will fail in this case because the
+# reconstructed card always has a whitespace between '/' and the
+# comment.  Go our own way....
 
+$i = Astro::FITS::Header::Item->new(
+    Card => 'NOSPACE =                    T /C');
+is($i->comment, 'C', 'value, no-space comment');
+
+$i = Astro::FITS::Header::Item->new(
+    Card => 'NOSPACE = /C');
+is($i->comment, 'C', 'no value, no-space comment');
+
+foreach my $card (
+        'NOSPACE = \'value\'/WORD/WORD/WORD',
+        'NOSPACE = \'value\'/ WORD/WORD/WORD',
+        'NOSPACE = \'value\' /WORD/WORD/WORD',
+        'NOSPACE = \'value\' / WORD/WORD/WORD') {
+    $i = Astro::FITS::Header::Item->new(Card => $card);
+    is($i->comment, 'WORD/WORD/WORD', 'non-null string, no-space comment');
+}
+
+foreach my $card (
+        'NOSPACE = \'\'/WORD/WORD/WORD',
+        'NOSPACE = \'\'/ WORD/WORD/WORD',
+        'NOSPACE = \'\' /WORD/WORD/WORD',
+        'NOSPACE = \'\' / WORD/WORD/WORD') {
+    $i = Astro::FITS::Header::Item->new(Card => $card);
+    is($i->comment, 'WORD/WORD/WORD', 'null string, no-space comment');
+}
 
 #keyword
 #value
